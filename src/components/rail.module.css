@@ -1,0 +1,63 @@
+/* ------------------------------------------------------------------ *
+ * Rail droit — mécanique de figement.
+ *
+ * Le slot délimite la plage de figement : sa hauteur = celle de la
+ * section à laquelle le carton est rattaché. Le carton est en
+ * position: sticky, top 84px. Il monte avec la page, se fige à 84px,
+ * reste figé tant que le slot est à l'écran, puis repart vers le haut
+ * avec lui.
+ *
+ * Rien ici ne porte overflow ni contain.
+ * ------------------------------------------------------------------ */
+
+.slot {
+  /* hauteur posée par la section correspondante (style inline sur /test,
+     plus tard : le slot enveloppera la vraie section) */
+  min-height: 0;
+}
+
+.card {
+  position: sticky;
+  top: var(--rail-stick);
+  width: 210px;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line-accent);
+  border-radius: 4px;
+  background: var(--ground); /* opaque */
+}
+
+/* Le seul carton qui porte une action : filet rouge plein, rien d'autre */
+.cardAction {
+  border-color: var(--accent);
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ink);
+}
+
+.cardText {
+  margin: 0;
+  font-size: var(--t-small);
+  line-height: var(--t-small-lh);
+  letter-spacing: var(--t-small-ls);
+  color: var(--ink);
+}
+
+/* Mobile : les cartons quittent le rail, pleine largeur, sans figement */
+@media (max-width: 1023px) {
+  .slot {
+    height: auto !important;
+  }
+
+  .card {
+    position: static;
+    width: 100%;
+  }
+}

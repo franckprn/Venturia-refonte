@@ -1,0 +1,63 @@
+/* ------------------------------------------------------------------ *
+ * Shell de page — géométrie du CLAUDE.md.
+ *
+ * Desktop (>= 1024px)
+ *   conteneur 1440px centré, marge gauche 54px
+ *   contenu : 12 colonnes, gap 20px  (1136px à 1440)
+ *   rail : 250px, dernier élément, collé au bord droit du conteneur
+ *
+ * Mobile (< 1024px)
+ *   6 colonnes, gap 20px, marges 20px
+ *   le rail passe en pleine largeur, dans le flux
+ *
+ * Aucun overflow / contain nulle part sur cet arbre : un seul suffirait
+ * à casser le position: sticky du rail.
+ * ------------------------------------------------------------------ */
+
+.shell {
+  width: 100%;
+  max-width: var(--shell-max);
+  margin-inline: auto;
+  padding-left: var(--shell-gutter-left);
+  display: grid;
+  grid-template-columns: 1fr var(--shell-rail);
+  align-items: start;
+}
+
+.content {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--shell-gutter);
+  align-content: start;
+}
+
+/* Le rail est le dernier élément, collé au bord droit du conteneur.
+   Son padding de 20px le protège : 250 - 40 = 210 utiles. */
+.rail {
+  min-width: 0;
+  padding-inline: var(--shell-rail-pad);
+  display: flex;
+  flex-direction: column;
+  /* l'écart entre cartons = celui des sections, porté par le gap, pas par
+     des marges sur les cartons */
+  gap: var(--shell-gutter);
+}
+
+@media (max-width: 1023px) {
+  .shell {
+    display: block;
+    max-width: none;
+    padding-left: 0;
+    padding-inline: var(--shell-gutter);
+  }
+
+  .content {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .rail {
+    padding-inline: 0;
+    margin-top: var(--shell-gutter);
+  }
+}

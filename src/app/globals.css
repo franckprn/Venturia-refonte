@@ -1,26 +1,126 @@
 @import "tailwindcss";
+@config "../../tailwind.config.ts";
 
+/* ------------------------------------------------------------------ *
+ * Variables — seule source de vérité, reprises telles quelles du
+ * CLAUDE.md. Tailwind ne fait que leur donner un nom (voir la config).
+ * ------------------------------------------------------------------ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Couleurs — palette fermée, trois valeurs + deux filets */
+  --ground: #dedcd3;
+  --ink: #0a0605;
+  --accent: #fe3939;
+  --line: rgba(10, 6, 5, 0.16);
+  --line-accent: rgba(254, 57, 57, 0.2);
+
+  /* Typographie — valeurs desktop (>= 768px) */
+  --t-mono: 13px;
+  --t-small: 15px;
+  --t-body: 17px;
+  --t-lead: 21px;
+  --t-title: 40px;
+  --t-hero: 72px;
+  --t-mass: 180px;
+
+  /* Interlignages */
+  --t-mono-lh: 1.3;
+  --t-small-lh: 1.45;
+  --t-body-lh: 1.55;
+  --t-lead-lh: 1.4;
+  --t-title-lh: 1.1;
+  --t-hero-lh: 1.04;
+  --t-mass-lh: 0.82;
+
+  /* Approches (letter-spacing) — le positif est mesuré, ne pas y toucher */
+  --t-mono-ls: 0.01em;
+  --t-small-ls: 0.01em;
+  --t-body-ls: 0.01em;
+  --t-lead-ls: 0.01em;
+  --t-title-ls: -0.02em;
+  --t-hero-ls: -0.03em;
+  --t-mass-ls: -0.01em;
+
+  /* Le chapô passe en poids 500 sur mobile */
+  --t-lead-weight: 400;
+
+  /* Géométrie du shell */
+  --shell-max: 1440px;
+  --shell-gutter-left: 54px;
+  --shell-gutter: 20px;
+  --shell-rail: 250px;
+  --shell-rail-pad: 20px;
+  --nav-h: 64px;
+  --rail-stick: 84px; /* nav (64) + 20 */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+/* Typographie — bascule mobile à 767px (breakpoint typo, distinct du shell) */
+@media (max-width: 767px) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --t-mono: 15px;
+    --t-small: 15px;
+    --t-body: 16px;
+    --t-lead: 19px;
+    --t-title: 28px;
+    --t-hero: 40px;
+    --t-mass: 60px;
+    --t-lead-weight: 500;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ------------------------------------------------------------------ *
+ * Base
+ * ------------------------------------------------------------------ */
+@layer base {
+  /* Fond crème posé sur html : sinon le rebond de scroll iOS montre du blanc */
+  html {
+    background: var(--ground);
+    color: var(--ink);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: var(--t-body);
+    line-height: var(--t-body-lh);
+    letter-spacing: var(--t-body-ls);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display), system-ui, sans-serif;
+    /* text-wrap: balance réservé aux titres — coûteux sur un long texte */
+    text-wrap: balance;
+  }
+
+  /* Toute ancre interne atterrit sous la nav fixe */
+  :where(h1, h2, h3, h4, h5, h6, [id]) {
+    scroll-margin-top: var(--rail-stick);
+  }
+}
+
+/* Champs de formulaire >= 16px sur mobile, sinon Safari iOS zoome au focus */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* prefers-reduced-motion respecté partout */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

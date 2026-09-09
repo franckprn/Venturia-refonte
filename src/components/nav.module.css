@@ -1,0 +1,25 @@
+/* Barre de nav — socle uniquement pour cette session : hauteur 64px,
+   fixe, fond opaque, aucun backdrop-filter. Sert de référence au
+   figement du rail à 84px (64 + 20). */
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  padding-inline: var(--shell-gutter-left);
+  background: var(--ground);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ink);
+}
+
+@media (max-width: 1023px) {
+  .nav {
+    padding-inline: var(--shell-gutter);
+  }
+}
