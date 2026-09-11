@@ -56,6 +56,9 @@ Mono   : JetBrains Mono (400, 500)
 Le letter-spacing positif sur --t-small, --t-body et --t-lead est mesuré et
 délibéré : le conserver tel quel.
 
+Un titre de section peut descendre à --t-lead quand le contenu de la
+section porte déjà du --t-title, pour éviter deux niveaux concurrents.
+
 ## Shell de page
 
 Desktop (>= 1024px)
@@ -69,7 +72,9 @@ Desktop (>= 1024px)
 Mobile (< 1024px)
   6 colonnes, gap 20px, marges 20px
   le rail passe en pleine largeur : les cartons s'insèrent dans le flux,
-  350px de large (390 - 2×20), aux mêmes endroits que sur desktop
+  aux mêmes endroits que sur desktop. Leur largeur est fluide — 100 % de la
+  largeur disponible entre les marges de 20px — jamais une valeur figée en px,
+  sinon un iPhone large laisse du vide sur le côté.
 
 Le contenu reste dans le conteneur. Seul le rail va jusqu'au bord, protégé
 par son padding de 20px.
@@ -131,7 +136,7 @@ qui « ne marche pas ». Si un carton ne colle pas, remonter l'arbre DOM avant
 de toucher au CSS du carton.
 
 carton
-largeur    210px desktop / 350px mobile
+largeur    210px desktop / 100 % de la largeur disponible en mobile
 padding    14px
 display    grid, gap 10px
 border     1px solid var(--line-accent)

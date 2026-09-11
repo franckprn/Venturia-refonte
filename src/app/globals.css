@@ -51,6 +51,10 @@
   --shell-rail-pad: 20px;
   --nav-h: 64px;
   --rail-stick: 84px; /* nav (64) + 20 */
+
+  /* Hauteur commune des cartons du rail — voir rail.module.css pour le
+     pourquoi (empilement sans chiffre magique). */
+  --rail-card-h: 160px;
 }
 
 /* Typographie — bascule mobile à 767px (breakpoint typo, distinct du shell) */

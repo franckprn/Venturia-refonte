@@ -1,23 +1,5 @@
 import styles from "./rail.module.css";
 
-type RailSlotProps = {
-  /**
-   * Hauteur de la plage de figement = hauteur de la section rattachée.
-   * Provisoire : sur /test on la pose à la main. Plus tard le slot
-   * enveloppera la vraie section et prendra sa hauteur naturellement.
-   */
-  height?: number | string;
-  children?: React.ReactNode;
-};
-
-export function RailSlot({ height, children }: RailSlotProps) {
-  return (
-    <div className={styles.slot} data-rail-slot style={{ height }}>
-      {children}
-    </div>
-  );
-}
-
 type RailCardProps = {
   title: string;
   children: React.ReactNode;
@@ -25,6 +7,15 @@ type RailCardProps = {
   action?: boolean;
 };
 
+/**
+ * Carton du rail. Il vit dans la colonne de droite de sa <Section> et
+ * n'en sort jamais latéralement. Desktop : position: sticky, top 84px,
+ * figé tant que sa section est à l'écran. Mobile : statique, pleine
+ * largeur, dans le flux de la section.
+ *
+ * La plage de figement est la colonne rail de la section, qui s'étire
+ * sur la hauteur réelle de celle-ci — aucune valeur en dur.
+ */
 export function RailCard({ title, children, action = false }: RailCardProps) {
   return (
     <article

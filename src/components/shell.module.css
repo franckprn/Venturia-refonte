@@ -1,17 +1,18 @@
 /* ------------------------------------------------------------------ *
  * Shell de page — géométrie du CLAUDE.md.
  *
- * Desktop (>= 1024px)
- *   conteneur 1440px centré, marge gauche 54px
- *   contenu : 12 colonnes, gap 20px  (1136px à 1440)
- *   rail : 250px, dernier élément, collé au bord droit du conteneur
+ * Une seule grille pour toute la page : colonne contenu (1fr) + colonne
+ * rail (250px). Les lignes sont nommées par section (une par <Section>,
+ * hauteur `auto`), calculées par Shell.tsx à partir de l'ordre des
+ * enfants — jamais de hauteur écrite en dur ici.
  *
- * Mobile (< 1024px)
- *   6 colonnes, gap 20px, marges 20px
- *   le rail passe en pleine largeur, dans le flux
+ * <Section> et son carton de rail (voir Section.tsx) sont deux enfants
+ * directs de cette grille (la Section les rend en fragment), pas un
+ * parent et son enfant : c'est ce qui permet au carton de viser une
+ * ligne différente de celle de son contenu.
  *
- * Aucun overflow / contain nulle part sur cet arbre : un seul suffirait
- * à casser le position: sticky du rail.
+ * Aucun overflow / contain nulle part : un seul suffirait à casser
+ * le position: sticky des cartons.
  * ------------------------------------------------------------------ */
 
 .shell {
@@ -24,40 +25,11 @@
   align-items: start;
 }
 
-.content {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: var(--shell-gutter);
-  align-content: start;
-}
-
-/* Le rail est le dernier élément, collé au bord droit du conteneur.
-   Son padding de 20px le protège : 250 - 40 = 210 utiles. */
-.rail {
-  min-width: 0;
-  padding-inline: var(--shell-rail-pad);
-  display: flex;
-  flex-direction: column;
-  /* l'écart entre cartons = celui des sections, porté par le gap, pas par
-     des marges sur les cartons */
-  gap: var(--shell-gutter);
-}
-
 @media (max-width: 1023px) {
   .shell {
     display: block;
     max-width: none;
     padding-left: 0;
     padding-inline: var(--shell-gutter);
-  }
-
-  .content {
-    grid-template-columns: repeat(6, 1fr);
-  }
-
-  .rail {
-    padding-inline: 0;
-    margin-top: var(--shell-gutter);
   }
 }
