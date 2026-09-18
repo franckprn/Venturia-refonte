@@ -1,21 +1,17 @@
 /* ------------------------------------------------------------------ *
- * Section = deux enfants du Shell : le contenu (colonne 1) et, s'il y
- * en a un, le conteneur du carton de rail (colonne 2). Leur ligne de
- * grille (`name-start`, et `name-start / -1` pour le rail) est posée en
- * style inline par Section.tsx à partir du `name` — rien de figé ici.
+ * Section = un <section>, colonne 1 du Shell. Sa ligne de grille
+ * (`name-start`) est posée en style inline par Section.tsx à partir du
+ * `name` — rien de figé ici. Les cartons du rail vivent à part (voir
+ * components/layout/Rail.tsx + rail.module.css), pas dans ce fichier.
  *
  * Desktop (>= 1024px)
  *   .section  colonne 1, sa ligne = hauteur naturelle du contenu
  *   .body     12 colonnes, gap 20px  (1136px à 1440)
- *   .rail     colonne 2, s'étend jusqu'au bas de la grille (align-self:
- *             stretch) = la plage où le carton peut se figer
- *   .card     position: sticky, empilement — voir rail.module.css
  *
  * Mobile (< 1024px)
- *   Le Shell repasse en bloc : grid-row/-column sont ignorés, le
- *   fragment (section puis carton) retombe naturellement dans le flux.
+ *   Le Shell repasse en bloc : grid-row/-column sont ignorés, chaque
+ *   <section> retombe naturellement dans le flux.
  *   .body     6 colonnes, gap 20px
- *   .rail     pleine largeur, DANS le flux, juste après le contenu
  *
  * Espacement inter-sections : 96px mobile / 160px desktop, porté par le
  * padding-top de chaque section sauf la première.
@@ -39,13 +35,6 @@
   align-content: start;
 }
 
-.rail {
-  grid-column: 2;
-  min-width: 0;
-  align-self: stretch;
-  padding-inline: var(--shell-rail-pad);
-}
-
 @media (min-width: 1024px) {
   .section:not(:first-child) {
     padding-top: 160px;
@@ -55,10 +44,5 @@
 @media (max-width: 1023px) {
   .body {
     grid-template-columns: repeat(6, 1fr);
-  }
-
-  .rail {
-    padding-inline: 0;
-    margin-top: 32px;
   }
 }

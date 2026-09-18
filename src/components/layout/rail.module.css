@@ -1,0 +1,110 @@
+/* ------------------------------------------------------------------ *
+ * Rail droit — empilement permanent (CLAUDE.md, « Rail droit »).
+ *
+ * .slot est un item de la grille du Shell (grid-row posé en style
+ * inline par Rail.tsx, jusqu'à la dernière ligne de la grille) : c'est
+ * lui qui délimite la plage où son carton peut se figer, pas la
+ * hauteur de sa section.
+ *
+ * Aucun overflow ni contain ici, ni sur aucun ancêtre (Shell, wrapper
+ * de page) : un seul suffit à désactiver position: sticky, sans erreur.
+ * ------------------------------------------------------------------ */
+
+.slot {
+  grid-column: 2;
+  min-width: 0;
+  /* 250px de colonne, 20px de chaque côté → 210px utiles (CLAUDE.md,
+     « Rail droit ») : sans ce padding, le carton (largeur fixe 210px)
+     reste collé au bord GAUCHE de la colonne, laissant 40px de vide à
+     droite au lieu des 20px voulus contre le bord de l'écran. */
+  padding-inline: var(--shell-rail-pad);
+  /* .shell pose align-items: start (shell.module.css) : sans stretch
+     ici, ce slot ne ferait que la hauteur de son propre contenu au
+     lieu de remplir toute sa plage de lignes — et son carton, sticky
+     à l'intérieur, décollerait dès que ce petit slot défilerait hors
+     champ, bien avant le bas de la page. */
+  align-self: stretch;
+  /* Le fond plein écran du bloc de fin de page (footer.module.css
+     .section::before) déborde jusqu'aux bords VRAIS de l'écran, donc
+     par-dessus la colonne du rail aussi — et vient après ces slots
+     dans le DOM (isolation: isolate + ordre naturel = il peinturlure
+     par-dessus à z-index égal). Un z-index explicite fait passer les
+     cartons devant, sans toucher au fond ni à l'empilement lui-même.
+     Reste sous la nav (60) et le méga-menu (55/65). */
+  z-index: 10;
+}
+
+.stickyWrap {
+  position: sticky;
+}
+
+.stickyWrap1 {
+  top: var(--rail-stick);
+}
+
+.stickyWrap2 {
+  top: calc(var(--rail-stick) + var(--rail-h1) + 20px);
+}
+
+.stickyWrap3 {
+  top: calc(var(--rail-stick) + var(--rail-h1) + var(--rail-h2) + 40px);
+}
+
+.card {
+  display: grid;
+  gap: 10px;
+  width: 210px;
+  min-height: 44px;
+  padding: 14px;
+  border: 1px solid var(--line-accent);
+  border-radius: 4px;
+  background: var(--ground);
+  text-decoration: none;
+}
+
+/* Le seul carton qui porte une action : filet rouge plein, rien d'autre. */
+.cardAction {
+  border-color: var(--accent);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ink);
+}
+
+.cardText {
+  margin: 0;
+  font-size: var(--t-small);
+  line-height: var(--t-small-lh);
+  letter-spacing: var(--t-small-ls);
+  color: var(--ink);
+}
+
+/* Mobile/tablette (< 1024px) : pas de rail, pas de sticky — bloc pleine
+   largeur dans le flux, à l'endroit où le slot a été placé dans le
+   JSX (voir page.tsx, juste après chaque section déclencheuse). */
+@media (max-width: 1023px) {
+  .slot {
+    grid-column: auto;
+    padding-inline: 0;
+    margin-top: 32px;
+  }
+
+  .stickyWrap {
+    position: static;
+    top: auto;
+  }
+
+  .card {
+    width: 100%;
+  }
+}

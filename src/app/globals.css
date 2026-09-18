@@ -44,7 +44,7 @@
   --t-lead-weight: 400;
 
   /* Géométrie du shell */
-  --shell-max: 1440px;
+  --shell-max: 1920px;
   --shell-gutter-left: 54px;
   --shell-gutter: 20px;
   --shell-rail: 250px;
@@ -52,9 +52,14 @@
   --nav-h: 64px;
   --rail-stick: 84px; /* nav (64) + 20 */
 
-  /* Hauteur commune des cartons du rail — voir rail.module.css pour le
-     pourquoi (empilement sans chiffre magique). */
-  --rail-card-h: 160px;
+  /* Hauteurs réelles des cartons 1 et 2 du rail, mesurées au montage et
+     au resize (voir components/layout/Rail.tsx) puis écrites ici en JS
+     — la valeur ci-dessous n'est qu'un repli pour le rendu sans JS
+     (CLAUDE.md, « Rail droit ») : les cartons doivent y rester lisibles
+     et empilés, quitte à ce que l'écart ne soit pas pixel-parfait tant
+     que le JS n'a pas mesuré la vraie hauteur. */
+  --rail-h1: 160px;
+  --rail-h2: 160px;
 }
 
 /* Typographie — bascule mobile à 767px (breakpoint typo, distinct du shell) */

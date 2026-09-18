@@ -1,0 +1,212 @@
+/* ------------------------------------------------------------------ *
+ * Section « Services » (home) — liste de quatre lignes pleine largeur,
+ * chacune un lien. Fond --ground, dans la zone de contenu (jamais sous
+ * le rail). Espacement de section standard (96/160px) : pas d'override
+ * ici, section.module.css suffit.
+ *
+ * Le deuxième carton du rail s'ancrera ici plus tard : aucun ancêtre de
+ * cette section ne porte overflow ni contain, pour ne pas casser son
+ * futur sticky (CLAUDE.md, « Rail droit »).
+ *
+ * Filets : la liste porte le filet du haut, chaque ligne porte celui
+ * du bas — 5 filets pour 4 lignes. Au survol/focus d'une ligne, son
+ * propre filet ET celui qui la touche par au-dessus (le filet du bas
+ * de la ligne précédente, ou celui du haut de la liste pour la
+ * première ligne) passent à transparent via :has(), sinon un trait
+ * coupe le rectangle --ink en deux.
+ *
+ * Palette fermée à trois couleurs (CLAUDE.md) : l'atténuation des
+ * lignes non survolées se fait à l'opacité, jamais avec un gris.
+ *
+ * prefers-reduced-motion : la consigne dit « seul le changement de
+ * fond reste », mais l'annuler au clavier rendrait le texte --ink sur
+ * fond --ink illisible pour la ligne focus-visible — contraire à la
+ * règle « ligne active toujours visible au clavier », elle aussi du
+ * CLAUDE.md. Choix fait ici : tous les changements d'état restent
+ * (fond, couleurs, filets, opacité des voisines), seules les
+ * *transitions* (durée/anim) sont supprimées — le survol devient
+ * instantané au lieu d'animé. À confirmer avec Franck si ce n'est pas
+ * la lecture voulue.
+ * ------------------------------------------------------------------ */
+
+.label {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ink);
+}
+
+.title {
+  grid-column: 1 / -1;
+  margin: 0;
+  margin-top: 16px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-title);
+  line-height: var(--t-title-lh);
+  letter-spacing: var(--t-title-ls);
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.list {
+  grid-column: 1 / -1;
+  margin-top: 32px;
+  border-top: 1px solid var(--line);
+  transition: border-color 200ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+/* --- Ligne : mobile d'abord (pile verticale) --- */
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "num num"
+    "name arrow"
+    "phrase phrase";
+  row-gap: 8px;
+  align-items: start;
+  min-height: 72px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--line);
+  border-radius: 4px;
+  text-decoration: none;
+  transition:
+    background-color 200ms cubic-bezier(0, 0.55, 0.45, 1),
+    border-color 200ms cubic-bezier(0, 0.55, 0.45, 1),
+    opacity 200ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.number {
+  grid-area: num;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ink);
+  transition: color 200ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.name {
+  grid-area: name;
+  align-self: center;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-title);
+  line-height: var(--t-title-lh);
+  letter-spacing: var(--t-title-ls);
+  color: var(--ink);
+  transition: color 200ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.phrase {
+  grid-area: phrase;
+  max-width: 68ch;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+  transition: color 200ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+/* Visible en permanence sur mobile (pas de survol tactile) */
+.arrow {
+  grid-area: arrow;
+  align-self: center;
+  justify-self: end;
+  flex: none;
+  color: var(--accent);
+}
+
+/* --- Ligne : desktop (grille 12 colonnes pleine largeur) --- */
+
+@media (min-width: 1024px) {
+  .row {
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-areas: none;
+    column-gap: var(--shell-gutter);
+    row-gap: 0;
+    align-items: center;
+    min-height: 96px;
+    padding: 0 24px;
+  }
+
+  .number {
+    grid-column: 1 / 2;
+  }
+
+  .name {
+    grid-column: 2 / 7;
+  }
+
+  .phrase {
+    grid-column: 8 / 12;
+  }
+
+  .arrow {
+    grid-column: 12 / 13;
+    justify-self: end;
+    color: var(--ink);
+    opacity: 0;
+    transition:
+      color 200ms cubic-bezier(0, 0.55, 0.45, 1),
+      opacity 200ms cubic-bezier(0, 0.55, 0.45, 1);
+  }
+
+  /* Ligne active : fond --ink, texte/numéro --ground, flèche --accent. */
+  .row:hover,
+  .row:focus-visible {
+    background: var(--ink);
+    border-bottom-color: transparent;
+  }
+
+  .row:hover .number,
+  .row:hover .name,
+  .row:hover .phrase,
+  .row:focus-visible .number,
+  .row:focus-visible .name,
+  .row:focus-visible .phrase {
+    color: var(--ground);
+  }
+
+  .row:hover .arrow,
+  .row:focus-visible .arrow {
+    color: var(--accent);
+    opacity: 1;
+  }
+
+  /* Filet du haut de la liste transparent quand la 1ʳᵉ ligne est active */
+  .list:has(> .row:first-child:hover),
+  .list:has(> .row:first-child:focus-visible) {
+    border-top-color: transparent;
+  }
+
+  /* Filet du bas de la ligne précédente transparent quand la ligne
+     suivante est active */
+  .row:has(+ .row:hover),
+  .row:has(+ .row:focus-visible) {
+    border-bottom-color: transparent;
+  }
+
+  /* Les lignes non actives s'atténuent à l'opacité — jamais au gris */
+  .list:has(.row:hover) .row:not(:hover),
+  .list:has(.row:focus-visible) .row:not(:focus-visible) {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .list,
+  .row,
+  .number,
+  .name,
+  .phrase,
+  .arrow {
+    transition: none;
+  }
+}

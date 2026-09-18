@@ -15,6 +15,12 @@
  * le position: sticky des cartons.
  * ------------------------------------------------------------------ */
 
+/* Fluide, sans marge à droite, jusqu'à --shell-max (1920px) : width:
+   100% l'emporte tant que le viewport ne dépasse pas ce plafond, donc
+   margin-inline: auto n'a rien à distribuer (aucune marge visible) —
+   le rail reste collé au bord droit de l'écran. Au-delà de 1920px,
+   max-width plafonne le shell et margin-inline: auto le centre : un
+   garde-fou, pas le cas nominal (CLAUDE.md, « Shell de page »). */
 .shell {
   width: 100%;
   max-width: var(--shell-max);

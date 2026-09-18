@@ -1,0 +1,225 @@
+/* ------------------------------------------------------------------ *
+ * Section « Dernier accompagnement » (home, section 2) — un seul cas
+ * client, en split visuel / chiffres.
+ *
+ * .split est un item unique de la grille 12 colonnes de la section
+ * (section.module.css .body), mais reproduit cette même grille à
+ * l'identique en interne (mêmes proportions, même gap) pour placer le
+ * visuel (1-5) et les chiffres (7-12) sur une seule ligne, alignés en
+ * haut par construction (align-items: start sur une grille à une
+ * seule ligne) — pas par un margin-top qu'il faudrait garder identique
+ * des deux côtés.
+ *
+ * row-gap à 0 sur la grille externe (bodyStyle, page.tsx) : les écarts
+ * entre label / titre / split / lien sont portés par les margin-top
+ * ci-dessous, pas par le gap de la grille.
+ *
+ * overflow: hidden ne vit que sur .visual, dans la colonne de contenu —
+ * cette section n'a de toute façon aucun carton de rail.
+ * ------------------------------------------------------------------ */
+
+.label {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--accent);
+}
+
+.title {
+  grid-column: 1 / -1;
+  margin-top: 32px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-title);
+  line-height: var(--t-title-lh);
+  letter-spacing: var(--t-title-ls);
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.split {
+  grid-column: 1 / -1;
+  margin-top: 32px;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--shell-gutter);
+  align-items: start;
+}
+
+.visualSlot {
+  grid-column: 1 / -1;
+}
+
+/* Le conteneur réel du visuel (rendu côté serveur, voir
+   DernierAccompagnement.tsx) : format, radius, overflow et le
+   dégradé + tags qui vivent par-dessus l'image. */
+.visual {
+  position: relative;
+  aspect-ratio: 1 / 1.25;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.image {
+  object-fit: cover;
+}
+
+.imageFallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  text-align: center;
+  background: var(--ink); /* opaque, en attendant la photo réelle */
+  color: var(--ground);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+}
+
+.imageGradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(10, 6, 5, 0.45));
+}
+
+.tags {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.tag {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  padding: 8px 13px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ground);
+}
+
+.figures {
+  grid-column: 1 / -1;
+  margin-top: 32px;
+  border-top: 1px solid var(--line);
+}
+
+.figureRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  padding-block: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.figureValue {
+  flex: none;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: var(--t-title);
+  line-height: var(--t-title-lh);
+  letter-spacing: var(--t-title-ls);
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.figureCaption {
+  flex: 0 1 55%;
+  text-align: right;
+  font-size: var(--t-small);
+  line-height: var(--t-small-lh);
+  letter-spacing: var(--t-small-ls);
+  color: var(--ink);
+}
+
+/* Pas de bouton : filet permanent, qui se décale de 4px au survol. */
+.link {
+  grid-column: 1 / -1;
+  margin-top: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  min-height: 44px;
+  padding-bottom: 0;
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: var(--t-body);
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+  transition: padding-bottom 200ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.link:hover,
+.link:focus-visible {
+  padding-bottom: 4px;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.linkArrow {
+  flex: none;
+}
+
+@media (min-width: 1024px) {
+  .split {
+    margin-top: 48px;
+  }
+
+  .visualSlot {
+    grid-column: 1 / 6;
+  }
+
+  .figures {
+    grid-column: 7 / 13;
+    margin-top: 0;
+  }
+
+  .title {
+    grid-column: 1 / 8;
+    margin-top: 48px;
+  }
+
+  .link {
+    grid-column: 7 / 13;
+  }
+}
+
+@media (max-width: 1023px) {
+  .split {
+    display: block;
+  }
+
+  .figures {
+    margin-top: 32px;
+  }
+
+  /* Valeur/libellé côte à côte n'a plus la largeur pour tenir le
+     libellé le plus long sur deux lignes (mesuré : 3 lignes à 390px) —
+     empilés plutôt que raccourcir le texte. */
+  .figureRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .figureCaption {
+    flex: 1 1 auto;
+    max-width: none;
+    text-align: left;
+  }
+}

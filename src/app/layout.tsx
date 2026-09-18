@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { Nav } from "@/components/Nav";
+import { Nav } from "@/components/layout/Nav";
 
 // Polices auto-hébergées par next/font (servies depuis notre domaine,
 // aucun <link> vers fonts.googleapis.com).

@@ -61,13 +61,23 @@ section porte déjà du --t-title, pour éviter deux niveaux concurrents.
 
 ## Shell de page
 
-Desktop (>= 1024px)
-  conteneur    max-width 1440px, centré au-delà
-  marge gauche 54px
-  contenu      12 colonnes, gap 20px   (1136px à 1440 de large)
-  rail droit   250px, padding-inline 20px  →  210px utiles
-  le rail est le dernier élément, collé au bord droit du conteneur
+Desktop (>= 1024px) — construction springsummer.dk : fluide, sans marge à
+droite. La marge de 54px n'existe qu'à gauche ; le rail est collé au bord
+DROIT de l'écran, pas d'un conteneur centré.
+  conteneur    largeur = min(100 %, 1920px) — pas de centrage, pas de marge
+               à droite tant que l'écran ne dépasse pas 1920px : le shell
+               occupe tout l'espace disponible. Au-delà de 1920px, garde-fou :
+               le shell se borne à 1920px et SE CENTRE (marges symétriques) —
+               un cas exceptionnel, pas le comportement nominal.
+  marge gauche 54px, uniquement à gauche
+  contenu      12 colonnes, gap 20px — largeur = largeur du shell − 54 − 250,
+               donc fluide elle aussi (jusqu'à 1616px de large à 1920px)
+  rail droit   250px, padding-inline 20px → 210px utiles, collé au bord droit
+               du shell (donc de l'écran, tant qu'on est sous 1920px)
   hauteur de nav 64px
+  Aucun 100vw dans les calculs de largeur : 100vw inclut la barre de
+  défilement et déborde de sa largeur sur Windows et Firefox. Tout calcul se
+  fait en % du conteneur (voir le filet de nav et le méga-menu).
 
 Mobile (< 1024px)
   6 colonnes, gap 20px, marges 20px
@@ -85,6 +95,39 @@ Titre de section → contenu : 32px mobile / 48px desktop.
 Échelle : 4 · 8 · 12 · 16 · 20 · 24 · 32 · 48 · 64 · 96 · 128 · 160.
 Espacer au `gap` d'un flex ou d'une grille plutôt qu'aux marges individuelles.
 
+## Barre de navigation
+
+position fixed, top, hauteur 64px. Aucun nom de marque dans la barre : le nom
+du site reste porté par le titre géant du bloc de fin de page. Les entrées
+(déclencheur du méga-menu, Réalisations, Contact) sont alignées à gauche, à la
+marge du conteneur (54px desktop), gap 40px, --t-body, --ink.
+
+En haut de page : fond transparent, aucun filet. Dès 80px de scroll : fond
+--ground opaque, aucune ombre. La barre se rétracte (translateY -100%) au
+scroll vers le bas, revient au scroll vers le haut — toujours visible sous
+80px. 300ms, cubic-bezier(0,.55,.45,1).
+
+Filet sous la barre : il ne couvre PAS toute la largeur de l'écran, seulement
+la zone de contenu — de la marge gauche (54px) jusqu'au bord de la colonne du
+rail (250px), la même largeur que le panneau du méga-menu. À chacune de ses
+deux extrémités, il se retourne vers le bas par un congé de 4px (le rayon des
+cartons du rail) et se prolonge verticalement sur 12px.
+
+C'est un élément décoratif dédié, pas une border sur la barre :
+  <div data-nav-rule aria-hidden="true">
+  position fixed, top = hauteur de la nav, left = marge du conteneur
+  width = largeur de la zone de contenu, height 12px
+  border-top, border-left, border-right : 1px solid var(--line)
+  pas de border-bottom, radius 4px 4px 0 0, pointer-events none
+
+Il apparaît et disparaît avec le fond de la barre (même seuil de 80px, même
+transition) et se rétracte avec elle : jamais visible seul quand la barre est
+transparente ou rétractée.
+
+Mobile (< 1024px) : pas de rail, donc pas de zone de contenu réduite — le
+filet couvre la largeur disponible entre les marges de 20px, mêmes retours
+d'angle. Le déclencheur « Menu » reste à droite, inchangé.
+
 ## Arrondis
 
 4px   boutons, cartons du rail, panneau du méga-menu, cartes, champs de
@@ -98,36 +141,33 @@ Trois cartons, chacun rattaché à une section de la page :
   2. au niveau de la section services
   3. juste avant le CTA final
 
-Comportement attendu, à l'identique de springsummer.dk :
-le carton vit dans la colonne du rail et n'en sort jamais latéralement.
+Comportement attendu : un empilement permanent, pas un relais.
+Le carton vit dans la colonne du rail et n'en sort jamais latéralement.
 Il monte avec la page, puis se fige à 84px du haut de la fenêtre — soit la
 hauteur de nav (64px) plus 20px, la même marge que le gap de grille et que
-le retrait du rail. Il reste figé tant que sa section est à l'écran, puis
-il repart vers le haut avec elle et le carton suivant prend le relais.
-Si deux cartons devaient se retrouver figés en même temps, le second se fige
-20px sous le bas du premier.
+le retrait du rail. Une fois figé, il RESTE visible jusqu'au bas de la page :
+il ne repart jamais vers le haut, quelle que soit la section à l'écran.
+Le carton suivant se fige à son tour, 20px sous le bas du précédent. En bas
+de page, les trois cartons sont visibles, empilés.
 
-Deux implémentations acceptables :
+Implémentation : CSS sticky, aucun JS d'animation.
+  <aside data-rail>
+    <article data-rail-card>   position: sticky; top: 84px
+    <article data-rail-card>   position: sticky;
+                                top: calc(84px + hauteur du 1ᵉʳ + 20px)
+    <article data-rail-card>   position: sticky;
+                                top: calc(84px + hauteur du 1ᵉʳ + hauteur du 2ᵉ + 40px)
+Le conteneur de chaque carton s'étend de son point d'apparition jusqu'au BAS
+de la zone rail — jamais jusqu'à la fin de sa seule section : c'est ce qui
+distingue l'empilement du relais. Un conteneur qui s'arrête avec sa section
+fait repartir le carton au lieu de le laisser figé.
 
-  A. CSS sticky (à privilégier, aucun JS)
-     <aside data-rail>
-       <div data-rail-slot>          hauteur = celle de la section 1
-         <article data-rail-card>    position: sticky; top: 84px
-       </div>
-       <div data-rail-slot>          hauteur = celle de la section 2
-         <article data-rail-card>    position: sticky; top: 84px
-       </div>
-     Le slot est ce qui délimite la plage de figement. Le carton reste dans
-     la colonne du rail dans tous les cas.
+Les hauteurs des cartons varient avec leur contenu (nombre de lignes) : les
+mesurer au montage et au resize plutôt que les coder en dur, et les écrire
+dans des variables CSS pour que les `top` restent des calc().
 
-  B. Pin GSAP ScrollTrigger (ce que fait Spring/Summer)
-     ScrollTrigger.create({ trigger: slot, start: 'top 84px',
-       end: 'bottom 84px', pin: card, pinSpacing: false })
-     À utiliser seulement si le sticky ne suffit pas — par exemple pour
-     enchaîner le figement avec une autre animation de la timeline.
-
-L'écart vertical entre deux cartons est celui des sections elles-mêmes :
-ne pas ajouter de marge sur les cartons.
+L'écart vertical entre deux cartons figés est fixe : 20px. Ce n'est plus
+celui des sections elles-mêmes.
 
 Aucun ancêtre d'un carton ne doit porter overflow: hidden, overflow: auto,
 overflow: clip ni contain. Un seul de ces ancêtres suffit à désactiver
@@ -153,7 +193,8 @@ aux mêmes endroits, en pleine largeur, sans figement.
 ## Méga-menu — desktop
 
 panneau      position fixed, top = hauteur de la nav, left 54px
-             largeur = celle de la zone de contenu (1136px à 1440)
+             largeur = celle de la zone de contenu, fluide (jusqu'à 1616px
+             à 1920px de large)
              padding 20px
              fond --ground, opaque — pas de backdrop-filter
              border 1px solid var(--line-accent) sur les quatre côtés
@@ -269,7 +310,8 @@ Trois contrôles chiffrés, dans la console de la page :
 2. méga-menu OUVERT en 1440, sa hauteur reste sous 55 % de la fenêtre
    document.querySelector('[data-megamenu]').getBoundingClientRect().height
    / window.innerHeight   → < 0.55
-3. les trois cartons du rail se figent bien à 84px et se relaient
+3. les trois cartons du rail se figent bien à 84px et restent visibles,
+   empilés, jusqu'au bas de la page
 
 Puis navigation complète au clavier, du premier lien au dernier.
 Corriger avant de rendre la main.

@@ -1,0 +1,327 @@
+/* ------------------------------------------------------------------ *
+ * Méga-menu — CLAUDE.md, sections « Méga-menu — desktop » et
+ * « Méga-menu — mobile », appliquées à la lettre.
+ *
+ * Fond --ground OPAQUE partout, aucun backdrop-filter : le filtre le
+ * plus coûteux du navigateur, et source d'artefacts Safari iOS avec du
+ * position: fixed — exactement notre cas ici.
+ *
+ * Plusieurs nombres de cette page (21px/18px/40px pour le texte, les
+ * ls +.02em, le lh 40px) ne correspondent à AUCUN token --t-* existant
+ * : CLAUDE.md les donne littéralement, propres à ce composant, comme
+ * .benefit dans services.module.css réutilise --t-lead à une taille
+ * qui n'est pas la sienne. Figés ici à dessein, pas des oublis.
+ *
+ * rgba(255,255,255,.2) sur les tags de la carte cas client : un filet
+ * blanc pensé pour rester lisible sur n'importe quelle photo, pas une
+ * des trois couleurs de la palette — même exception déjà en place sur
+ * .tag dans dernier-accompagnement.module.css.
+ *
+ * .desktopPanelWrap/.desktopPanelInner centrent le panneau sans aucun
+ * `vw` (même technique que nav.module.css .ruleWrap/.ruleInner) : les
+ * deux doivent tomber exactement sur les mêmes bords.
+ * ------------------------------------------------------------------ */
+
+/* --------------------------- Desktop (>= 1024px) --------------------- */
+
+/* Même technique de centrage que le filet de nav (nav.module.css
+   .ruleWrap/.ruleInner) : aucun `vw` nulle part, pour rester
+   pixel-parfait avec lui (100vw inclut la barre de défilement sur
+   Windows/Firefox) et s'aligner exactement sur la zone de contenu. */
+.desktopPanelWrap {
+  position: fixed;
+  top: var(--nav-h);
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 55;
+}
+
+.desktopPanelInner {
+  width: 100%;
+  max-width: var(--shell-max);
+  padding-left: var(--shell-gutter-left);
+  padding-right: var(--shell-rail);
+}
+
+.desktopPanel {
+  width: 100%;
+  max-height: 55vh;
+  overflow-y: auto;
+  padding: 20px;
+  background: var(--ground);
+  border: 1px solid var(--line-accent);
+  border-radius: 4px;
+}
+
+.columns {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+/* Largeur fixe, jamais flex: 1 : le vide entre deux colonnes doit
+   rester plus large qu'une colonne — c'est ce qui fait tenir le
+   panneau, pas une donnée esthétique accessoire. */
+.column {
+  width: 269px;
+  flex: 0 0 auto;
+}
+
+.columnTitle {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ink);
+}
+
+.entryList {
+  list-style: none;
+  margin: 0;
+  margin-top: 40px;
+  padding: 0;
+  display: grid;
+}
+
+.entryListServices {
+  gap: 44px;
+}
+
+.entryListSecteurs {
+  gap: 33px;
+}
+
+.entryServices {
+  display: inline-block;
+  width: fit-content;
+  font-size: var(--t-lead);
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.entrySecteurs {
+  display: inline-block;
+  width: fit-content;
+  font-size: 18px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  font-weight: 400;
+  color: var(--ink);
+  opacity: 0.7;
+}
+
+.entryLink {
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 200ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.entryLink:hover,
+.entryLink:focus-visible {
+  border-bottom-color: var(--ink);
+}
+
+.entryLink:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.caseCardSlot {
+  margin-top: 40px;
+}
+
+.caseCard {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1.25;
+  border-radius: 4px;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.caseImage {
+  object-fit: cover;
+}
+
+.caseImageFallback {
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+}
+
+.caseGradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ink) 45%, transparent),
+    transparent 30%,
+    transparent 70%,
+    color-mix(in srgb, var(--ink) 45%, transparent)
+  );
+}
+
+.caseTop {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+}
+
+.caseClient,
+.caseSubtitle {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ground);
+}
+
+.caseTags {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.caseTag {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  padding: 8px 13px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ground);
+}
+
+/* --------------------------- Mobile (< 1024px) ------------------------ */
+
+.mobilePanel {
+  position: fixed;
+  top: var(--nav-h);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 55;
+  padding: 52px 20px 25px;
+  background: var(--ground);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileList {
+  list-style: none;
+  margin: 0;
+  /* padding-top (52px) + cette marge = 92px du haut du panneau,
+     valeur donnée par CLAUDE.md pour la première entrée. */
+  margin-top: 40px;
+  padding: 0;
+  display: grid;
+  gap: 60px;
+}
+
+.mobileItem {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  text-align: left;
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 40px;
+  line-height: 40px;
+  letter-spacing: 0.02em;
+  font-weight: 400;
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.mobileItem:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Accordéon en grid-template-rows 0fr → 1fr : anime sans jamais
+   mesurer de hauteur en JS. */
+.mobileSubWrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 250ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.mobileSubWrap[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+
+.mobileSubList {
+  overflow: hidden;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.mobileSubWrap[data-open="true"] .mobileSubList {
+  margin-top: 20px;
+}
+
+.mobileSubEntry {
+  display: inline-block;
+  width: fit-content;
+  min-height: 44px;
+  align-content: center;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+.mobileFooter {
+  margin-top: auto;
+  padding-top: 40px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ink);
+}
+
+.mobileFooterLink {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 200ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.mobileFooterLink:hover,
+.mobileFooterLink:focus-visible {
+  border-bottom-color: var(--ink);
+}
+
+.mobileFooterLink:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobileSubWrap {
+    transition: none;
+  }
+}
