@@ -58,8 +58,24 @@
   padding: 14px;
   border: 1px solid var(--line-accent);
   border-radius: 4px;
-  background: var(--ground);
   text-decoration: none;
+  /* Translucide et flouté, desktop uniquement (CLAUDE.md, « Rail
+     droit ») : exception explicite à l'interdiction générale du
+     backdrop-filter (« Couleurs ») — elle reste valable partout
+     ailleurs (nav, méga-menu, etc.). 24px et pas plus : au-delà, le
+     coût de recomposition grimpe sans gain visuel sur un carton de
+     210px. */
+  background: color-mix(in srgb, var(--ground) 75%, transparent);
+  -webkit-backdrop-filter: blur(24px); /* obligatoire, Safari */
+  backdrop-filter: blur(24px);
+}
+
+/* Repli si le filtre n'est pas supporté : sans lui le carton translucide
+   devient illisible sur fond de section quelconque. */
+@supports not (backdrop-filter: blur(1px)) {
+  .card {
+    background: var(--ground);
+  }
 }
 
 /* Le seul carton qui porte une action : filet rouge plein, rien d'autre. */
@@ -70,6 +86,22 @@
 .card:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+.cardIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line-accent);
+  border-radius: 4px;
+  color: var(--ink);
+}
+
+.cardIconSvg {
+  width: 20px;
+  height: 20px;
 }
 
 .cardTitle {
@@ -106,5 +138,12 @@
 
   .card {
     width: 100%;
+    /* Aucun backdrop-filter sous 1024px : cartons pleine largeur, coût
+       GPU maximal, et Safari iOS produit des artefacts quand le filtre
+       coexiste avec la nav en position: fixed (CLAUDE.md, « Rail
+       droit »). */
+    background: var(--ground);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }

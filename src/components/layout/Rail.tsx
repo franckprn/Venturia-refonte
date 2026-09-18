@@ -1,9 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ComponentType } from "react";
 import Link from "next/link";
 import { railCards, type RailCardContent } from "@/content/rail";
+import { IconArrowRight, IconClock, IconSparkle } from "./RailIcons";
 import styles from "./rail.module.css";
+
+// Une icône par carton, dans l'ordre de content/rail.ts (CLAUDE.md,
+// « Rail droit ») : horloge, étoile à quatre branches, flèche.
+const RAIL_ICONS = [IconClock, IconSparkle, IconArrowRight] as const;
 
 type RailSlotProps = {
   /** Index du carton dans content/rail.ts (0, 1 ou 2). */
@@ -70,16 +75,27 @@ export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
   return (
     <div className={styles.slot} data-rail-slot style={{ gridRow: `${anchor}-start / -1` }}>
       <div ref={measureRef} className={stickyClassName}>
-        <RailCardArticle card={card} action={cardIndex === 2} />
+        <RailCardArticle card={card} action={cardIndex === 2} Icon={RAIL_ICONS[cardIndex]} />
       </div>
     </div>
   );
 }
 
-function RailCardArticle({ card, action }: { card: RailCardContent; action: boolean }) {
+function RailCardArticle({
+  card,
+  action,
+  Icon,
+}: {
+  card: RailCardContent;
+  action: boolean;
+  Icon: ComponentType<{ className?: string }>;
+}) {
   const className = [styles.card, action ? styles.cardAction : ""].filter(Boolean).join(" ");
   const content = (
     <>
+      <span className={styles.cardIcon}>
+        <Icon className={styles.cardIconSvg} />
+      </span>
       <p className={styles.cardTitle}>{card.title}</p>
       <p className={styles.cardText}>{card.text}</p>
     </>

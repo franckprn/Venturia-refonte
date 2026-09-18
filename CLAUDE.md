@@ -181,7 +181,20 @@ padding    14px
 display    grid, gap 10px
 border     1px solid var(--line-accent)
 radius     4px
-fond       --ground, opaque
+icône      carré de 44px, en haut à gauche du carton, filet 1px
+           var(--line-accent), radius 4px, contenant un SVG 20px, trait
+           1.5px, couleur --ink. Décorative : aria-hidden="true" sur le
+           SVG. Titre et texte suivent, en dessous du carré.
+fond       desktop uniquement, translucide et flouté :
+           background: color-mix(in srgb, var(--ground) 75%, transparent);
+           backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+           Repli en fond --ground opaque si le filtre n'est pas supporté
+           (@supports not (backdrop-filter: blur(1px))), et
+           systématiquement en dessous de 1024px — voir « Couleurs ».
+           Exception explicite à la règle « Couleurs » qui interdit tout
+           backdrop-filter : ici, sur les cartons du rail en desktop
+           uniquement, il est autorisé. La règle générale reste valable
+           partout ailleurs — nav, méga-menu, et tout le reste du site.
 distinction le seul carton qui porte une action prend border-color: var(--accent)
            au lieu de var(--line-accent) — pas de fond différent, pas de blanc
 titre      --t-mono, --ink
