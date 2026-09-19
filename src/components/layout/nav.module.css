@@ -3,11 +3,13 @@
  * seuil/direction de scroll ici (voir Nav.tsx — la barre ne se cache
  * ni ne devient transparente, plus jamais).
  *
- * Fond transparent et flouté en permanence, AUCUNE teinte, même
- * traitement que les cartons du rail (rail.module.css .card) —
- * exception explicite à l'interdiction générale du backdrop-filter
- * (CLAUDE.md, « Couleurs »), étendue ici à la nav en desktop ET en
- * mobile (contrairement aux cartons, floutés seulement en desktop).
+ * Le flou est porté par UN SEUL élément (.navBlur, voir plus bas), pas
+ * par .nav : un backdrop-filter ne floute que ce qui est sous SA PROPRE
+ * surface, donc plusieurs surfaces floutées côte à côte (l'ancien trio
+ * bande du haut + .blurLeft + .blurRight) recalculent chacune leur flou
+ * séparément et laissent une couture visible au raccord. .nav reste
+ * transparent, sans backdrop-filter, et vit dans un calque AU-DESSUS de
+ * .navBlur : le texte, le logo, ne sont jamais eux-mêmes floutés.
  *
  * Couleur de texte : `--fg`, posée par [data-tone] (globals.css),
  * piloté en JS par Nav.tsx selon la section sous le centre vertical de
@@ -22,11 +24,6 @@
  * data-nav-rule — pas une border sur .nav) vit dans ce fichier mais PAS
  * dans .nav : c'est un élément fixed indépendant, positionné sous la
  * barre, sans aucun `vw` dans son calcul de largeur (voir plus bas).
- * Les deux bandes floutées latérales (.blurLeft/.blurRight) vivent dans
- * le padding de .ruleInner : avec le fond de .nav ci-dessus, elles
- * composent le fond flouté en forme d'encoche inversée (CLAUDE.md,
- * « Barre de navigation ») — net entre les deux angles du trait, flouté
- * partout ailleurs jusqu'au bas des angles.
  *
  * Aucun ancêtre du méga-menu (le <header> lui-même compris) ne porte
  * overflow/contain/transform : ça casserait le position: fixed du
@@ -42,19 +39,8 @@
   align-items: center;
   padding-inline: var(--shell-gutter-left);
   background: transparent;
-  -webkit-backdrop-filter: blur(24px); /* obligatoire, Safari, avant le standard */
-  backdrop-filter: blur(24px);
   color: var(--fg);
   transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
-}
-
-/* Repli si le filtre n'est pas supporté : sans lui la barre transparente
-   laisse le texte de la page se superposer à celui de la nav. Fond
-   OPAQUE de la tonalité en cours, jamais transparent sans flou. */
-@supports not (backdrop-filter: blur(1px)) {
-  .nav {
-    background: var(--tone-bg);
-  }
 }
 
 .items {
@@ -152,19 +138,17 @@
 
 /* ------------------------------- Filet sous la barre ------------------ */
 
-/* Trois niveaux, aucun `vw` nulle part (100vw inclut la barre de
+/* Deux niveaux, aucun `vw` nulle part (100vw inclut la barre de
    défilement sur Windows/Firefox — un calcul basé dessus déborde ou se
    décale de sa largeur, ~15px) :
    .ruleWrap  fixed, width 100 % (du viewport réel, sans le biais du
               scrollbar — contrairement à 100vw), flex + justify-content
-              center : centre .ruleInner au-delà de 1728px sans aucune
+              center : centre .ruleInner au-delà de 1920px sans aucune
               arithmétique de viewport.
-   .ruleInner max-width 1728px, width 100 %, porte les marges (54px /
+   .ruleInner max-width 1920px, width 100 %, porte les marges (54px /
               250px desktop, 20px des deux côtés en mobile) via son
               propre padding : sa boîte de contenu EST la zone de
               contenu, au pixel près, quelle que soit la largeur.
-              position: relative pour héberger .blurLeft/.blurRight, qui
-              se positionnent dans ce padding (voir plus bas).
    .rule      width 100 % de .ruleInner (donc de la zone de contenu) :
               le filet visible, trois côtés + radius sur les deux coins
               hauts pour le congé de 4px qui se prolonge sur 12px.
@@ -184,7 +168,6 @@
 }
 
 .ruleInner {
-  position: relative;
   width: 100%;
   max-width: var(--shell-max);
   padding-left: var(--shell-gutter-left);
@@ -205,38 +188,86 @@
   transition: border-color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
-/* Bandes latérales du fond flouté — l'« encoche inversée » (CLAUDE.md,
-   « Barre de navigation ») : logées dans le padding de .ruleInner (donc
-   HORS de la zone de contenu que délimite .rule), même hauteur que lui
-   (100 % de .ruleInner, qui vaut 12px puisque .rule est son seul enfant
-   en flux normal). Même fond/flou que .nav : avec le fond de la barre
-   au-dessus (0 → 64px, pleine largeur), elles composent le flou continu
-   qui descend jusqu'au bas des angles (64 → 76px) de chaque côté du
-   trait — net entre les deux angles, où rien ne les recouvre. */
-.blurLeft,
-.blurRight {
-  position: absolute;
+/* --------------------------- Surface floutée unique -------------------- */
+
+/* .navBlur : SEUL élément de la nav à porter backdrop-filter. Un
+   rectangle fixe pleine largeur (jamais 100vw), du haut de l'écran
+   jusqu'au bas des angles du trait (var(--nav-h) + 12px), découpé par
+   clip-path pour laisser un trou net sous le trait — l'« encoche
+   inversée » (CLAUDE.md, « Barre de navigation »). Parce que le trou
+   touche le bord bas du rectangle, la découpe est un simple polygone
+   concave en U (pas de trou fermé) : pas besoin de la ruse du polygone
+   à double tracé.
+
+   --nb-offset reproduit exactement le centrage flex de .ruleWrap
+   (garde-fou au-delà de 1920px) ; --nb-x1/--nb-x2 reproduisent le
+   padding-left/right de .ruleInner (mêmes variables, desktop puis
+   mobile dans le @media plus bas) : la découpe reste alignée sur le
+   bord EXTÉRIEUR du trait à toutes les largeurs.
+
+   Les deux coins hauts de la découpe suivent le rayon 4px des angles du
+   trait (border-radius de .rule) : chaque quart de cercle est approché
+   par 5 points (centre du coin, r = 4px, pas de 22.5°) — cos/sin dérivés :
+   r·(1-cos22.5°)=0.30, r·sin22.5°=1.53 ; r·(1-cos45°)=1.17, r·sin45°=2.83 ;
+   r·(1-cos67.5°)=2.47, r·sin67.5°=3.70. */
+.navBlur {
+  --nb-offset: calc((100% - min(100%, var(--shell-max))) / 2);
+  --nb-x1: calc(var(--nb-offset) + var(--shell-gutter-left));
+  --nb-x2: calc(var(--nb-offset) + min(100%, var(--shell-max)) - var(--shell-rail));
+  position: fixed;
   top: 0;
-  height: 100%;
-  background: transparent;
-  -webkit-backdrop-filter: blur(24px);
-  backdrop-filter: blur(24px);
-  pointer-events: none;
-}
-
-.blurLeft {
   left: 0;
-  width: var(--shell-gutter-left);
+  width: 100%;
+  height: calc(var(--nav-h) + 12px);
+  background: transparent;
+  -webkit-backdrop-filter: blur(24px); /* obligatoire, Safari, avant le standard */
+  backdrop-filter: blur(24px);
+  -webkit-clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(var(--nav-h) + 12px),
+    var(--nb-x2) calc(var(--nav-h) + 12px),
+    var(--nb-x2) calc(var(--nav-h) + 4px),
+    calc(var(--nb-x2) - 0.3px) calc(var(--nav-h) + 2.47px),
+    calc(var(--nb-x2) - 1.17px) calc(var(--nav-h) + 1.17px),
+    calc(var(--nb-x2) - 2.47px) calc(var(--nav-h) + 0.3px),
+    calc(var(--nb-x2) - 4px) var(--nav-h),
+    calc(var(--nb-x1) + 4px) var(--nav-h),
+    calc(var(--nb-x1) + 2.47px) calc(var(--nav-h) + 0.3px),
+    calc(var(--nb-x1) + 1.17px) calc(var(--nav-h) + 1.17px),
+    calc(var(--nb-x1) + 0.3px) calc(var(--nav-h) + 2.47px),
+    var(--nb-x1) calc(var(--nav-h) + 4px),
+    var(--nb-x1) calc(var(--nav-h) + 12px),
+    0 calc(var(--nav-h) + 12px)
+  );
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(var(--nav-h) + 12px),
+    var(--nb-x2) calc(var(--nav-h) + 12px),
+    var(--nb-x2) calc(var(--nav-h) + 4px),
+    calc(var(--nb-x2) - 0.3px) calc(var(--nav-h) + 2.47px),
+    calc(var(--nb-x2) - 1.17px) calc(var(--nav-h) + 1.17px),
+    calc(var(--nb-x2) - 2.47px) calc(var(--nav-h) + 0.3px),
+    calc(var(--nb-x2) - 4px) var(--nav-h),
+    calc(var(--nb-x1) + 4px) var(--nav-h),
+    calc(var(--nb-x1) + 2.47px) calc(var(--nav-h) + 0.3px),
+    calc(var(--nb-x1) + 1.17px) calc(var(--nav-h) + 1.17px),
+    calc(var(--nb-x1) + 0.3px) calc(var(--nav-h) + 2.47px),
+    var(--nb-x1) calc(var(--nav-h) + 4px),
+    var(--nb-x1) calc(var(--nav-h) + 12px),
+    0 calc(var(--nav-h) + 12px)
+  );
+  pointer-events: none;
+  z-index: 58;
 }
 
-.blurRight {
-  right: 0;
-  width: var(--shell-rail);
-}
-
+/* Repli si le filtre n'est pas supporté : fond OPAQUE de la tonalité en
+   cours, jamais transparent sans flou — la découpe (clip-path) reste
+   active, donc ce repli ne peint toujours que la bande du haut et les
+   deux bandes latérales, jamais la fenêtre de contenu. */
 @supports not (backdrop-filter: blur(1px)) {
-  .blurLeft,
-  .blurRight {
+  .navBlur {
     background: var(--tone-bg);
   }
 }
@@ -254,7 +285,7 @@
     display: inline-flex;
   }
 
-  /* Pas de rail en mobile : le filet et les deux bandes latérales
+  /* Pas de rail en mobile : le filet et la découpe de .navBlur
      couvrent la largeur disponible entre les marges de 20px, mêmes
      retours d'angle. */
   .ruleInner {
@@ -262,9 +293,9 @@
     padding-right: var(--shell-gutter);
   }
 
-  .blurLeft,
-  .blurRight {
-    width: var(--shell-gutter);
+  .navBlur {
+    --nb-x1: calc(var(--nb-offset) + var(--shell-gutter));
+    --nb-x2: calc(var(--nb-offset) + min(100%, var(--shell-max)) - var(--shell-gutter));
   }
 
   /* Repli prêt, volontairement PAS activé (voir CLAUDE.md, « Barre de

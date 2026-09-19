@@ -15,7 +15,8 @@ const HOVER_CLOSE_DELAY = 200;
  * Barre de nav fixe, 64px, TOUJOURS visible : aucune logique de
  * scroll ici (ni seuil, ni sens, ni transparence) — la barre et le
  * filet sous elle forment un seul bloc fixe et permanent, fond
- * translucide et flouté en continu (voir nav.module.css `.nav`).
+ * translucide et flouté en continu, porté par un élément unique (voir
+ * nav.module.css `.navBlur`).
  *
  * Aucun nom de marque dans la barre (le titre géant du bloc de fin de
  * page porte le nom du site) : seul le logo (`<Logo>`, SVG inline,
@@ -25,11 +26,12 @@ const HOVER_CLOSE_DELAY = 200;
  * Le filet sous la barre n'est pas une border sur la barre elle-même
  * mais un élément dédié (`.rule` / `data-nav-rule`), qui ne couvre que
  * la zone de contenu et se retourne vers le bas à chaque extrémité —
- * voir nav.module.css. `.blurLeft`/`.blurRight`, à côté de `.rule` dans
- * `.ruleInner`, composent avec le fond de la barre le flou en forme
- * d'encoche inversée (CLAUDE.md, « Barre de navigation ») : net entre
- * les deux angles du trait, flouté partout ailleurs jusqu'au bas des
- * angles.
+ * voir nav.module.css. Le flou est porté par un seul élément séparé,
+ * `.navBlur`, découpé par une clip-path pour laisser une fenêtre nette
+ * sous le trait — un backdrop-filter ne floute que ce qui est sous sa
+ * propre surface, donc plusieurs surfaces floutées côte à côte
+ * laisseraient une couture au raccord (CLAUDE.md, « Barre de
+ * navigation »).
  *
  * Un seul état `open`/un seul <MegaMenu>, piloté par DEUX déclencheurs
  * (le bouton desktop « Ce que je fais » et le mot « Menu » mobile) :
@@ -126,6 +128,14 @@ export function Nav() {
 
   return (
     <>
+      {/* Surface floutée unique de la nav (voir nav.module.css
+          .navBlur) : un rectangle fixe, du haut de l'écran jusqu'au bas
+          des angles du trait, découpé par clip-path pour laisser une
+          fenêtre nette sous le trait. Rendu hors du <header> (frère, pas
+          descendant) pour porter son propre data-tone — --fg/--tone-bg
+          (globals.css [data-tone]) ne s'y hériteraient pas sinon. */}
+      <div className={styles.navBlur} data-tone={navTone} aria-hidden="true" />
+
       <header ref={headerRef} className={styles.nav} data-tone={navTone}>
         <nav className={styles.items} aria-label="Navigation principale">
           <div className={styles.leftCluster}>
@@ -179,17 +189,12 @@ export function Nav() {
           100vw inclut la barre de défilement et décale/élargit tout
           calcul basé dessus — d'où le débordement horizontal que ce
           calcul provoquait. Toujours visible, comme la barre : plus de
-          fondu/rétractation liés au scroll. .blurLeft/.blurRight, dans
-          le padding de .ruleInner (hors zone de contenu), composent
-          avec le fond de la barre le flou en forme d'encoche inversée
-          — net entre les deux angles du trait. data-tone répété ici (même
+          fondu/rétractation liés au scroll. data-tone répété ici (même
           valeur que le <header>) : .ruleWrap est un FRÈRE du <header>, pas
           son descendant — --fg/--tone-bg (globals.css [data-tone]) ne s'y
           hériteraient pas sinon. */}
       <div className={styles.ruleWrap} data-tone={navTone} aria-hidden="true">
         <div className={styles.ruleInner}>
-          <div className={styles.blurLeft} />
-          <div className={styles.blurRight} />
           <div data-nav-rule className={styles.rule} />
         </div>
       </div>
