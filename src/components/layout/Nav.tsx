@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { nav } from "@/content/nav";
 import { MegaMenu } from "./MegaMenu";
+import { Logo } from "./Logo";
 import styles from "./nav.module.css";
 
 const SCROLL_SHOW_THRESHOLD = 80;
@@ -16,8 +17,11 @@ const HOVER_CLOSE_DELAY = 200;
  * revient au scroll vers le haut — toujours visible sous 80px.
  *
  * Aucun nom de marque dans la barre (le titre géant du bloc de fin de
- * page porte le nom du site) : les entrées commencent à la marge
- * gauche du conteneur. Le filet sous la barre n'est pas une border sur
+ * page porte le nom du site) : seul le logo (`<Logo>`, SVG inline,
+ * fill="currentColor") ouvre la barre, à la marge gauche du conteneur,
+ * suivi des entrées — voir `.leftCluster` / `.logoLink` dans
+ * nav.module.css pour le cluster et la surface cliquable 44×44.
+ * Le filet sous la barre n'est pas une border sur
  * la barre elle-même mais un élément dédié (`.rule` / `data-nav-rule`),
  * qui ne couvre que la zone de contenu et se retourne vers le bas à
  * chaque extrémité — voir nav.module.css. Il suit le même fond/la même
@@ -136,24 +140,34 @@ export function Nav() {
           .join(" ")}
       >
         <nav className={styles.items} aria-label="Navigation principale">
-          <div className={styles.group}>
-            <button
-              ref={desktopTriggerRef}
-              type="button"
-              className={styles.link}
-              aria-expanded={open}
-              aria-controls={menuId}
-              onMouseEnter={() => scheduleOpen(desktopTriggerRef.current)}
-              onMouseLeave={() => scheduleClose()}
-              onClick={() => toggleImmediate(desktopTriggerRef.current)}
+          <div className={styles.leftCluster}>
+            <Link
+              href="/"
+              className={styles.logoLink}
+              aria-label="Venturia, retour à l'accueil"
             >
-              {nav.trigger}
-            </button>
-            {nav.topLinks.map((entry) => (
-              <Link key={entry.href} href={entry.href} className={styles.link}>
-                {entry.label}
-              </Link>
-            ))}
+              <Logo className={styles.logoIcon} />
+            </Link>
+
+            <div className={styles.group}>
+              <button
+                ref={desktopTriggerRef}
+                type="button"
+                className={styles.link}
+                aria-expanded={open}
+                aria-controls={menuId}
+                onMouseEnter={() => scheduleOpen(desktopTriggerRef.current)}
+                onMouseLeave={() => scheduleClose()}
+                onClick={() => toggleImmediate(desktopTriggerRef.current)}
+              >
+                {nav.trigger}
+              </button>
+              {nav.topLinks.map((entry) => (
+                <Link key={entry.href} href={entry.href} className={styles.link}>
+                  {entry.label}
+                </Link>
+              ))}
+            </div>
           </div>
 
           <button
