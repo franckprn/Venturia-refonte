@@ -3,6 +3,7 @@
 import { useEffect, useRef, type ComponentType } from "react";
 import Link from "next/link";
 import { railCards, type RailCardContent } from "@/content/rail";
+import { useSectionTone, type Tone } from "@/lib/tone";
 import { IconArrowRight, IconClock, IconSparkle } from "./RailIcons";
 import styles from "./rail.module.css";
 
@@ -41,10 +42,17 @@ type RailSlotProps = {
  * avec leur texte, jamais leur position) : écrites dans --rail-h1 et
  * --rail-h2 sur :root au montage et au resize (ResizeObserver), lues
  * par les calc() de rail.module.css. Repli sans JS dans globals.css.
+ *
+ * Tonalité (CLAUDE.md, « Tonalités ») : `measureRef` (le wrapper sticky,
+ * dont la boîte visuelle épouse exactement celle du carton) sert aussi
+ * de sonde au moteur partagé (src/lib/tone.ts) — la tonalité de la
+ * section sous le centre vertical du carton, propre à CE carton,
+ * indépendante de la nav et des deux autres.
  */
 export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
   const card = railCards[cardIndex];
   const measureRef = useRef<HTMLDivElement>(null);
+  const tone = useSectionTone(measureRef);
 
   useEffect(() => {
     // Le 3ᵉ carton n'a personne après lui à positionner : rien à mesurer.
@@ -75,7 +83,12 @@ export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
   return (
     <div className={styles.slot} data-rail-slot style={{ gridRow: `${anchor}-start / -1` }}>
       <div ref={measureRef} className={stickyClassName}>
-        <RailCardArticle card={card} action={cardIndex === 2} Icon={RAIL_ICONS[cardIndex]} />
+        <RailCardArticle
+          card={card}
+          action={cardIndex === 2}
+          Icon={RAIL_ICONS[cardIndex]}
+          tone={tone}
+        />
       </div>
     </div>
   );
@@ -85,10 +98,12 @@ function RailCardArticle({
   card,
   action,
   Icon,
+  tone,
 }: {
   card: RailCardContent;
   action: boolean;
   Icon: ComponentType<{ className?: string }>;
+  tone: Tone;
 }) {
   const className = [styles.card, action ? styles.cardAction : ""].filter(Boolean).join(" ");
   const content = (
@@ -103,14 +118,14 @@ function RailCardArticle({
 
   if (card.href) {
     return (
-      <Link href={card.href} className={className} data-rail-card>
+      <Link href={card.href} className={className} data-rail-card data-tone={tone}>
         {content}
       </Link>
     );
   }
 
   return (
-    <article className={className} data-rail-card>
+    <article className={className} data-rail-card data-tone={tone}>
       {content}
     </article>
   );

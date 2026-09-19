@@ -3,11 +3,15 @@
  * seuil/direction de scroll ici (voir Nav.tsx — la barre ne se cache
  * ni ne devient transparente, plus jamais).
  *
- * Fond translucide et flouté en permanence, même traitement que les
- * cartons du rail (rail.module.css .card) — exception explicite à
- * l'interdiction générale du backdrop-filter (CLAUDE.md, « Couleurs »),
- * étendue ici à la nav en desktop ET en mobile (contrairement aux
- * cartons, floutés seulement en desktop).
+ * Fond transparent et flouté en permanence, AUCUNE teinte, même
+ * traitement que les cartons du rail (rail.module.css .card) —
+ * exception explicite à l'interdiction générale du backdrop-filter
+ * (CLAUDE.md, « Couleurs »), étendue ici à la nav en desktop ET en
+ * mobile (contrairement aux cartons, floutés seulement en desktop).
+ *
+ * Couleur de texte : `--fg`, posée par [data-tone] (globals.css),
+ * piloté en JS par Nav.tsx selon la section sous le centre vertical de
+ * la barre (CLAUDE.md, « Tonalités ») — jamais --ink en dur ici.
  *
  * Aucun nom de marque dans la barre : c'est le logo (.leftCluster) qui
  * ouvre .items, à la marge du conteneur, suivi des entrées ; « Menu »
@@ -37,17 +41,19 @@
   display: flex;
   align-items: center;
   padding-inline: var(--shell-gutter-left);
-  background: color-mix(in srgb, var(--ground) 75%, transparent);
+  background: transparent;
   -webkit-backdrop-filter: blur(24px); /* obligatoire, Safari, avant le standard */
   backdrop-filter: blur(24px);
-  color: var(--ink);
+  color: var(--fg);
+  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
-/* Repli si le filtre n'est pas supporté : sans lui la barre translucide
-   devient illisible sur le Hero. */
+/* Repli si le filtre n'est pas supporté : sans lui la barre transparente
+   laisse le texte de la page se superposer à celui de la nav. Fond
+   OPAQUE de la tonalité en cours, jamais transparent sans flou. */
 @supports not (backdrop-filter: blur(1px)) {
   .nav {
-    background: var(--ground);
+    background: var(--tone-bg);
   }
 }
 
@@ -77,7 +83,7 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  color: var(--ink);
+  color: var(--fg);
   transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
@@ -94,9 +100,13 @@
   height: 24px;
   width: auto;
   display: block;
+  /* fill="currentColor" (Logo.tsx) : transitionne avec .logoLink.color,
+     redit ici au cas où le navigateur n'anime pas currentColor dérivé
+     sans déclaration explicite sur la propriété elle-même. */
+  transition: fill 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
-/* Entrées de nav : gap 40px, --t-body, --ink. */
+/* Entrées de nav : gap 40px, --t-body, var(--fg). */
 .group {
   display: flex;
   align-items: center;
@@ -114,7 +124,7 @@
   border: 0;
   font-family: var(--font-sans), system-ui, sans-serif;
   font-size: var(--t-body);
-  color: var(--ink);
+  color: var(--fg);
   text-decoration: none;
   cursor: pointer;
   transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
@@ -184,11 +194,15 @@
 .rule {
   width: 100%;
   height: 12px;
-  border-top: 1px solid var(--line);
-  border-left: 1px solid var(--line);
-  border-right: 1px solid var(--line);
+  /* var(--fg), pas --line fixe : le trait doit rester lisible sur les
+     trois tonalités (CLAUDE.md, « Tonalités »), même opacité que --line
+     aujourd'hui. */
+  border-top: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
   border-bottom: none;
   border-radius: 4px 4px 0 0;
+  transition: border-color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
 /* Bandes latérales du fond flouté — l'« encoche inversée » (CLAUDE.md,
@@ -204,7 +218,7 @@
   position: absolute;
   top: 0;
   height: 100%;
-  background: color-mix(in srgb, var(--ground) 75%, transparent);
+  background: transparent;
   -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
   pointer-events: none;
@@ -223,7 +237,7 @@
 @supports not (backdrop-filter: blur(1px)) {
   .blurLeft,
   .blurRight {
-    background: var(--ground);
+    background: var(--tone-bg);
   }
 }
 

@@ -1,3 +1,4 @@
+import type { Tone } from "@/lib/tone";
 import styles from "./section.module.css";
 
 type SectionProps = {
@@ -7,6 +8,13 @@ type SectionProps = {
    *  <RailSlot> (voir components/layout/Rail.tsx). Stable, unique dans
    *  la page. */
   name: string;
+  /** Tonalité RÉELLE du fond de la section — "light" (--ground), "dark"
+   *  (--ink) ou "accent" (--accent). Obligatoire (CLAUDE.md,
+   *  « Tonalités ») : la nav et les cartons du rail lisent cet attribut
+   *  en JS (voir src/lib/tone.ts) pour adapter leur --fg. Portée par le
+   *  <section> lui-même, pas par .body : c'est l'élément que le moteur
+   *  de tonalités interroge (`section[data-tone]`). */
+  tone: Tone;
   /** id d'ancre (nav interne), si différent de `name`. scroll-margin-top
    *  84px est global. */
   id?: string;
@@ -30,6 +38,7 @@ type SectionProps = {
  */
 export function Section({
   name,
+  tone,
   id,
   labelledBy,
   className,
@@ -40,6 +49,7 @@ export function Section({
   return (
     <section
       id={id ?? name}
+      data-tone={tone}
       aria-labelledby={labelledBy}
       className={[styles.section, className].filter(Boolean).join(" ")}
       style={{ gridRow: `${name}-start` }}

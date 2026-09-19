@@ -64,22 +64,23 @@
   border: 1px solid var(--line-accent);
   border-radius: 4px;
   text-decoration: none;
-  /* Translucide et flouté, desktop uniquement (CLAUDE.md, « Rail
-     droit ») : exception explicite à l'interdiction générale du
+  /* Transparent et flouté, AUCUNE teinte, desktop uniquement (CLAUDE.md,
+     « Rail droit ») : exception explicite à l'interdiction générale du
      backdrop-filter (« Couleurs ») — elle reste valable partout
      ailleurs (nav, méga-menu, etc.). 24px et pas plus : au-delà, le
      coût de recomposition grimpe sans gain visuel sur un carton de
      210px. */
-  background: color-mix(in srgb, var(--ground) 75%, transparent);
+  background: transparent;
   -webkit-backdrop-filter: blur(24px); /* obligatoire, Safari */
   backdrop-filter: blur(24px);
 }
 
-/* Repli si le filtre n'est pas supporté : sans lui le carton translucide
-   devient illisible sur fond de section quelconque. */
+/* Repli si le filtre n'est pas supporté : fond OPAQUE de la tonalité en
+   cours (--tone-bg, piloté par data-tone — CLAUDE.md, « Tonalités »),
+   jamais transparent sans flou. */
 @supports not (backdrop-filter: blur(1px)) {
   .card {
-    background: var(--ground);
+    background: var(--tone-bg);
   }
 }
 
@@ -101,12 +102,20 @@
   height: 44px;
   border: 1px solid var(--line-accent);
   border-radius: 4px;
-  color: var(--ink);
+  /* var(--fg), pas --ink en dur : icône adaptée à la tonalité sous CE
+     carton (CLAUDE.md, « Tonalités »). Le filet --line-accent, lui, ne
+     change jamais. */
+  color: var(--fg);
+  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
 .cardIconSvg {
   width: 20px;
   height: 20px;
+  /* stroke="currentColor" (RailIcons.tsx) : transitionne avec
+     .cardIcon.color, redit ici pour le même motif que .logoIcon
+     (nav.module.css). */
+  transition: stroke 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
 .cardTitle {
@@ -115,7 +124,8 @@
   font-size: var(--t-mono);
   line-height: var(--t-mono-lh);
   letter-spacing: var(--t-mono-ls);
-  color: var(--ink);
+  color: var(--fg);
+  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
 .cardText {
@@ -123,7 +133,8 @@
   font-size: var(--t-small);
   line-height: var(--t-small-lh);
   letter-spacing: var(--t-small-ls);
-  color: var(--ink);
+  color: var(--fg);
+  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
 /* Mobile/tablette (< 1024px) : pas de rail, pas de sticky — bloc pleine
@@ -150,5 +161,16 @@
     background: var(--ground);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+  }
+
+  /* Cartons mobiles hors scope de la session « Tonalités » (prochaine
+     étape, voir CLAUDE.md) : fixés --ink sur --ground quelle que soit la
+     tonalité que le moteur JS calcule pour eux (il continue de tourner
+     sans effet visuel ici — measureRef reste une sonde valide même sans
+     sticky). */
+  .cardIcon,
+  .cardTitle,
+  .cardText {
+    color: var(--ink);
   }
 }

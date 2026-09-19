@@ -29,6 +29,7 @@ export default function ContactPage() {
     <Shell>
       <Section
         name="contact"
+        tone="light"
         labelledBy="contact-title"
         className={styles.section}
         bodyStyle={{ rowGap: 0 }}
@@ -84,7 +85,7 @@ export default function ContactPage() {
         </div>
       </Section>
 
-      <Section name="footer" className={footerStyles.section} bodyStyle={{ rowGap: 0 }}>
+      <Section name="footer" tone="dark" className={footerStyles.section} bodyStyle={{ rowGap: 0 }}>
         <Footer />
       </Section>
     </Shell>

@@ -1,8 +1,9 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { nav } from "@/content/nav";
+import { useSectionTone, type Tone } from "@/lib/tone";
 import { MegaMenu } from "./MegaMenu";
 import { Logo } from "./Logo";
 import styles from "./nav.module.css";
@@ -49,13 +50,36 @@ export function Nav() {
   // État, pas une ref : lue au rendu (JSX ci-dessous), et une ref ne
   // peut pas être lue pendant le rendu.
   const [shouldFocusOnOpen, setShouldFocusOnOpen] = useState(false);
+  // < 1024px : n'a besoin d'être exact qu'à l'instant où `open` passe à
+  // true (voir navTone plus bas) — false au premier rendu ne provoque
+  // aucun flash, "open" démarre lui-même toujours à false.
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
 
   const menuId = useId();
+  const headerRef = useRef<HTMLElement>(null);
   const desktopTriggerRef = useRef<HTMLButtonElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
   const activeTriggerRef = useRef<HTMLButtonElement | null>(null);
   const openTimerRef = useRef<number | null>(null);
   const closeTimerRef = useRef<number | null>(null);
+
+  // Tonalité de la section sous le centre vertical de la barre (CLAUDE.md,
+  // « Tonalités »), tenue à jour par le moteur partagé (src/lib/tone.ts).
+  const liveTone = useSectionTone(headerRef);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const update = () => setIsMobileViewport(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  // Panneau mobile ouvert = crème (megamenu.module.css .mobilePanel) :
+  // la nav qui le surplombe passe en light le temps qu'il reste ouvert,
+  // quelle que soit la section défilée derrière (CLAUDE.md, « Tonalités »).
+  // Le méga-menu desktop, lui, ne recouvre pas la barre : rien à forcer.
+  const navTone: Tone = open && isMobileViewport ? "light" : liveTone;
 
   function clearTimers() {
     if (openTimerRef.current !== null) {
@@ -102,7 +126,7 @@ export function Nav() {
 
   return (
     <>
-      <header className={styles.nav}>
+      <header ref={headerRef} className={styles.nav} data-tone={navTone}>
         <nav className={styles.items} aria-label="Navigation principale">
           <div className={styles.leftCluster}>
             <Link
@@ -158,8 +182,11 @@ export function Nav() {
           fondu/rétractation liés au scroll. .blurLeft/.blurRight, dans
           le padding de .ruleInner (hors zone de contenu), composent
           avec le fond de la barre le flou en forme d'encoche inversée
-          — net entre les deux angles du trait. */}
-      <div className={styles.ruleWrap} aria-hidden="true">
+          — net entre les deux angles du trait. data-tone répété ici (même
+          valeur que le <header>) : .ruleWrap est un FRÈRE du <header>, pas
+          son descendant — --fg/--tone-bg (globals.css [data-tone]) ne s'y
+          hériteraient pas sinon. */}
+      <div className={styles.ruleWrap} data-tone={navTone} aria-hidden="true">
         <div className={styles.ruleInner}>
           <div className={styles.blurLeft} />
           <div className={styles.blurRight} />

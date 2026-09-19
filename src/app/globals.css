@@ -83,6 +83,28 @@
 }
 
 /* ------------------------------------------------------------------ *
+ * Tonalités (CLAUDE.md, « Tonalités ») — `--fg` (couleur de texte) et
+ * `--tone-bg` (repli opaque pour les fonds flous sans backdrop-filter),
+ * posés par [data-tone] sur la section elle-même ou sur un élément
+ * adaptatif (nav, carton du rail — piloté en JS, voir src/lib/tone.ts).
+ * Custom properties : héritées normalement par tout descendant.
+ * ------------------------------------------------------------------ */
+[data-tone="light"] {
+  --fg: var(--ink);
+  --tone-bg: var(--ground);
+}
+
+[data-tone="dark"] {
+  --fg: var(--ground);
+  --tone-bg: var(--ink);
+}
+
+[data-tone="accent"] {
+  --fg: var(--ground);
+  --tone-bg: var(--accent);
+}
+
+/* ------------------------------------------------------------------ *
  * Base
  * ------------------------------------------------------------------ */
 @layer base {

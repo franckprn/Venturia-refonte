@@ -36,6 +36,45 @@ Dans une section en négatif, un paragraphe long passe à 80 % d'opacité :
 sur fond sombre, un texte clair paraît optiquement plus gras et vibre sur
 plusieurs lignes. Les titres restent à 100 %.
 
+## Tonalités
+
+Chaque section de page déclare sa tonalité réelle avec `data-tone="light"`
+(fond --ground), `"dark"` (fond --ink) ou `"accent"` (fond --accent), portée
+par `<Section tone="...">`. Obligatoire pour toute nouvelle section ou
+page — sans elle, la nav et les cartons du rail ne savent pas quelle
+couleur de texte prendre.
+
+Deux éléments adaptatifs lisent cette information et reçoivent eux-mêmes un
+`data-tone`, piloté en JS (jamais en CSS) :
+  - la nav : tonalité de la section sous le centre vertical de la barre
+  - chaque carton du rail : tonalité de la section sous SON PROPRE centre
+    vertical, indépendamment de la nav et des autres cartons
+Quand le menu mobile est ouvert, la nav passe en tonalité `light` (son
+panneau est crème), quelle que soit la section défilée derrière.
+
+Implémentation (`src/lib/tone.ts`) : un seul listener scroll passif,
+throttlé par requestAnimationFrame, plus un recalcul au resize. Les
+positions verticales des sections sont mises en cache (recalculées au
+resize et via un ResizeObserver sur body) puis comparées à scrollY —
+jamais un `getBoundingClientRect` sur toutes les sections à chaque frame.
+Rendu serveur : la nav et les cartons partent avec la tonalité de la
+PREMIÈRE section de la page, pour éviter tout flash de couleur et toute
+erreur d'hydratation.
+
+Chaque tonalité pose une variable `--fg` (couleur de texte) :
+  light   --fg: var(--ink)
+  dark    --fg: var(--ground)
+  accent  --fg: var(--ground)
+Texte des entrées de nav, logo, déclencheur « Menu », titre/texte/icône des
+cartons : `color: var(--fg)` (currentColor pour les SVG). Transition sur
+`color`/`border-color`/`stroke`/`fill`, 150ms, cubic-bezier(0,.55,.45,1) —
+jamais sur `backdrop-filter`. Bascule instantanée avec
+prefers-reduced-motion.
+Le filet --line-accent des cartons et la bordure --accent du carton 3 ne
+changent jamais avec la tonalité. Le trait à angles sous la nav non plus
+n'utilise plus --line fixe : `color-mix(in srgb, var(--fg) 16%,
+transparent)`, même opacité que --line aujourd'hui.
+
 ## Typographie
 
 Titres : Bricolage Grotesque (600, 800)
@@ -106,15 +145,18 @@ sens ou à la distance du scroll. La barre et le filet sous elle (voir
 plus bas) forment un seul bloc fixe. Aucun nom de marque dans la barre : le
 nom du site reste porté par le titre géant du bloc de fin de page. Les
 entrées (déclencheur du méga-menu, Réalisations, Contact) sont alignées à
-gauche, à la marge du conteneur (54px desktop), gap 40px, --t-body, --ink.
+gauche, à la marge du conteneur (54px desktop), gap 40px, --t-body,
+var(--fg) (voir « Tonalités »).
 
-Fond translucide et flouté, en permanence, sur toute la hauteur de la
-barre — même traitement que les cartons du rail (exception explicite à
-l'interdiction générale du backdrop-filter, voir « Couleurs ») :
-  background: color-mix(in srgb, var(--ground) 75%, transparent);
+Fond transparent et flouté, en permanence, sur toute la hauteur de la
+barre — AUCUNE teinte — même traitement que les cartons du rail (exception
+explicite à l'interdiction générale du backdrop-filter, voir « Couleurs ») :
+  background: transparent;
   -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
 Repli si le filtre n'est pas supporté :
-  @supports not (backdrop-filter: blur(1px)) { fond var(--ground) opaque }
+  @supports not (backdrop-filter: blur(1px)) { fond = couleur OPAQUE de la
+  tonalité en cours (--ground, --ink ou --accent) — jamais transparent sans
+  flou, le texte de la page se superposerait à celui de la nav }
 Cette exception s'étend à la barre en desktop ET en mobile — contrairement
 aux cartons du rail, floutés seulement en desktop. Une classe de repli
 mobile opaque existe dans nav.module.css (fond --ground, sans
@@ -211,22 +253,25 @@ border     1px solid var(--line-accent)
 radius     4px
 icône      carré de 44px, en haut à gauche du carton, filet 1px
            var(--line-accent), radius 4px, contenant un SVG 20px, trait
-           1.5px, couleur --ink. Décorative : aria-hidden="true" sur le
-           SVG. Titre et texte suivent, en dessous du carré.
-fond       desktop uniquement, translucide et flouté :
-           background: color-mix(in srgb, var(--ground) 75%, transparent);
-           backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-           Repli en fond --ground opaque si le filtre n'est pas supporté
-           (@supports not (backdrop-filter: blur(1px))), et
-           systématiquement en dessous de 1024px — voir « Couleurs ».
+           1.5px, couleur var(--fg) (voir « Tonalités »). Décorative :
+           aria-hidden="true" sur le SVG. Titre et texte suivent, en
+           dessous du carré.
+fond       desktop uniquement, transparent et flouté, AUCUNE teinte :
+           background: transparent;
+           -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
+           Repli en fond OPAQUE de la tonalité en cours (--ground, --ink ou
+           --accent) si le filtre n'est pas supporté (@supports not
+           (backdrop-filter: blur(1px))), et systématiquement --ground en
+           dessous de 1024px (dette mobile, prochaine étape) — voir
+           « Couleurs ».
            Exception explicite à la règle « Couleurs » qui interdit tout
            backdrop-filter : ici, sur les cartons du rail en desktop
            uniquement, il est autorisé. La règle générale reste valable
            partout ailleurs — nav, méga-menu, et tout le reste du site.
 distinction le seul carton qui porte une action prend border-color: var(--accent)
            au lieu de var(--line-accent) — pas de fond différent, pas de blanc
-titre      --t-mono, --ink
-texte      --t-small, --ink
+titre      --t-mono, var(--fg)
+texte      --t-small, var(--fg)
 
 Mobile (< 1024px) : les cartons quittent le rail et s'insèrent dans le flux
 aux mêmes endroits, en pleine largeur, sans figement.

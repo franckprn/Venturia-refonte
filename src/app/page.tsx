@@ -38,6 +38,7 @@ export default function Home() {
     <Shell>
       <Section
         name="hero"
+        tone="light"
         labelledBy="hero-title"
         className={heroStyles.section}
         bodyStyle={{ rowGap: 0 }}
@@ -49,6 +50,7 @@ export default function Home() {
 
       <Section
         name="dernier-accompagnement"
+        tone="light"
         labelledBy="dernier-accompagnement-title"
         bodyStyle={{ rowGap: 0 }}
       >
@@ -57,25 +59,26 @@ export default function Home() {
 
       <Section
         name="respiration"
+        tone="dark"
         className={respirationStyles.section}
         bodyStyle={{ rowGap: 0 }}
       >
         <Respiration />
       </Section>
 
-      <Section name="services" labelledBy="services-title" bodyStyle={{ rowGap: 0 }}>
+      <Section name="services" tone="light" labelledBy="services-title" bodyStyle={{ rowGap: 0 }}>
         <Services />
       </Section>
 
       <RailSlot cardIndex={1} anchor="services" />
 
-      <Section name="processus" labelledBy="processus-title" bodyStyle={{ rowGap: 0 }}>
+      <Section name="processus" tone="light" labelledBy="processus-title" bodyStyle={{ rowGap: 0 }}>
         <Processus />
       </Section>
 
       <RailSlot cardIndex={2} anchor="processus" />
 
-      <Section name="footer" className={footerStyles.section} bodyStyle={{ rowGap: 0 }}>
+      <Section name="footer" tone="dark" className={footerStyles.section} bodyStyle={{ rowGap: 0 }}>
         <Footer />
       </Section>
     </Shell>
