@@ -50,7 +50,13 @@
   --shell-rail: 250px;
   --shell-rail-pad: 20px;
   --nav-h: 64px;
-  --rail-stick: 84px; /* nav (64) + 20 */
+  /* Carton du rail aligné sur le trait sous la nav (même hauteur, au pixel
+     — CLAUDE.md, « Rail droit »). Distinct de --scroll-offset ci-dessous :
+     depuis que le carton colle au trait, les deux valeurs divergent. */
+  --rail-stick: var(--nav-h);
+  /* Ancres internes : hauteur du bloc nav jusqu'au trait (64) + 20px de
+     respiration (CLAUDE.md, « Barre de navigation »). */
+  --scroll-offset: calc(var(--nav-h) + 20px);
 
   /* Hauteurs réelles des cartons 1 et 2 du rail, mesurées au montage et
      au resize (voir components/layout/Rail.tsx) puis écrites ici en JS
@@ -109,7 +115,7 @@
 
   /* Toute ancre interne atterrit sous la nav fixe */
   :where(h1, h2, h3, h4, h5, h6, [id]) {
-    scroll-margin-top: var(--rail-stick);
+    scroll-margin-top: var(--scroll-offset);
   }
 }
 

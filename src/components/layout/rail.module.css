@@ -30,8 +30,13 @@
      dans le DOM (isolation: isolate + ordre naturel = il peinturlure
      par-dessus à z-index égal). Un z-index explicite fait passer les
      cartons devant, sans toucher au fond ni à l'empilement lui-même.
-     Reste sous la nav (60) et le méga-menu (55/65). */
-  z-index: 10;
+     Au-dessus du bloc nav (60/59) : depuis que le carton se fige à la
+     hauteur du trait (--rail-stick = --nav-h), il partage sa position
+     avec la bande floutée latérale du trait côté rail (.blurRight,
+     nav.module.css) — sans ce z-index, cette bande le floute (CLAUDE.md,
+     « Rail droit »). Le méga-menu (55) ne couvre pas la colonne du rail,
+     donc l'ordre avec lui n'a pas d'incidence visuelle. */
+  z-index: 65;
 }
 
 .stickyWrap {

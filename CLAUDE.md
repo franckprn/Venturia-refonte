@@ -24,10 +24,13 @@ librement — fond de section, titre, aplat, filet, chiffre, souligné.
 Franck arbitre le contraste au cas par cas : ne pas remplacer un rouge par
 du charbon « pour la lisibilité » sans le lui demander.
 
-Tous les fonds sont opaques. Aucun backdrop-filter nulle part : c'est le filtre
-le plus coûteux du navigateur, il recompose tout l'arrière-plan à chaque frame et
-provoque des artefacts sur Safari iOS quand il coexiste avec du position: fixed —
-donc avec la nav et le méga-menu. Un aplat --ground rend la même chose.
+Tous les fonds sont opaques, sauf deux exceptions explicites : les cartons du
+rail en desktop, et la barre de nav (desktop ET mobile — voir « Barre de
+navigation »). Ailleurs, aucun backdrop-filter : c'est le filtre le plus
+coûteux du navigateur, il recompose tout l'arrière-plan à chaque frame et
+provoque des artefacts sur Safari iOS quand il coexiste avec du position:
+fixed — le méga-menu (fixed lui aussi) en reste donc exclu. Un aplat --ground
+rend la même chose partout ailleurs.
 
 Dans une section en négatif, un paragraphe long passe à 80 % d'opacité :
 sur fond sombre, un texte clair paraît optiquement plus gras et vibre sur
@@ -97,21 +100,34 @@ Espacer au `gap` d'un flex ou d'une grille plutôt qu'aux marges individuelles.
 
 ## Barre de navigation
 
-position fixed, top, hauteur 64px. Aucun nom de marque dans la barre : le nom
-du site reste porté par le titre géant du bloc de fin de page. Les entrées
-(déclencheur du méga-menu, Réalisations, Contact) sont alignées à gauche, à la
-marge du conteneur (54px desktop), gap 40px, --t-body, --ink.
+position fixed, top, hauteur 64px, TOUJOURS visible : ne se cache jamais au
+scroll — pas de translateY, pas d'état transparent, aucune logique liée au
+sens ou à la distance du scroll. La barre et le filet sous elle (voir
+plus bas) forment un seul bloc fixe. Aucun nom de marque dans la barre : le
+nom du site reste porté par le titre géant du bloc de fin de page. Les
+entrées (déclencheur du méga-menu, Réalisations, Contact) sont alignées à
+gauche, à la marge du conteneur (54px desktop), gap 40px, --t-body, --ink.
 
-En haut de page : fond transparent, aucun filet. Dès 80px de scroll : fond
---ground opaque, aucune ombre. La barre se rétracte (translateY -100%) au
-scroll vers le bas, revient au scroll vers le haut — toujours visible sous
-80px. 300ms, cubic-bezier(0,.55,.45,1).
+Fond translucide et flouté, en permanence, sur toute la hauteur de la
+barre — même traitement que les cartons du rail (exception explicite à
+l'interdiction générale du backdrop-filter, voir « Couleurs ») :
+  background: color-mix(in srgb, var(--ground) 75%, transparent);
+  -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
+Repli si le filtre n'est pas supporté :
+  @supports not (backdrop-filter: blur(1px)) { fond var(--ground) opaque }
+Cette exception s'étend à la barre en desktop ET en mobile — contrairement
+aux cartons du rail, floutés seulement en desktop. Une classe de repli
+mobile opaque existe dans nav.module.css (fond --ground, sans
+backdrop-filter) pour le jour où un test sur un vrai iPhone montrerait des
+artefacts, mais elle n'est volontairement PAS activée tant que ce test n'a
+pas été fait.
 
 Filet sous la barre : il ne couvre PAS toute la largeur de l'écran, seulement
 la zone de contenu — de la marge gauche (54px) jusqu'au bord de la colonne du
 rail (250px), la même largeur que le panneau du méga-menu. À chacune de ses
 deux extrémités, il se retourne vers le bas par un congé de 4px (le rayon des
-cartons du rail) et se prolonge verticalement sur 12px.
+cartons du rail) et se prolonge verticalement sur 12px. Fixe avec la barre,
+toujours visible — jamais de fondu ni de rétractation liés au scroll.
 
 C'est un élément décoratif dédié, pas une border sur la barre :
   <div data-nav-rule aria-hidden="true">
@@ -120,13 +136,20 @@ C'est un élément décoratif dédié, pas une border sur la barre :
   border-top, border-left, border-right : 1px solid var(--line)
   pas de border-bottom, radius 4px 4px 0 0, pointer-events none
 
-Il apparaît et disparaît avec le fond de la barre (même seuil de 80px, même
-transition) et se rétracte avec elle : jamais visible seul quand la barre est
-transparente ou rétractée.
+Fond flouté, en forme d'encoche inversée : sur toute la largeur de l'écran,
+du haut jusqu'au trait (0 → 64px), c'est le fond de la barre elle-même.
+Entre les deux angles du trait (la zone de contenu, celle du méga-menu), le
+flou s'arrête exactement sur le trait — rien en dessous n'est flouté, le
+contenu y défile net. De chaque côté du trait, entre le bord de l'écran et
+l'angle, le flou continue de descendre jusqu'au bas de l'angle (64 → 76px) :
+deux bandes latérales, même color-mix/blur que la barre, logées dans le
+padding de .ruleInner (la zone hors filet, celle qui porte déjà la marge
+gauche et la colonne du rail).
 
 Mobile (< 1024px) : pas de rail, donc pas de zone de contenu réduite — le
-filet couvre la largeur disponible entre les marges de 20px, mêmes retours
-d'angle. Le déclencheur « Menu » reste à droite, inchangé.
+filet et les deux bandes latérales couvrent la largeur disponible entre les
+marges de 20px, mêmes retours d'angle. Le déclencheur « Menu » reste à
+droite, logo VA à gauche, inchangés.
 
 ## Arrondis
 
@@ -143,20 +166,25 @@ Trois cartons, chacun rattaché à une section de la page :
 
 Comportement attendu : un empilement permanent, pas un relais.
 Le carton vit dans la colonne du rail et n'en sort jamais latéralement.
-Il monte avec la page, puis se fige à 84px du haut de la fenêtre — soit la
-hauteur de nav (64px) plus 20px, la même marge que le gap de grille et que
-le retrait du rail. Une fois figé, il RESTE visible jusqu'au bas de la page :
-il ne repart jamais vers le haut, quelle que soit la section à l'écran.
-Le carton suivant se fige à son tour, 20px sous le bas du précédent. En bas
-de page, les trois cartons sont visibles, empilés.
+Il monte avec la page, puis se fige à 64px du haut de la fenêtre — la hauteur
+de la nav, EXACTEMENT la même valeur que le haut du trait sous la barre
+(voir « Barre de navigation ») : le haut du carton figé tombe pile sur le
+trait, alignés au pixel. Une fois figé, il RESTE visible jusqu'au bas de la
+page : il ne repart jamais vers le haut, quelle que soit la section à
+l'écran. Le carton suivant se fige à son tour, 20px sous le bas du
+précédent. En bas de page, les trois cartons sont visibles, empilés.
+
+Le carton passe AU-DESSUS du bloc nav (z-index) : à cette hauteur, il
+partage sa position avec la bande floutée latérale du trait, côté rail — le
+carton doit rester net, jamais flouté par cette bande.
 
 Implémentation : CSS sticky, aucun JS d'animation.
   <aside data-rail>
-    <article data-rail-card>   position: sticky; top: 84px
+    <article data-rail-card>   position: sticky; top: 64px
     <article data-rail-card>   position: sticky;
-                                top: calc(84px + hauteur du 1ᵉʳ + 20px)
+                                top: calc(64px + hauteur du 1ᵉʳ + 20px)
     <article data-rail-card>   position: sticky;
-                                top: calc(84px + hauteur du 1ᵉʳ + hauteur du 2ᵉ + 40px)
+                                top: calc(64px + hauteur du 1ᵉʳ + hauteur du 2ᵉ + 40px)
 Le conteneur de chaque carton s'étend de son point d'apparition jusqu'au BAS
 de la zone rail — jamais jusqu'à la fin de sa seule section : c'est ce qui
 distingue l'empilement du relais. Un conteneur qui s'arrête avec sa section
@@ -287,8 +315,11 @@ Un seul `<h1>` par page. Si SplitText découpe le titre, il découpe des `<span>
   Safari iOS zoome la page à la mise au point du champ et ne la dézoome pas.
 - Toute cible tactile (lien, bouton, entrée de menu) fait au moins 44×44px
   de surface cliquable, quitte à agrandir le padding sans agrandir le texte.
-- `scroll-margin-top: 84px` sur toute ancre interne, sinon la section visée
-  atterrit sous la nav fixe.
+- `scroll-margin-top: 84px` (`--scroll-offset` : hauteur de la barre + 20px)
+  sur toute ancre interne, sinon la section visée atterrit sous le bloc nav
+  fixe. Valeur distincte de `--rail-stick` (64px, la hauteur de la seule
+  barre) qui positionne le figement des cartons du rail — les deux ne se
+  confondent plus depuis que les cartons s'alignent sur le trait.
 - Le fond crème est posé sur `html`, pas seulement sur `body` : sinon le
   rebond de scroll d'iOS laisse apparaître du blanc en haut et en bas.
 - `text-wrap: balance` sur les titres : évite le mot orphelin sur la
