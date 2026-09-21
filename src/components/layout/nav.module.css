@@ -272,6 +272,20 @@
   }
 }
 
+/* Panneau du menu mobile ouvert (Nav.tsx `data-suspended`) : son propre
+   flou plein écran remplace celui-ci — désactivé ici, sinon on empile
+   deux surfaces floutées (CLAUDE.md, « Menu mobile » § 2). z-index 58 >
+   z-index 55 du panneau (megamenu.module.css .mobilePanel) : sans cette
+   désactivation, .navBlur resterait visible PAR-DESSUS le panneau sur
+   sa bande du haut, flou ou repli opaque compris — d'où le
+   background: transparent explicite ici aussi, pas seulement le
+   backdrop-filter. */
+.navBlur[data-suspended="true"] {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 @media (max-width: 1023px) {
   .nav {
     padding-inline: var(--shell-gutter);

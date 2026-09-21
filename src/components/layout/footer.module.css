@@ -65,82 +65,6 @@
   min-width: 0;
 }
 
-/* ------------------------------- BANDE 1 — CONTACT ------------------ */
-
-.contact {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  column-gap: var(--shell-gutter);
-}
-
-.contactLabel {
-  grid-column: 1 / -1;
-  margin: 0;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--t-mono);
-  line-height: var(--t-mono-lh);
-  letter-spacing: var(--t-mono-ls);
-  color: var(--accent);
-}
-
-.contactIntro {
-  grid-column: 1 / -1;
-  min-width: 0;
-  margin: 0;
-  margin-top: 24px;
-  max-width: 68ch;
-  font-size: var(--t-lead);
-  line-height: var(--t-lead-lh);
-  letter-spacing: var(--t-lead-ls);
-  font-weight: var(--t-lead-weight);
-  color: var(--ground);
-}
-
-.contactLinksRow {
-  grid-column: 1 / -1;
-  margin-top: 48px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 48px;
-}
-
-.contactLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  width: fit-content;
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--t-mono);
-  line-height: var(--t-mono-lh);
-  letter-spacing: var(--t-mono-ls);
-  color: var(--ground);
-  transition: border-color 200ms cubic-bezier(0, 0.55, 0.45, 1);
-}
-
-.contactLink:hover,
-.contactLink:focus-visible {
-  border-bottom-color: var(--ground);
-}
-
-.contactLink:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 4px;
-}
-
-/* Carré de 44px, surface tactile minimale : ne pas réduire. */
-.iconBox {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  flex: none;
-  border: 1px solid var(--line-accent);
-  border-radius: 4px;
-  color: var(--ground);
-}
-
 /* ------------------------------- BANDE 3 — LIENS --------------------- */
 
 .linksGrid {
@@ -232,8 +156,12 @@
    plusieurs lignes ne décale que sa toute première ligne avec sa
    propre margin-left, pas les suivantes — porter le décalage sur le
    bloc ancêtre le fait s'appliquer uniformément aux deux lignes. */
+/* Pas de margin-top : premier enfant de .bands désormais (l'ancienne
+   bande CONTACT au-dessus a été retirée) — le padding-top de .section
+   (96px) suffit à lui seul, un margin-top ici recréerait le trou que la
+   suppression devait combler. */
 .giant {
-  margin-top: 96px;
+  margin-top: 0;
 }
 
 /* display: inline (celui d'un <a> par défaut, redit ici pour ne rien
@@ -331,12 +259,6 @@
 /* ------------------------------- Desktop (>= 768px) ------------------- */
 
 @media (min-width: 768px) {
-  .contactLabel,
-  .contactIntro,
-  .contactLinksRow {
-    grid-column: 1 / 9;
-  }
-
   .linksGrid {
     row-gap: 0;
   }

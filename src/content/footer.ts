@@ -19,16 +19,6 @@ export type FooterLinkColumn = {
 };
 
 export const footer = {
-  contact: {
-    label: "CONTACT",
-    lines: [
-      "Dites-nous ce que vous voulez construire.",
-      "On répond dans la journée.",
-    ] as [string, string],
-    write: { label: "Écrire un mail", href: "/contact" },
-    email: { label: "hey@venturia.fr", href: "mailto:hey@venturia.fr" },
-  },
-
   linkColumns: [
     {
       title: "SERVICES",

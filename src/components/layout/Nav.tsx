@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { nav } from "@/content/nav";
-import { useSectionTone, type Tone } from "@/lib/tone";
+import { DEFAULT_TONE, getDominantTone, useSectionTone, type Tone } from "@/lib/tone";
 import { MegaMenu } from "./MegaMenu";
 import { Logo } from "./Logo";
 import styles from "./nav.module.css";
@@ -56,6 +56,12 @@ export function Nav() {
   // true (voir navTone plus bas) — false au premier rendu ne provoque
   // aucun flash, "open" démarre lui-même toujours à false.
   const [isMobileViewport, setIsMobileViewport] = useState(false);
+  // Tonalité du panneau mobile, mesurée UNE SEULE FOIS à l'instant de
+  // l'ouverture (voir toggleImmediate) — jamais recalculée tant qu'il
+  // reste ouvert, le scroll étant bloqué (CLAUDE.md, « Menu mobile »
+  // § 3). Valeur de repli sans incidence : lue seulement quand `open &&
+  // isMobileViewport` (navTone plus bas).
+  const [mobileTone, setMobileTone] = useState<Tone>(DEFAULT_TONE);
 
   const menuId = useId();
   const headerRef = useRef<HTMLElement>(null);
@@ -77,11 +83,13 @@ export function Nav() {
     return () => mq.removeEventListener("change", update);
   }, []);
 
-  // Panneau mobile ouvert = crème (megamenu.module.css .mobilePanel) :
-  // la nav qui le surplombe passe en light le temps qu'il reste ouvert,
-  // quelle que soit la section défilée derrière (CLAUDE.md, « Tonalités »).
-  // Le méga-menu desktop, lui, ne recouvre pas la barre : rien à forcer.
-  const navTone: Tone = open && isMobileViewport ? "light" : liveTone;
+  // Panneau mobile ouvert : la nav qui le surplombe (fond flouté, trait,
+  // logo, « Fermer ») partage la MÊME couleur unique que le panneau —
+  // celle de la section qui occupe la plus grande surface derrière lui,
+  // mesurée à l'ouverture (`mobileTone`, voir toggleImmediate) — plus de
+  // "light" forcé (CLAUDE.md, « Menu mobile » § 3). Le méga-menu
+  // desktop, lui, ne recouvre pas la barre : rien à forcer.
+  const navTone: Tone = open && isMobileViewport ? mobileTone : liveTone;
 
   function clearTimers() {
     if (openTimerRef.current !== null) {
@@ -113,17 +121,30 @@ export function Nav() {
   function toggleImmediate(trigger: HTMLButtonElement | null) {
     clearTimers();
     activeTriggerRef.current = trigger;
-    setOpen((prev) => {
-      const next = !prev;
-      if (next) setShouldFocusOnOpen(true);
-      return next;
-    });
+    const willOpen = !open;
+    // Mesurée AVANT setOpen (donc avant que le panneau bloque le
+    // scroll) : la position de scroll au clic est déjà la position
+    // finale, pas besoin d'attendre un effet.
+    if (willOpen && isMobileViewport) {
+      setMobileTone(getDominantTone());
+    }
+    setOpen(willOpen);
+    if (willOpen) setShouldFocusOnOpen(true);
   }
 
   function closeAndRefocus() {
     clearTimers();
     setOpen(false);
     activeTriggerRef.current?.focus();
+  }
+
+  // Tap sur Contact (menu mobile) : ferme le panneau, la navigation du
+  // <Link> suit sans être bloquée (CLAUDE.md, « Menu mobile » § 4). Pas
+  // de renvoi de focus au déclencheur ici (contrairement à Escape) : le
+  // focus suit naturellement la nouvelle page.
+  function closeOnNavigate() {
+    clearTimers();
+    setOpen(false);
   }
 
   return (
@@ -133,8 +154,17 @@ export function Nav() {
           des angles du trait, découpé par clip-path pour laisser une
           fenêtre nette sous le trait. Rendu hors du <header> (frère, pas
           descendant) pour porter son propre data-tone — --fg/--tone-bg
-          (globals.css [data-tone]) ne s'y hériteraient pas sinon. */}
-      <div className={styles.navBlur} data-tone={navTone} aria-hidden="true" />
+          (globals.css [data-tone]) ne s'y hériteraient pas sinon.
+          data-suspended : le panneau mobile floute déjà tout l'écran
+          quand il est ouvert — jamais de flou sur du flou (CLAUDE.md,
+          « Menu mobile » § 2). Sans effet sur le méga-menu desktop, qui
+          ne couvre pas la barre. */}
+      <div
+        className={styles.navBlur}
+        data-tone={navTone}
+        data-suspended={open && isMobileViewport}
+        aria-hidden="true"
+      />
 
       <header ref={headerRef} className={styles.nav} data-tone={navTone}>
         <nav className={styles.items} aria-label="Navigation principale">
@@ -176,7 +206,7 @@ export function Nav() {
             aria-controls={menuId}
             onClick={() => toggleImmediate(mobileTriggerRef.current)}
           >
-            {nav.mobile.triggerLabel}
+            {open ? nav.mobile.closeLabel : nav.mobile.triggerLabel}
           </button>
         </nav>
       </header>
@@ -202,8 +232,10 @@ export function Nav() {
       <MegaMenu
         id={menuId}
         open={open}
+        tone={mobileTone}
         shouldFocusOnOpen={shouldFocusOnOpen}
         onEscape={closeAndRefocus}
+        onNavigate={closeOnNavigate}
         onPointerEnter={clearTimers}
         onPointerLeave={scheduleClose}
       />

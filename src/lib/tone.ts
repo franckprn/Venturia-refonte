@@ -131,6 +131,45 @@ export function subscribeTone(el: HTMLElement, onChange: (tone: Tone) => void): 
 }
 
 /**
+ * Tonalité de la section qui occupe la plus grande surface de la
+ * fenêtre visible, À L'INSTANT DE L'APPEL — pour le panneau du menu
+ * mobile (CLAUDE.md, « Menu mobile »), mesurée une seule fois à
+ * l'ouverture (le scroll est bloqué tant qu'il reste ouvert, donc aucun
+ * recalcul pendant que le panneau est affiché). Contrairement à
+ * `toneAt`/`runProbes` ci-dessus (le centre vertical d'UN point), ici on
+ * cumule la hauteur visible de CHAQUE section par tonalité — les
+ * sections occupant toute la largeur du shell, leur hauteur visible est
+ * une mesure fidèle de leur surface à l'écran — et on retourne la
+ * tonalité au plus grand cumul. Lecture directe du DOM (pas le cache de
+ * `bounds`, recalculé seulement au scroll/resize) : appelée rarement
+ * (un clic), la précision prime sur l'économie d'un cache déjà
+ * potentiellement périmé.
+ */
+export function getDominantTone(): Tone {
+  const sections = Array.from(document.querySelectorAll<HTMLElement>("section[data-tone]"));
+  const viewportHeight = window.innerHeight;
+  const areaByTone = new Map<Tone, number>();
+
+  for (const el of sections) {
+    const rect = el.getBoundingClientRect();
+    const visible = Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0);
+    if (visible <= 0) continue;
+    const tone = (el.dataset.tone as Tone) ?? DEFAULT_TONE;
+    areaByTone.set(tone, (areaByTone.get(tone) ?? 0) + visible);
+  }
+
+  let best: Tone = DEFAULT_TONE;
+  let bestArea = -1;
+  areaByTone.forEach((area, tone) => {
+    if (area > bestArea) {
+      bestArea = area;
+      best = tone;
+    }
+  });
+  return best;
+}
+
+/**
  * Tonalité vivante d'un élément adaptatif, tenue à jour par le moteur
  * partagé (voir `subscribeTone`). `initial` doit correspondre à la
  * tonalité posée côté serveur (voir `DEFAULT_TONE`) : l'état ne change

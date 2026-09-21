@@ -2,9 +2,12 @@
  * Méga-menu — CLAUDE.md, sections « Méga-menu — desktop » et
  * « Méga-menu — mobile », appliquées à la lettre.
  *
- * Fond --ground OPAQUE partout, aucun backdrop-filter : le filtre le
- * plus coûteux du navigateur, et source d'artefacts Safari iOS avec du
- * position: fixed — exactement notre cas ici.
+ * Panneau DESKTOP : fond --ground OPAQUE, aucun backdrop-filter — le
+ * filtre le plus coûteux du navigateur, et source d'artefacts Safari
+ * iOS avec du position: fixed. Panneau MOBILE : exception explicite
+ * (comme la nav et les cartons du rail, voir CLAUDE.md « Couleurs ») —
+ * transparent et flouté en permanence, exactement le même traitement
+ * que .navBlur (nav.module.css), voir .mobilePanel plus bas.
  *
  * Plusieurs nombres de cette page (21px/18px/40px pour le texte, les
  * ls +.02em, le lh 40px) ne correspondent à AUCUN token --t-* existant
@@ -204,26 +207,58 @@
 
 /* --------------------------- Mobile (< 1024px) ------------------------ */
 
+/* Plein écran (inset: 0, PAS top: var(--nav-h)) : le trait à angles sous
+   la nav (nav.module.css .ruleWrap, z-index 59) et la barre elle-même
+   (z-index 60) restent tous deux AU-DESSUS de ce panneau (z-index 55,
+   inchangé) — donc visibles par-dessus lui, CLAUDE.md « Menu mobile »
+   § 2. Même flou que la nav : fond transparent, AUCUNE teinte, préfixe
+   -webkit AVANT le standard. UNE seule surface floutée pour tout
+   l'écran pendant que ce panneau est ouvert — le flou propre de la nav
+   est désactivé pendant ce temps (nav.module.css .navBlur[data-suspended]).
+
+   flex column, overflow hidden sur la racine : .mobileScroll (ci-dessous)
+   défile seul en interne si l'accordéon ouvert déborde, .mobileBottom
+   reste à sa position fixe en bas quelle que soit la hauteur de l'écran
+   ou l'état de l'accordéon (CLAUDE.md § 5) — pas de position: fixed
+   séparée à calculer, c'est la mise en page flex qui le garantit. */
 .mobilePanel {
   position: fixed;
-  top: var(--nav-h);
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   z-index: 55;
-  padding: 52px 20px 25px;
-  background: var(--ground);
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  background: transparent;
+  -webkit-backdrop-filter: blur(24px); /* obligatoire, Safari, avant le standard */
+  backdrop-filter: blur(24px);
+  color: var(--fg);
+  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+/* Repli si le filtre n'est pas supporté : fond OPAQUE de la tonalité du
+   panneau (posée par data-tone, MegaMenu.tsx), jamais transparent sans
+   flou. */
+@supports not (backdrop-filter: blur(1px)) {
+  .mobilePanel {
+    background: var(--tone-bg);
+  }
+}
+
+/* Zone défilante : padding-top = hauteur de la nav (64px) + hauteur du
+   trait sous elle (12px) + 40px de respiration — même position pour la
+   première entrée qu'avant cette refonte (le panneau partait alors à
+   top: var(--nav-h), padding-top: 52px = 116px du haut de l'écran ;
+   64 + 12 + 40 = 116px aussi, donc rien ne bouge). */
+.mobileScroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: calc(var(--nav-h) + 12px + 40px) 20px 48px;
 }
 
 .mobileList {
   list-style: none;
   margin: 0;
-  /* padding-top (52px) + cette marge = 92px du haut du panneau,
-     valeur donnée par CLAUDE.md pour la première entrée. */
-  margin-top: 40px;
   padding: 0;
   display: grid;
   gap: 60px;
@@ -243,9 +278,10 @@
   line-height: 40px;
   letter-spacing: 0.02em;
   font-weight: 400;
-  color: var(--ink);
+  color: var(--fg);
   text-decoration: none;
   cursor: pointer;
+  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
 .mobileItem:focus-visible {
@@ -253,12 +289,46 @@
   outline-offset: 2px;
 }
 
-/* Accordéon en grid-template-rows 0fr → 1fr : anime sans jamais
-   mesurer de hauteur en JS. */
+/* Réalisations / À propos : <span>, jamais dans l'ordre de tabulation —
+   pas de curseur pointeur, contrairement aux entrées cliquables/dépliables. */
+.mobileItemStatic {
+  cursor: default;
+}
+
+/* Services : seule entrée de premier niveau à se déplier — flex row
+   pour poser le chevron à droite du mot, centré verticalement dessus. */
+.mobileTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Chevron dessiné à la main (jamais une icône de librairie) : pointe
+   vers le bas fermé, pivote de 180° ouvert — piloté par [aria-expanded]
+   sur .mobileTrigger, pas par un état séparé côté JS. */
+.mobileChevron {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  color: var(--fg);
+  transition:
+    transform 200ms cubic-bezier(0, 0.55, 0.45, 1),
+    color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.mobileTrigger[aria-expanded="true"] .mobileChevron {
+  transform: rotate(180deg);
+}
+
+/* Accordéon en grid-template-rows 0fr → 1fr : anime sans jamais mesurer
+   de hauteur en JS. 300ms (CLAUDE.md « Menu mobile » § 4 — plus long
+   que les 200ms du chevron, dont la rotation reste perceptible pendant
+   le dépliage plutôt que de se figer avant la fin). */
 .mobileSubWrap {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 250ms cubic-bezier(0, 0.55, 0.45, 1);
+  transition: grid-template-rows 300ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
 .mobileSubWrap[data-open="true"] {
@@ -283,45 +353,71 @@
   width: fit-content;
   min-height: 44px;
   align-content: center;
-  font-size: var(--t-body);
-  line-height: var(--t-body-lh);
-  letter-spacing: var(--t-body-ls);
-  color: var(--ink);
+  font-size: var(--t-lead);
+  line-height: var(--t-lead-lh);
+  letter-spacing: var(--t-lead-ls);
+  color: var(--fg);
+  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
-.mobileFooter {
-  margin-top: auto;
-  padding-top: 40px;
+/* ------------------------------ Bas du panneau ------------------------- */
+
+/* flex: none dans le flex column de .mobilePanel : reste à sa hauteur
+   naturelle en bas de l'écran, jamais poussé ni comprimé — voir le
+   commentaire d'en-tête de .mobilePanel. */
+.mobileBottom {
+  flex: none;
+  padding: 0 20px calc(20px + env(safe-area-inset-bottom));
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 20px;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobileBottomRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: var(--t-mono);
   line-height: var(--t-mono-lh);
   letter-spacing: var(--t-mono-ls);
-  color: var(--ink);
+  color: var(--fg);
+  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
-.mobileFooterLink {
-  color: var(--ink);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: border-color 200ms cubic-bezier(0, 0.55, 0.45, 1);
+/* Largeur réservée d'avance (5 caractères, "14:32") : le passage de la
+   chaîne vide (rendu serveur) à l'heure réelle ne doit rien déplacer —
+   CLAUDE.md, « Menu mobile » § 5. « Toulouse », à droite, reste collé
+   au bord via justify-content: space-between sur .mobileBottomRow. */
+.mobileTime {
+  display: inline-block;
+  min-width: 5ch;
+  font-variant-numeric: tabular-nums;
 }
 
-.mobileFooterLink:hover,
-.mobileFooterLink:focus-visible {
-  border-bottom-color: var(--ink);
+.mobileCity {
+  flex: none;
 }
 
-.mobileFooterLink:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 4px;
+/* Trait retourné : même filet que nav.module.css .rule (1px, congés
+   4px, branches 12px), orientation inverse — la ligne horizontale est
+   en BAS de la boîte de 12px, les deux congés remontent vers le haut
+   (branches "pointent vers le haut", CLAUDE.md). Largeur 100% dans un
+   parent déjà en padding 20px de chaque côté (.mobileBottom) : à 20px
+   des bords de l'écran sans calcul supplémentaire. */
+.mobileBottomRule {
+  width: 100%;
+  height: 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  transition: border-color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .mobileSubWrap {
-    transition: none;
-  }
-}
+/* Pas de @media prefers-reduced-motion ici : la règle globale
+   (globals.css) écrase déjà toutes les durées de transition/animation
+   CSS à 0.01ms — accordéon, rotation du chevron, couleurs. Seule
+   l'ouverture du panneau (opacité, tween GSAP donc pas concernée par
+   cette règle CSS) gère `reduced` explicitement, dans MegaMenu.tsx. */

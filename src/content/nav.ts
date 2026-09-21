@@ -38,10 +38,6 @@ const SERVICES_ENTRIES: NavEntry[] = [
   { label: "Automatisation", href: "/services/automatisation-n8n", isLink: false },
 ];
 
-export type MobileMenuItem =
-  | { type: "accordion"; label: string; entries: NavEntry[] }
-  | { type: "link"; label: string; href: string; isLink: boolean };
-
 export const nav = {
   brand: "Venturia",
   trigger: "Services",
@@ -80,15 +76,13 @@ export const nav = {
 
   mobile: {
     triggerLabel: "Menu",
-    items: [
-      { type: "accordion", label: "Services", entries: SERVICES_ENTRIES },
-      { type: "link", label: "Réalisations", href: "/realisations", isLink: true },
-      { type: "link", label: "À propos", href: "/a-propos", isLink: true },
-    ] as MobileMenuItem[],
+    /** Remplace triggerLabel sur le déclencheur pendant que le panneau
+     *  est ouvert (CLAUDE.md, « Menu mobile » § 1). */
+    closeLabel: "Fermer",
+    /** Pas d'entrée dédiée pour « À propos » ailleurs dans ce fichier
+     *  (contrairement à Réalisations/Contact, repris de `topLinks` plus
+     *  bas pour ne pas dupliquer leur libellé). */
+    aboutLabel: "À propos",
     city: "Toulouse",
-    writeLabel: "Écrire un mail",
-    writeHref: "/contact",
-    /** Pas de vrai numéro fourni : placeholder visible, jamais inventé. */
-    phonePlaceholder: "[TÉLÉPHONE À FOURNIR]",
   },
 };

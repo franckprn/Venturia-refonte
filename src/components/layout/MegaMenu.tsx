@@ -7,17 +7,27 @@ import { gsap } from "gsap";
 import { VENTURIA_EASE } from "@/lib/ease";
 import { pauseLenis, resumeLenis } from "@/lib/lenis";
 import { nav, type NavCaseStudy, type NavEntry } from "@/content/nav";
+import { services } from "@/content/services";
+import type { Tone } from "@/lib/tone";
+import { LocalTime } from "./LocalTime";
 import styles from "./megamenu.module.css";
 
 type MegaMenuProps = {
   id: string;
   open: boolean;
+  /** Tonalité unique du panneau MOBILE (entrées, ligne du bas, trait du
+   *  bas — voir CLAUDE.md, « Menu mobile » § 3), mesurée par Nav.tsx à
+   *  l'ouverture. Ignorée par le panneau desktop, toujours --ground. */
+  tone: Tone;
   /** Focus déplacé dans le panneau seulement pour une ouverture clic/
    *  clavier — jamais pour un simple survol souris (ça déplacerait le
    *  focus sans action explicite de l'utilisateur). */
   shouldFocusOnOpen: boolean;
   /** Escape ferme ET rend le focus au déclencheur — géré par Nav.tsx. */
   onEscape: () => void;
+  /** Tap sur Contact (mobile) : ferme le panneau, la navigation suit
+   *  sans renvoi de focus au déclencheur (contrairement à onEscape). */
+  onNavigate: () => void;
   /** Survoler le panneau annule une fermeture programmée par le survol
    *  du déclencheur (même minuteur, voir Nav.tsx). */
   onPointerEnter: () => void;
@@ -35,10 +45,12 @@ const FOCUSABLE_SELECTOR =
  * d'éléments focusables/dupliqués dans le DOM, et le piège de focus
  * n'a jamais besoin de filtrer une moitié cachée.
  *
- * Ouverture : translateY(-10px)→0 + opacité 0→1, 300ms, easing du
- * site, posée en JS (gsap.set) — jamais en CSS, jamais autoAlpha
- * (visibility:hidden sortirait les liens de l'ordre de tabulation).
- * prefers-reduced-motion : opacité seule, pas de translation.
+ * Ouverture, posée en JS (gsap.set) — jamais en CSS, jamais autoAlpha
+ * (visibility:hidden sortirait les liens de l'ordre de tabulation) :
+ * desktop translateY(-10px)→0 + opacité 0→1, 300ms, easing du site ;
+ * mobile opacité SEULE 0→1, même durée (CLAUDE.md, « Menu mobile »
+ * § 2). prefers-reduced-motion : desktop garde sa transition sans la
+ * translation, mobile saute directement à l'état final (aucun tween).
  * Pas d'animation de sortie (non demandée) : le panneau se démonte.
  *
  * Pendant l'ouverture : scroll de page bloqué, Lenis mis en pause
@@ -49,13 +61,18 @@ const FOCUSABLE_SELECTOR =
 export function MegaMenu({
   id,
   open,
+  tone,
   shouldFocusOnOpen,
   onEscape,
+  onNavigate,
   onPointerEnter,
   onPointerLeave,
 }: MegaMenuProps) {
   const [isDesktop, setIsDesktop] = useState(false);
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  // Accordéon Services (mobile uniquement) — un seul, contrairement à
+  // l'ancien `expandedIndex` généraliste : Réalisations et À propos ne
+  // se déplient plus (CLAUDE.md, « Menu mobile » § 4).
+  const [servicesOpen, setServicesOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,18 +92,34 @@ export function MegaMenu({
   const [prevOpen, setPrevOpen] = useState(open);
   if (open !== prevOpen) {
     setPrevOpen(open);
-    if (!open) setExpandedIndex(null);
+    if (!open) setServicesOpen(false);
   }
 
-  // Entrée : translateY + opacité, posées en JS uniquement.
+  // Entrée, posée en JS uniquement (jamais d'état initial en CSS, jamais
+  // autoAlpha) : desktop translateY(-10px)→0 + opacité (inchangé) ;
+  // mobile opacité SEULE, 0→1 — CLAUDE.md, « Menu mobile » § 2, distinct
+  // du glissement desktop. reduced-motion : mobile saute directement à
+  // l'état final (aucun tween), ouverture instantanée ; desktop garde sa
+  // transition existante, seule la translation y est neutralisée.
   useEffect(() => {
     if (!open) return;
     const panel = panelRef.current;
     if (!panel) return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    gsap.set(panel, { opacity: 0, y: reduced ? 0 : -10 });
-    gsap.to(panel, { opacity: 1, y: 0, duration: 0.3, ease: VENTURIA_EASE });
+
+    if (isDesktop) {
+      gsap.set(panel, { opacity: 0, y: reduced ? 0 : -10 });
+      gsap.to(panel, { opacity: 1, y: 0, duration: 0.3, ease: VENTURIA_EASE });
+      return;
+    }
+
+    if (reduced) {
+      gsap.set(panel, { opacity: 1 });
+      return;
+    }
+    gsap.set(panel, { opacity: 0 });
+    gsap.to(panel, { opacity: 1, duration: 0.3, ease: VENTURIA_EASE });
   }, [open, isDesktop]);
 
   // Focus initial (clic/clavier seulement), scroll bloqué, Lenis en
@@ -191,53 +224,108 @@ export function MegaMenu({
       </div>
     </div>
   ) : (
-    <div id={id} ref={panelRef} data-megamenu className={styles.mobilePanel}>
-      <ul className={styles.mobileList}>
-        {nav.mobile.items.map((item, i) => (
-          <li key={item.label}>
-            {item.type === "accordion" ? (
-              <>
-                <button
-                  type="button"
-                  className={styles.mobileItem}
-                  aria-expanded={expandedIndex === i}
-                  aria-controls={`${id}-sub-${i}`}
-                  onClick={() => setExpandedIndex(expandedIndex === i ? null : i)}
-                >
-                  {item.label}
-                </button>
-                <div
-                  className={styles.mobileSubWrap}
-                  data-open={expandedIndex === i}
-                >
-                  <ul id={`${id}-sub-${i}`} className={styles.mobileSubList}>
-                    {item.entries.map((entry) => (
-                      <li key={entry.label}>
-                        <NavEntryItem entry={entry} className={styles.mobileSubEntry} />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </>
-            ) : item.isLink ? (
-              <Link href={item.href} className={styles.mobileItem}>
-                {item.label}
-              </Link>
-            ) : (
-              <span className={styles.mobileItem}>{item.label}</span>
-            )}
+    <div
+      id={id}
+      ref={panelRef}
+      data-megamenu
+      data-tone={tone}
+      className={styles.mobilePanel}
+    >
+      {/* Zone défilante : seule elle scrolle si l'accordéon ouvert
+          déborde — .mobileBottom (ligne heure/ville + trait) reste à sa
+          position fixe en bas, CLAUDE.md « Menu mobile » § 5. */}
+      <div className={styles.mobileScroll}>
+        <ul className={styles.mobileList}>
+          {/* Services — seule entrée qui se déplie (accordéon), ses 4
+              services lus depuis content/services.ts : aucun texte
+              dupliqué avec la section Services de la page d'accueil. */}
+          <li>
+            <button
+              type="button"
+              className={`${styles.mobileItem} ${styles.mobileTrigger}`}
+              aria-expanded={servicesOpen}
+              aria-controls={`${id}-services`}
+              onClick={() => setServicesOpen((v) => !v)}
+            >
+              {nav.trigger}
+              <MobileChevron className={styles.mobileChevron} />
+            </button>
+            <div className={styles.mobileSubWrap} data-open={servicesOpen}>
+              <ul id={`${id}-services`} className={styles.mobileSubList}>
+                {services.map((service) => (
+                  <li key={service.name}>
+                    {/* <span>, jamais un lien : /services/* n'existe pas
+                        encore (CLAUDE.md, « Menu mobile » § 4). */}
+                    <span className={styles.mobileSubEntry}>{service.name}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </li>
-        ))}
-      </ul>
 
-      <div className={styles.mobileFooter}>
-        <span>{nav.mobile.city}</span>
-        <Link href={nav.mobile.writeHref} className={styles.mobileFooterLink}>
-          {nav.mobile.writeLabel}
-        </Link>
-        <span>{nav.mobile.phonePlaceholder}</span>
+          {/* Réalisations / À propos : <span>, ni dépliable ni
+              cliquable — leurs pages n'existent pas encore. Le libellé
+              « Réalisations » est repris de `nav.topLinks` (même mot,
+              même fichier) plutôt que retapé une seconde fois ici. */}
+          <li>
+            <span className={`${styles.mobileItem} ${styles.mobileItemStatic}`}>
+              {nav.topLinks[0].label}
+            </span>
+          </li>
+          <li>
+            <span className={`${styles.mobileItem} ${styles.mobileItemStatic}`}>
+              {nav.mobile.aboutLabel}
+            </span>
+          </li>
+
+          {/* Contact : seule entrée cliquable, /contact existe déjà. Le
+              tap ferme le panneau puis laisse la navigation du <Link>
+              suivre son cours (onNavigate ne bloque rien). */}
+          <li>
+            <Link href={nav.topLinks[1].href} className={styles.mobileItem} onClick={onNavigate}>
+              {nav.topLinks[1].label}
+            </Link>
+          </li>
+        </ul>
+      </div>
+
+      <div className={styles.mobileBottom}>
+        <div className={styles.mobileBottomRow}>
+          <LocalTime className={styles.mobileTime} />
+          <span className={styles.mobileCity}>{nav.mobile.city}</span>
+        </div>
+        {/* Même filet que nav.module.css .rule, retourné (branches vers
+            le haut) — voir megamenu.module.css .mobileBottomRule. */}
+        <div className={styles.mobileBottomRule} aria-hidden="true" />
       </div>
     </div>
+  );
+}
+
+/**
+ * Chevron de l'accordéon Services — SVG dessiné à la main, jamais une
+ * icône de librairie (CLAUDE.md, « Menu mobile » § 4). Pointe vers le
+ * bas fermé, pivote de 180° ouvert : la rotation est purement CSS,
+ * pilotée par `[aria-expanded]` sur le bouton parent (voir
+ * megamenu.module.css `.mobileTrigger[aria-expanded="true"]`) — aucun
+ * état à gérer ici. Décoratif : l'état est déjà porté par aria-expanded.
+ */
+function MobileChevron({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M6 9L12 15L18 9" />
+    </svg>
   );
 }
 

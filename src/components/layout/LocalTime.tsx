@@ -38,8 +38,13 @@ function subscribe(callback: () => void): () => void {
  * client, donc aucune erreur d'hydratation possible), `subscribe`
  * pose l'intervalle et le nettoie lui-même à la fin de l'abonnement —
  * pas de useEffect séparé à démonter à la main.
+ *
+ * Partagé entre la barre légale du footer (défaut, `.legalTime`) et le
+ * bas du panneau du menu mobile (`className`, voir megamenu.module.css
+ * `.mobileTime`) : même logique, jamais dupliquée — seule l'habille
+ * change.
  */
-export function LocalTime() {
+export function LocalTime({ className }: { className?: string }) {
   const time = useSyncExternalStore(subscribe, getToulouseTime, getServerSnapshot);
-  return <span className={styles.legalTime}>{time}</span>;
+  return <span className={className ?? styles.legalTime}>{time}</span>;
 }

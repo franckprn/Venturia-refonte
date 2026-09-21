@@ -3,45 +3,17 @@ import { footer } from "@/content/footer";
 import { LocalTime } from "./LocalTime";
 import styles from "./footer.module.css";
 
-// Enveloppe, puis arobase — dessinées à la main, jamais une librairie
-// d'icônes ni un emoji. La couleur vient de --ground, héritée via
-// currentColor depuis .iconBox (footer.module.css).
-function MailIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <rect x="2.5" y="4.5" width="15" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <path
-        d="M3 5.5L10 11L17 5.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function AtIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.5" />
-      <path
-        d="M13 10V11.5C13 12.6 13.9 13.3 14.8 12.9C16 12.4 16.75 11.3 16.75 10C16.75 6.55 13.95 3.75 10.5 3.75C7.05 3.75 4.25 6.55 4.25 10C4.25 13.45 7.05 16.25 10.5 16.25C11.8 16.25 13 15.86 14 15.19"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 // Bloc de fin de page — CTA + footer en UN SEUL bloc sombre (pas deux
-// sections) : contact, titre géant (lien entier vers /contact),
-// colonnes de liens, barre légale. Suit Processus (clair) ; le fond
-// --ink pleine largeur vit sur le <Section> qui l'englobe (voir
-// page.tsx et footer.module.css .section), pas ici — ce composant ne
-// rend que le contenu.
+// sections) : titre géant (lien entier vers /contact), colonnes de
+// liens, barre légale. Suit Processus (clair) ; le fond --ink pleine
+// largeur vit sur le <Section> qui l'englobe (voir page.tsx et
+// footer.module.css .section), pas ici — ce composant ne rend que le
+// contenu.
+//
+// Commence directement par le titre géant : l'ancienne bande CONTACT
+// (label, phrases, « Écrire un mail », adresse email) a été retirée —
+// l'adresse vivait déjà dans content/contact.ts, lue par /contact,
+// jamais par ce fichier ; rien à y déplacer.
 //
 // Racine en <div>, pas <footer> : imbriqué dans le <section> que Shell
 // exige pour la mécanique de grille (figement du rail jusqu'au bas de
@@ -52,35 +24,12 @@ function AtIcon() {
 //
 // Contenu réel (provisoire) dans content/footer.ts.
 export function Footer() {
-  const { contact, linkColumns, address, giantTitle, legal } = footer;
+  const { linkColumns, address, giantTitle, legal } = footer;
 
   return (
     <div className={styles.bands}>
-      {/* BANDE 1 — CONTACT */}
-      <div className={styles.contact}>
-        <p className={styles.contactLabel}>{contact.label}</p>
-        <p className={styles.contactIntro}>
-          {contact.lines[0]}
-          <br />
-          {contact.lines[1]}
-        </p>
-        <div className={styles.contactLinksRow}>
-          <Link href={contact.write.href} className={styles.contactLink}>
-            <span className={styles.iconBox} aria-hidden="true">
-              <MailIcon />
-            </span>
-            {contact.write.label}
-          </Link>
-          <Link href={contact.email.href} className={styles.contactLink}>
-            <span className={styles.iconBox} aria-hidden="true">
-              <AtIcon />
-            </span>
-            {contact.email.label}
-          </Link>
-        </div>
-      </div>
-
-      {/* BANDE 2 — TITRE GÉANT, lien entier vers /contact */}
+      {/* BANDE 2 — TITRE GÉANT, lien entier vers /contact (première
+          bande du footer désormais, voir commentaire d'en-tête) */}
       <div className={styles.giant}>
         <Link href="/contact" className={styles.giantTitle}>
           {giantTitle.text}

@@ -28,15 +28,15 @@ du charbon « pour la lisibilité » sans le lui demander.
 Toute couleur dérivée de la palette s'écrit en color-mix sur un token,
 jamais en rgba figé : une valeur en dur ne suit pas un changement de token.
 
-Tous les fonds sont opaques, sauf quatre exceptions explicites : la barre de
+Tous les fonds sont opaques, sauf cinq exceptions explicites : la barre de
 nav (desktop ET mobile — voir « Barre de navigation »), les cartons du rail en
-desktop, la pile mobile du rail (repliée et dépliée) et le calque plein écran
-derrière la pile dépliée (voir « Rail droit » § « Pile mobile »). Ailleurs,
-aucun backdrop-filter : c'est le filtre le plus coûteux du navigateur, il
-recompose tout l'arrière-plan à chaque frame et provoque des artefacts sur
-Safari iOS quand il coexiste avec du position: fixed — le méga-menu (fixed
-lui aussi) en reste donc exclu. Un aplat --ground rend la même chose partout
-ailleurs.
+desktop, la pile mobile du rail (repliée et dépliée), le calque plein écran
+derrière la pile dépliée (voir « Rail droit » § « Pile mobile ») et le panneau
+du menu mobile (voir « Méga-menu — mobile »). Ailleurs, aucun backdrop-filter :
+c'est le filtre le plus coûteux du navigateur, il recompose tout
+l'arrière-plan à chaque frame et provoque des artefacts sur Safari iOS quand
+il coexiste avec du position: fixed — le méga-menu DESKTOP (fixed lui aussi)
+en reste donc exclu. Un aplat --ground rend la même chose partout ailleurs.
 
 Dans une section en négatif, un paragraphe long passe à 80 % d'opacité :
 sur fond sombre, un texte clair paraît optiquement plus gras et vibre sur
@@ -55,8 +55,11 @@ Deux éléments adaptatifs lisent cette information et reçoivent eux-mêmes un
   - la nav : tonalité de la section sous le centre vertical de la barre
   - chaque carton du rail : tonalité de la section sous SON PROPRE centre
     vertical, indépendamment de la nav et des autres cartons
-Quand le menu mobile est ouvert, la nav passe en tonalité `light` (son
-panneau est crème), quelle que soit la section défilée derrière.
+Quand le menu mobile est ouvert, la nav ET le panneau partagent une
+troisième mesure, distincte des deux ci-dessus : la tonalité de la
+section qui occupe la plus grande SURFACE de la fenêtre visible (pas son
+centre), prise une seule fois à l'ouverture — voir « Méga-menu —
+mobile ».
 
 Implémentation (`src/lib/tone.ts`) : un seul listener scroll passif,
 throttlé par requestAnimationFrame, plus un recalcul au resize. Les
@@ -71,11 +74,12 @@ Chaque tonalité pose une variable `--fg` (couleur de texte) :
   light   --fg: var(--ink)
   dark    --fg: var(--ground)
   accent  --fg: var(--ground)
-Texte des entrées de nav, logo, déclencheur « Menu », titre/texte/icône des
-cartons : `color: var(--fg)` (currentColor pour les SVG). Transition sur
-`color`/`border-color`/`stroke`/`fill`, 150ms, cubic-bezier(0,.55,.45,1) —
-jamais sur `backdrop-filter`. Bascule instantanée avec
-prefers-reduced-motion.
+Texte des entrées de nav, logo, déclencheur « Menu »/« Fermer »,
+titre/texte/icône des cartons, panneau du menu mobile (entrées, ligne du
+bas, traits) : `color: var(--fg)` (currentColor pour les SVG). Transition
+sur `color`/`border-color`/`stroke`/`fill`, 150ms,
+cubic-bezier(0,.55,.45,1) — jamais sur `backdrop-filter`. Bascule
+instantanée avec prefers-reduced-motion.
 Le filet --line-accent des cartons et la bordure --accent du carton 3 ne
 changent jamais avec la tonalité. Le trait à angles sous la nav non plus
 n'utilise plus --line fixe : `color-mix(in srgb, var(--fg) 16%,
@@ -480,18 +484,94 @@ comportement desktop : survol, 120ms de délai à l'entrée, 200ms à la sortie
 
 Structure propre au mobile, pas un empilement des colonnes desktop.
 
-déclencheur  le mot « Menu » en --t-mono dans la barre, à droite
-panneau      plein écran, position fixed, padding 52px 20px 25px
-             fond --ground, opaque — pas de backdrop-filter
-             sans radius ni filet
-entrées      3 entrées de premier niveau en <button> :
-             Services · Réalisations · À propos
-             40px, lh 40px, ls +.02em, poids 400, --ink
-             pas vertical 60px, première entrée à 92px du haut
-sous-niveaux accordéon au clic
-contenu      ces 3 entrées et le bas de panneau, sans carte cas client
-bas          ville, puis « M'écrire » et le téléphone, en --t-mono,
-             sur une ligne, à 25px du bas
+déclencheur  le mot « Menu » dans la barre, à droite, --t-mono. Devient
+             « Fermer » (content/nav.ts, `mobile.closeLabel`) tant que le
+             panneau est ouvert. aria-expanded et aria-controls corrects.
+
+panneau      plein écran, position fixed (inset: 0, pas top: var(--nav-h))
+             — le trait à angles sous la nav et la barre elle-même
+             restent visibles par-dessus lui (z-index nav > z-index
+             panneau, voir plus bas)
+             fond transparent, flouté, AUCUNE teinte, même traitement que
+             la nav — -webkit-backdrop-filter PUIS backdrop-filter, dans
+             cet ordre :
+               background: transparent;
+               -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
+             Repli si le filtre n'est pas supporté : fond OPAQUE de la
+             tonalité du panneau (voir « tonalité » plus bas), jamais
+             transparent sans flou.
+             UNE seule surface floutée : pendant que ce panneau est
+             ouvert, le flou propre de la nav (.navBlur) est désactivé —
+             jamais de flou sur du flou, jamais deux surfaces floutées
+             côte à côte (voir « Couleurs », exceptions au
+             backdrop-filter).
+             sans radius ni filet propre (le filet visible en haut est
+             celui de la nav, inchangé ; celui du bas est décrit plus
+             bas)
+
+ouverture    opacité 0 → 1, 300ms, easing du site, posée en JS (gsap.set),
+             jamais d'état initial en CSS, jamais autoAlpha. Pas de
+             translateY (contrairement au panneau desktop).
+             reduced-motion : ouverture instantanée (aucun tween).
+             Scroll de la page bloqué, Lenis en pause. Escape ferme et
+             rend le focus au déclencheur. Focus piégé dans le panneau.
+
+tonalité     UNE seule couleur de texte pour tout le panneau (entrées,
+             ligne du bas, trait du bas) ET pour la nav qui le surplombe
+             pendant ce temps (déclencheur « Fermer », logo, trait du
+             haut) : --ink sur light, --ground sur dark/accent — celle de
+             la section qui occupe la plus grande SURFACE de la fenêtre
+             visible, pas celle sous un point précis (contrairement à la
+             nav/aux cartons en temps normal, voir « Tonalités »).
+             Mesurée UNE SEULE FOIS à l'ouverture (le scroll étant
+             bloqué tant qu'il reste ouvert, aucun recalcul pendant ce
+             temps) : `getDominantTone()` (src/lib/tone.ts) cumule, pour
+             chaque section, la hauteur de son intersection avec la
+             fenêtre visible, additionne ces hauteurs par tonalité, et
+             retourne celle au plus grand cumul — les sections occupant
+             toute la largeur du shell, leur hauteur visible est une
+             mesure fidèle de leur surface à l'écran.
+
+entrées      4 entrées de premier niveau, dans cet ordre, tailles et
+             espacements inchangés (40px, lh 40px, ls +.02em, poids 400,
+             pas vertical 60px, première entrée à 92px du haut de
+             l'écran — 64px de nav + 12px de trait + 16px) :
+               Services      <button>, seule à se déplier (accordéon)
+               Réalisations  <span>, ni dépliable ni cliquable
+               À propos      <span>, ni dépliable ni cliquable
+               Contact       <a> vers /contact ; le tap ferme le panneau
+                             puis laisse la navigation suivre
+             Réalisations et Contact reprennent leur libellé (et, pour
+             Contact, son href) depuis `nav.topLinks` — jamais retapés.
+
+accordéon    Services contient les 4 services de content/services.ts
+             (Référencement, Publicité, Site internet, Automatisation),
+             jamais dupliqués depuis un autre fichier. Chaque service est
+             un <span>, --t-lead : /services/* n'existe pas encore.
+             Ouverture/fermeture en hauteur, 300ms, easing du site.
+             Chevron : SVG dessiné à la main, trait 1.5px, currentColor,
+             aligné à droite du mot « Services », centré verticalement
+             dessus. Pointe vers le bas fermé, pivote de 180° ouvert,
+             200ms. aria-hidden (l'état est déjà porté par aria-expanded
+             sur le bouton Services, avec aria-controls).
+             reduced-motion : dépliage sans animation, chevron qui
+             change d'orientation instantanément.
+
+bas du       une ligne, --t-mono, position fixe quelle que soit la
+panneau      hauteur de l'écran et l'état de l'accordéon (si l'accordéon
+             ouvert déborde, c'est la zone des entrées qui défile en
+             interne, jamais cette ligne) :
+               gauche   heure de Toulouse (« 14:32 », timeZone
+                        'Europe/Paris'), calculée côté client, mise à
+                        jour chaque minute, chaîne vide au rendu serveur
+                        — largeur réservée d'avance (5ch) : son
+                        apparition ne déplace rien
+               droite   « Toulouse », toujours collé au bord droit
+             En dessous, à 12px : un trait identique à celui sous la nav
+             (filet 1px, congés 4px, branches 12px) mais RETOURNÉ, ses
+             branches pointent vers le HAUT. À 20px des bords gauche et
+             droit de l'écran. Le bas de ce trait est à
+             20px + env(safe-area-inset-bottom) du bas de l'écran.
 
 ## Images
 
