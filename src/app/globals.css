@@ -8,10 +8,10 @@
 :root {
   /* Couleurs — palette fermée, trois valeurs + deux filets */
   --ground: #dedcd3;
-  --ink: #0a0605;
+  --ink: #1a1614;
   --accent: #fe3939;
-  --line: rgba(10, 6, 5, 0.16);
-  --line-accent: rgba(254, 57, 57, 0.2);
+  --line: color-mix(in srgb, var(--ink) 16%, transparent);
+  --line-accent: color-mix(in srgb, var(--accent) 20%, transparent);
 
   /* Typographie — valeurs desktop (>= 768px) */
   --t-mono: 13px;

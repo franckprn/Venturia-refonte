@@ -16,7 +16,7 @@ export type RailCardContent = {
 export const railCards: [RailCardContent, RailCardContent, RailCardContent] = [
   {
     title: "Combien de temps",
-    resume: "Délais avant les premiers résultats",
+    resume: "Délais des premiers résultats",
     text:
       "Le référencement met 1 à 3 mois avant les premiers résultats. Les " +
       "annonces payantes, quelques jours.",

@@ -9,13 +9,14 @@ tout ce qui est rédigé pendant le développement est du placeholder.
 
 ## Couleurs
 
-Trois couleurs, reprises de springsummer.dk.
+Trois couleurs, reprises de springsummer.dk — le charbon a été éclairci par
+rapport à leur valeur (voir ci-dessous).
 
 --ground:      #DEDCD3   crème
---ink:         #0A0605   charbon
+--ink:         #1A1614   charbon
 --accent:      #FE3939   rouge
---line:        rgba(10,6,5,.16)
---line-accent: rgba(254,57,57,.2)
+--line:        color-mix(in srgb, var(--ink) 16%, transparent)
+--line-accent: color-mix(in srgb, var(--accent) 20%, transparent)
 
 Palette fermée : ces trois couleurs, pas de gris, pas de quatrième valeur.
 Aucune restriction d'usage : chacune peut porter du fond comme du texte.
@@ -23,6 +24,9 @@ Par défaut, fond crème et texte charbon, ou l'inverse. Le rouge s'emploie
 librement — fond de section, titre, aplat, filet, chiffre, souligné.
 Franck arbitre le contraste au cas par cas : ne pas remplacer un rouge par
 du charbon « pour la lisibilité » sans le lui demander.
+
+Toute couleur dérivée de la palette s'écrit en color-mix sur un token,
+jamais en rgba figé : une valeur en dur ne suit pas un changement de token.
 
 Tous les fonds sont opaques, sauf quatre exceptions explicites : la barre de
 nav (desktop ET mobile — voir « Barre de navigation »), les cartons du rail en
