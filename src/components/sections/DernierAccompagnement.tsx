@@ -1,19 +1,8 @@
-import fs from "node:fs";
-import path from "node:path";
 import Image from "next/image";
 import Link from "next/link";
 import { realisations } from "@/content/realisations";
 import { DernierAccompagnementReveal } from "./DernierAccompagnementReveal";
 import styles from "./dernier-accompagnement.module.css";
-
-function publicFileExists(publicPath?: string): boolean {
-  if (!publicPath) return false;
-  try {
-    return fs.existsSync(path.join(process.cwd(), "public", publicPath));
-  } catch {
-    return false;
-  }
-}
 
 // Section « Dernier accompagnement » (home, section 2) — un seul cas
 // client, en split visuel / chiffres. Suit le Hero (crème, aligné à
@@ -27,7 +16,7 @@ function publicFileExists(publicPath?: string): boolean {
 // Contenu réel dans content/realisations.ts, non complété ici.
 export function DernierAccompagnement() {
   const r = realisations;
-  const hasImage = publicFileExists(r.image);
+  const hasImage = Boolean(r.image);
 
   return (
     <>

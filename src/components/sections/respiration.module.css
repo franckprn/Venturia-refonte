@@ -3,17 +3,12 @@
  * accompagnement qui précède : fond --ink, rien que du texte.
  *
  * Le <section> lui-même (via <Section>) reste dans la zone de contenu
- * normale (grid-column: 1, pas sous le rail) — c'est UNIQUEMENT le
- * fond (::before) qui déborde jusqu'aux deux bords de l'écran. Ça
- * évite que le texte se retrouve sous les cartons du rail, qui restent
- * figés au-dessus de cette section (empilement permanent) : le fond
- * doit passer derrière eux, pas le texte à côté.
- *
- * Le calcul du débordement part du bord gauche du Shell (54px desktop
- * / 20px mobile de padding) PLUS, au-delà de 1440px de large, la marge
- * de centrage du Shell lui-même (max-width: 1440px) — sans ce second
- * terme, le fond s'arrêterait au bord du conteneur de 1440px au lieu
- * du vrai bord de l'écran.
+ * normale (grid-column: 1, pas sous le rail) — c'est le FOND (box-shadow
+ * + clip-path, voir .section ci-dessous) qui déborde jusqu'aux deux
+ * bords de l'écran, pas le contenu. Ça évite que le texte se retrouve
+ * sous les cartons du rail, qui restent figés au-dessus de cette
+ * section (empilement permanent) : le fond doit passer derrière eux,
+ * pas le texte à côté.
  *
  * padding-top est réécrit ici (128/200) : la règle générale
  * d'espacement inter-sections (section.module.css, 96/160) ne
@@ -30,28 +25,22 @@
   -webkit-font-smoothing: antialiased;
   padding-top: 128px !important;
   padding-bottom: 128px;
-}
-
-.section::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  left: calc(-1 * (var(--shell-gutter) + max(0px, (100vw - var(--shell-max)) / 2)));
-  width: 100vw;
+  /* Fond plein écran sans 100vw (CLAUDE.md, « Shell de page ») : le
+     box-shadow étend la même couleur unie bien au-delà des deux bords du
+     conteneur, le clip-path retaille cette extension à la hauteur exacte
+     de la section (sans lui, le débordement vertical envahirait les
+     sections voisines). Un box-shadow ne compte pas dans le scroll
+     overflow, contrairement à 100vw : aucun risque de barre de défilement
+     horizontale, quelle que soit la largeur de la barre verticale. */
   background: var(--ink);
+  box-shadow: 0 0 0 100vmax var(--ink);
+  clip-path: inset(0 -100vmax);
 }
 
 @media (min-width: 1024px) {
   .section {
     padding-top: 200px !important;
     padding-bottom: 200px;
-  }
-
-  .section::before {
-    left: calc(
-      -1 * (var(--shell-gutter-left) + max(0px, (100vw - var(--shell-max)) / 2))
-    );
   }
 }
 

@@ -3,7 +3,8 @@
  * --ink pleine largeur et le padding vertical (96px haut / 32px bas)
  * vivent sur `.section`, portée par le <Section> qui englobe ce
  * composant dans page.tsx — même technique de débordement que
- * Respiration (voir respiration.module.css pour le détail du calc()).
+ * Respiration (voir respiration.module.css et CLAUDE.md, « Shell de
+ * page », pour le détail du box-shadow/clip-path).
  *
  * `.bands` et ses enfants directs sont l'unique item de la grille 12
  * colonnes externe (section.module.css .body) : comme .split
@@ -26,6 +27,16 @@
   -webkit-font-smoothing: antialiased;
   padding-top: 96px !important;
   padding-bottom: 32px;
+  /* Fond plein écran sans 100vw (CLAUDE.md, « Shell de page ») : le
+     box-shadow étend la même couleur unie bien au-delà des deux bords du
+     conteneur, le clip-path retaille cette extension à la hauteur exacte
+     de la section (sans lui, le débordement vertical envahirait les
+     sections voisines). Un box-shadow ne compte pas dans le scroll
+     overflow, contrairement à 100vw : aucun risque de barre de défilement
+     horizontale, quelle que soit la largeur de la barre verticale. */
+  background: var(--ink);
+  box-shadow: 0 0 0 100vmax var(--ink);
+  clip-path: inset(0 -100vmax);
 }
 
 /* Sous 1024px, la pile mobile du rail est fixée par-dessus le bas de
@@ -39,24 +50,6 @@
 @media (max-width: 1023px) {
   .section {
     padding-bottom: calc(32px + var(--mobile-pile-space, 100px));
-  }
-}
-
-.section::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  left: calc(-1 * (var(--shell-gutter) + max(0px, (100vw - var(--shell-max)) / 2)));
-  width: 100vw;
-  background: var(--ink);
-}
-
-@media (min-width: 1024px) {
-  .section::before {
-    left: calc(
-      -1 * (var(--shell-gutter-left) + max(0px, (100vw - var(--shell-max)) / 2))
-    );
   }
 }
 

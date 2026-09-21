@@ -140,7 +140,10 @@ DROIT de l'écran, pas d'un conteneur centré.
   hauteur de nav 64px
   Aucun 100vw dans les calculs de largeur : 100vw inclut la barre de
   défilement et déborde de sa largeur sur Windows et Firefox. Tout calcul se
-  fait en % du conteneur (voir le filet de nav et le méga-menu).
+  fait en % du conteneur (voir le filet de nav et le méga-menu). Pour un
+  fond plein écran de couleur unie (Respiration, footer) : box-shadow: 0 0 0
+  100vmax var(--token); clip-path: inset(0 -100vmax); sur l'élément — un
+  box-shadow ne compte pas dans le scroll overflow, contrairement à 100vw.
 
 Mobile (< 1024px)
   6 colonnes, gap 20px, marges 20px
