@@ -24,9 +24,6 @@ export type NavCaseStudy = {
   tags: [string, string];
   href: string;
   isLink: boolean;
-  /** Chemin public de l'image (next/image). Absente pour l'instant. */
-  image?: string;
-  imageAlt: string;
 };
 
 // Contenu du CLAUDE.md, « Méga-menu — desktop » : trois services
@@ -64,6 +61,10 @@ export const nav = {
     ],
   } as NavColumn,
 
+  // Photo (image + imageAlt) volontairement absente d'ici : reprise
+  // directement de content/realisations.ts (même cas client, section
+  // « Dernier accompagnement ») par MegaMenu.tsx, pour ne jamais avoir
+  // deux chemins de fichier à faire évoluer ensemble.
   caseStudyTitle: "CAS CLIENT",
   caseStudy: {
     clientName: "Inoko",
@@ -71,7 +72,6 @@ export const nav = {
     tags: ["SEO", "GOOGLE ADS"],
     href: "/realisations/inoko",
     isLink: false,
-    imageAlt: "Mobilier modulable Inoko installé dans un van, à Toulouse",
   } as NavCaseStudy,
 
   mobile: {

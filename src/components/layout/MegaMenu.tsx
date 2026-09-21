@@ -7,6 +7,7 @@ import { gsap } from "gsap";
 import { VENTURIA_EASE } from "@/lib/ease";
 import { pauseLenis, resumeLenis } from "@/lib/lenis";
 import { nav, type NavCaseStudy, type NavEntry } from "@/content/nav";
+import { realisations } from "@/content/realisations";
 import { services } from "@/content/services";
 import type { Tone } from "@/lib/tone";
 import { LocalTime } from "./LocalTime";
@@ -316,7 +317,11 @@ export function MegaMenu({
             <div className={styles.column}>
               <p className={styles.columnTitle}>{nav.caseStudyTitle}</p>
               <div className={styles.caseCardSlot}>
-                <CaseStudyCard caseStudy={nav.caseStudy} />
+                <CaseStudyCard
+                  caseStudy={nav.caseStudy}
+                  image={realisations.image}
+                  imageAlt={realisations.imageAlt}
+                />
               </div>
             </div>
           </div>
@@ -461,28 +466,38 @@ function NavEntryItem({ entry, className }: { entry: NavEntry; className: string
   return <span className={className}>{entry.label}</span>;
 }
 
-// Pas de fs.existsSync ici (comme dans Services/DernierAccompagnement) :
-// ce composant est "use client" pour la mécanique du menu (survol,
-// piège de focus), le système de fichiers n'y est pas accessible.
-// Contrôle simple sur la présence du champ `image` dans le contenu —
-// Franck devra renseigner ce champ ET déposer le fichier ensemble,
-// plutôt que le second déclenchant seul l'apparition de l'image.
-function CaseStudyCard({ caseStudy }: { caseStudy: NavCaseStudy }) {
-  const hasImage = Boolean(caseStudy.image);
+// image/imageAlt viennent de content/realisations.ts (même cas client
+// que « Dernier accompagnement », voir nav.ts) : un seul champ `image`
+// à faire évoluer si la photo change, jamais deux chemins à
+// synchroniser à la main. Pas de fs.existsSync ici (comme dans
+// Services/DernierAccompagnement) : ce composant est "use client" pour
+// la mécanique du menu (survol, piège de focus), le système de
+// fichiers n'y est pas accessible — contrôle simple sur la présence du
+// champ `image`.
+function CaseStudyCard({
+  caseStudy,
+  image,
+  imageAlt,
+}: {
+  caseStudy: NavCaseStudy;
+  image?: string;
+  imageAlt: string;
+}) {
+  const hasImage = Boolean(image);
 
   const inner = (
     <>
       {hasImage ? (
         <Image
-          src={caseStudy.image as string}
-          alt={caseStudy.imageAlt}
+          src={image as string}
+          alt={imageAlt}
           fill
           sizes="269px"
           className={styles.caseImage}
         />
       ) : (
         // Photo pas encore fournie : aplat --ink, jamais de photo de
-        // stock. Fichier attendu : public{caseStudy.image}
+        // stock. Fichier attendu : public{image}
         <div className={styles.caseImageFallback} aria-hidden="true" />
       )}
       <div className={styles.caseGradient} aria-hidden="true" />
