@@ -7,7 +7,7 @@ import { railCards } from "@/content/rail";
 import { VENTURIA_EASE } from "@/lib/ease";
 import { onHeroTitleDone } from "@/lib/heroTitleSignal";
 import { pauseLenis, resumeLenis } from "@/lib/lenis";
-import { useSectionTone } from "@/lib/tone";
+import { getBottomTone, toVeilTone, useSectionTone, type Tone } from "@/lib/tone";
 import { useSectionHysteresis, type CrossEvent } from "@/lib/useSectionHysteresis";
 import { IconArrowRight, IconClock, IconSparkle, type RailIconHandle } from "./RailIcons";
 import styles from "./mobileRailStack.module.css";
@@ -70,6 +70,7 @@ export function MobileRailStack({ anchors }: MobileRailStackProps) {
 
   const wrapRef = useRef<HTMLDivElement>(null);
   const stackRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const cardRefs = useRef<Array<HTMLElement | null>>([null, null, null]);
   const iconRefs = [
@@ -89,10 +90,20 @@ export function MobileRailStack({ anchors }: MobileRailStackProps) {
     openRef.current = open;
   }, [open]);
 
-  // Tonalité UNIQUE pour toute la pile (texte, icônes) — pas une par
-  // carton comme sur le rail desktop (CLAUDE.md, « Pile mobile ») :
-  // celle de la section sous la pile elle-même.
+  // Tonalité UNIQUE pour toute la pile REPLIÉE (texte, icônes) — pas une
+  // par carton comme sur le rail desktop (CLAUDE.md, « Pile mobile ») :
+  // celle de la section sous la pile elle-même, mesure CONTINUE
+  // (inchangée par le voile de la pile dépliée, voir `deployTone`
+  // ci-dessous et `displayTone` plus bas).
   const tone = useSectionTone(wrapRef);
+  // Tonalité du voile de la pile DÉPLIÉE (calque plein écran + cartons
+  // dépliés), gelée à l'instant du dépliage (voir le bouton `.toggle`
+  // plus bas) — CLAUDE.md, « Rail droit » § « Pile mobile » : celle de
+  // la section tout en bas de l'écran, accent traité comme dark
+  // (`toVeilTone`), jamais recalculée tant que la pile reste dépliée
+  // (le scroll de page est de toute façon bloqué). Valeur de repli sans
+  // incidence tant que `open` est false (voir `displayTone`).
+  const [deployTone, setDeployTone] = useState<Tone>("light");
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 1023px)");
@@ -242,6 +253,55 @@ export function MobileRailStack({ anchors }: MobileRailStackProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  // Voile du calque plein écran derrière la pile dépliée (CLAUDE.md,
+  // « Rail droit » § « Pile mobile ») : monte du bas vers le haut en
+  // clip-path, inset(100% 0 0 0) → inset(0 0 0 0), 350ms à l'ouverture,
+  // 250ms (inverse) à la fermeture — mêmes valeurs et mécanique que le
+  // voile du menu mobile (MegaMenu.tsx). Contrairement au menu, le
+  // calque ne porte aucun texte (les cartons vivent dans `.wrap`, un
+  // élément séparé, au-dessus) : pas besoin d'une couche voile distincte
+  // du flou, le clip-path anime directement `.overlay` (flou + teinte
+  // ensemble). État initial posé en JS (gsap.set), jamais en CSS —
+  // seul le défaut « fermé » (clip-path: inset(100% 0 0 0)) vit dans le
+  // CSS (mobileRailStack.module.css), pour un calque toujours monté
+  // (jamais démonté/remonté) qui reste invisible sans JS.
+  // overwrite: true : une ouverture/fermeture qui interrompt
+  // l'animation en cours repart proprement dans l'autre sens, sans
+  // saut. reduced-motion : voile présent/absent instantanément.
+  useEffect(() => {
+    if (!isMobile) return;
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (open) {
+      if (reduced) {
+        gsap.set(overlay, { clipPath: "inset(0% 0% 0% 0%)" });
+        return;
+      }
+      gsap.set(overlay, { clipPath: "inset(100% 0% 0% 0%)" });
+      gsap.to(overlay, {
+        clipPath: "inset(0% 0% 0% 0%)",
+        duration: 0.35,
+        ease: VENTURIA_EASE,
+        overwrite: true,
+      });
+      return;
+    }
+
+    if (reduced) {
+      gsap.set(overlay, { clipPath: "inset(100% 0% 0% 0%)" });
+      return;
+    }
+    gsap.to(overlay, {
+      clipPath: "inset(100% 0% 0% 0%)",
+      duration: 0.25,
+      ease: VENTURIA_EASE,
+      overwrite: true,
+    });
+  }, [open, isMobile]);
+
   const close = useCallback(() => {
     setOpen(false);
     // PAS de toggleRef.current?.focus() ici : à cet instant, le DOM
@@ -362,22 +422,33 @@ export function MobileRailStack({ anchors }: MobileRailStackProps) {
   const frontIndex = flowIndexes.length > 0 ? flowIndexes[flowIndexes.length - 1] : null;
   const frontTitle = frontIndex !== null ? railCards[frontIndex].title : railCards[0].title;
 
+  // Pile REPLIÉE : `tone`, mesure continue (inchangée). Pile DÉPLIÉE :
+  // `deployTone`, gelé au dépliage (voir le bouton `.toggle` plus bas)
+  // — CLAUDE.md, « Rail droit » § « Pile mobile ». Un seul attribut
+  // data-tone bascule automatiquement entre les deux avec `open`.
+  const displayTone: Tone = open ? deployTone : tone;
+
   return (
     <>
       {/* Calque plein écran derrière la pile dépliée — UN seul élément
-          flouté, transparent, sans teinte (CLAUDE.md, « Pile mobile »).
-          Toujours monté (jamais démonté/remonté), visibilité pilotée en
-          CSS par data-open, pour une fermeture aussi progressive que
-          l'ouverture. */}
+          flouté et teinté (CLAUDE.md, « Pile mobile ») : le voile
+          (color-mix, mobileRailStack.module.css) et le flou vivent sur
+          le même élément, qui n'a aucun texte à protéger d'un flou
+          animé (contrairement au panneau du menu mobile, voir
+          MegaMenu.tsx) — son clip-path anime les deux ensemble (voir
+          l'effet de voile plus haut). Toujours monté (jamais
+          démonté/remonté), visibilité pilotée en JS (clip-path) avec un
+          repli CSS fermé par défaut. */}
       <div
+        ref={overlayRef}
         className={styles.overlay}
         data-open={open}
-        data-tone={tone}
+        data-tone={displayTone}
         aria-hidden="true"
         onClick={close}
       />
 
-      <div ref={wrapRef} className={styles.wrap} data-open={open} data-tone={tone}>
+      <div ref={wrapRef} className={styles.wrap} data-open={open} data-tone={displayTone}>
         <div className={styles.stackOuter}>
           {/* Surface floutée UNIQUE de la pile repliée — jamais un
               backdrop-filter par carton (CLAUDE.md, « Pile mobile ») :
@@ -427,7 +498,14 @@ export function MobileRailStack({ anchors }: MobileRailStackProps) {
             aria-expanded={open}
             aria-controls={stackId}
             aria-label={`Voir plus : ${frontTitle}`}
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              // Mesurée AVANT setOpen (donc avant que le scroll de page
+              // ne se bloque) : la position de scroll au tap est déjà
+              // la position finale, pas besoin d'attendre un effet —
+              // même raisonnement que Nav.tsx `toggleImmediate`.
+              setDeployTone(toVeilTone(getBottomTone()));
+              setOpen(true);
+            }}
           />
         </div>
       </div>

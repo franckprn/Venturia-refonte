@@ -211,23 +211,30 @@
    la nav (nav.module.css .ruleWrap, z-index 59) et la barre elle-même
    (z-index 60) restent tous deux AU-DESSUS de ce panneau (z-index 55,
    inchangé) — donc visibles par-dessus lui, CLAUDE.md « Menu mobile »
-   § 2. Même flou que la nav : fond transparent, AUCUNE teinte, préfixe
-   -webkit AVANT le standard. UNE seule surface floutée pour tout
-   l'écran pendant que ce panneau est ouvert — le flou propre de la nav
-   est désactivé pendant ce temps (nav.module.css .navBlur[data-suspended]).
+   § 2. Même flou que la nav : fond transparent, AUCUNE teinte SUR CETTE
+   COUCHE, préfixe -webkit AVANT le standard. UNE seule surface floutée
+   pour tout l'écran pendant que ce panneau est ouvert — le flou propre
+   de la nav est désactivé pendant ce temps
+   (nav.module.css .navBlur[data-suspended]).
 
-   flex column, overflow hidden sur la racine : .mobileScroll (ci-dessous)
-   défile seul en interne si l'accordéon ouvert déborde, .mobileBottom
-   reste à sa position fixe en bas quelle que soit la hauteur de l'écran
-   ou l'état de l'accordéon (CLAUDE.md § 5) — pas de position: fixed
-   séparée à calculer, c'est la mise en page flex qui le garantit. */
+   Exception à « aucune teinte » portée par un ENFANT dédié, .mobileVeil
+   (ci-dessous), pas par .mobilePanel lui-même : le voile teinté anime
+   son propre clip-path (montée du bas vers le haut, MegaMenu.tsx) sans
+   jamais faire bouger le flou, qui reste posé en continu tant que le
+   panneau est monté.
+
+   overflow hidden sur la racine, .mobileContent (juste après le voile)
+   reprend le flex column que portait .mobilePanel avant cette
+   refonte : .mobileScroll (ci-dessous) défile seul en interne si
+   l'accordéon ouvert déborde, .mobileBottom reste à sa position fixe
+   en bas quelle que soit la hauteur de l'écran ou l'état de l'accordéon
+   (CLAUDE.md § 5) — pas de position: fixed séparée à calculer, c'est la
+   mise en page flex qui le garantit. */
 .mobilePanel {
   position: fixed;
   inset: 0;
   z-index: 55;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
   background: transparent;
   -webkit-backdrop-filter: blur(24px); /* obligatoire, Safari, avant le standard */
   backdrop-filter: blur(24px);
@@ -237,11 +244,45 @@
 
 /* Repli si le filtre n'est pas supporté : fond OPAQUE de la tonalité du
    panneau (posée par data-tone, MegaMenu.tsx), jamais transparent sans
-   flou. */
+   flou. Le voile ci-dessous se superpose (translucide sur cet aplat
+   opaque) sans jamais laisser voir de transparence brute. */
 @supports not (backdrop-filter: blur(1px)) {
   .mobilePanel {
     background: var(--tone-bg);
   }
+}
+
+/* Voile teinté (CLAUDE.md, « Méga-menu — mobile ») : ENTRE le flou
+   ci-dessus (qui ne bouge pas) et .mobileContent (le texte, ci-dessous)
+   — absolute, hors du flux, jamais redimensionné par son contenu.
+   clip-path posé en JS (MegaMenu.tsx) : aucun défaut ici, le panneau
+   n'existe dans le DOM que pendant l'ouverture/la fermeture animée. */
+.mobileVeil {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.mobileVeil[data-tone="light"] {
+  background: color-mix(in srgb, var(--ground) var(--veil-ground-opacity), transparent);
+}
+
+.mobileVeil[data-tone="dark"] {
+  background: color-mix(in srgb, var(--ink) var(--veil-ink-opacity), transparent);
+}
+
+/* Regroupe la zone défilante et la ligne du bas dans le même flex
+   column que portait .mobilePanel avant cette refonte (rien ne bouge
+   pour elles) — au-dessus du voile (z-index), opacité animée en bloc
+   par MegaMenu.tsx. */
+.mobileContent {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Zone défilante : padding-top = hauteur de la nav (64px) + hauteur du

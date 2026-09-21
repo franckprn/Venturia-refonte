@@ -38,6 +38,15 @@ l'arrière-plan à chaque frame et provoque des artefacts sur Safari iOS quand
 il coexiste avec du position: fixed — le méga-menu DESKTOP (fixed lui aussi)
 en reste donc exclu. Un aplat --ground rend la même chose partout ailleurs.
 
+Parmi ces cinq exceptions, deux seulement portent en plus un VOILE teinté
+par-dessus leur flou : le panneau du menu mobile et le calque plein écran
+derrière la pile dépliée (voir ces deux sections pour le détail — tonalité,
+variables d'opacité, animation de montée). Sous un flou transparent sans
+teinte, le fond derrière ces deux surfaces plein écran mélange crème et
+charbon (et bientôt des photos) sans qu'aucune couleur de texte n'y reste
+lisible partout. La nav, les cartons du rail en desktop et la pile mobile
+REPLIÉE restent, eux, sans teinte.
+
 Dans une section en négatif, un paragraphe long passe à 80 % d'opacité :
 sur fond sombre, un texte clair paraît optiquement plus gras et vibre sur
 plusieurs lignes. Les titres restent à 100 %.
@@ -80,7 +89,9 @@ bas, traits) : `color: var(--fg)` (currentColor pour les SVG). Transition
 sur `color`/`border-color`/`stroke`/`fill`, 150ms,
 cubic-bezier(0,.55,.45,1) — jamais sur `backdrop-filter`. Bascule
 instantanée avec prefers-reduced-motion.
-Le filet --line-accent des cartons et la bordure --accent du carton 3 ne
+Le filet des cartons 1 et 2 (le carton ET le carré de son icône) suit
+`--fg`, comme le texte — voir « Rail droit ». Le filet --line-accent du
+carré d'icône et la bordure --accent du carton 3 (l'action), eux, ne
 changent jamais avec la tonalité. Le trait à angles sous la nav non plus
 n'utilise plus --line fixe : `color-mix(in srgb, var(--fg) 16%,
 transparent)`, même opacité que --line aujourd'hui.
@@ -260,13 +271,27 @@ carton
 largeur    210px desktop / 100 % de la largeur disponible en mobile
 padding    14px
 display    grid, gap 10px
-border     1px solid var(--line-accent)
+border     cartons 1 et 2 : 1px solid var(--fg) — suit la tonalité
+           comme le texte (transition 150ms, voir « Tonalités »), plus
+           de filet rouge fixe sur ces deux-là. Carton 3 : voir
+           « distinction » plus bas, inchangé.
 radius     4px
-icône      carré de 44px, en haut à gauche du carton, filet 1px
-           var(--line-accent), radius 4px, contenant un SVG 20px, trait
-           1.5px, couleur var(--fg) (voir « Tonalités »). Décorative :
+icône      carré de 44px, en haut à gauche du carton, radius 4px,
+           contenant un SVG 20px, trait 1.5px. Décorative :
            aria-hidden="true" sur le SVG. Titre et texte suivent, en
            dessous du carré.
+           Cartons 1 et 2 : filet du carré 1px var(--fg), même règle
+           et même transition que le filet du carton ci-dessus. Couleur
+           du DESSIN (currentColor du SVG, distincte du filet du
+           carré) : var(--accent) — sauf quand le carton est sur une
+           section de tonalité accent, où le rouge du dessin ne se
+           verrait plus sur un fond rouge : il suit alors var(--fg),
+           comme le carton 3. Dans la pile mobile DÉPLIÉE, cette règle
+           suit la tonalité DU VOILE (jamais accent, déjà traité comme
+           dark — voir « Pile mobile ») plutôt que la section brute ;
+           dans la pile REPLIÉE, la section brute (peut valoir accent).
+           Carton 3 : inchangé — filet du carré var(--line-accent),
+           dessin var(--fg), quelle que soit la tonalité.
 fond       desktop uniquement, transparent et flouté, AUCUNE teinte :
            background: transparent;
            -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
@@ -280,8 +305,11 @@ fond       desktop uniquement, transparent et flouté, AUCUNE teinte :
            backdrop-filter : ici, sur les cartons du rail en desktop
            uniquement, il est autorisé. La règle générale reste valable
            partout ailleurs — nav, méga-menu, et tout le reste du site.
-distinction le seul carton qui porte une action prend border-color: var(--accent)
-           au lieu de var(--line-accent) — pas de fond différent, pas de blanc
+distinction le seul carton qui porte une action (carton 3) : filet DU
+           CARTON var(--accent) — jamais var(--fg), ne change pas avec
+           la tonalité — pas de fond différent, pas de blanc. Filet du
+           carré et dessin de l'icône : voir « icône » ci-dessus,
+           inchangés eux aussi (ne suivent jamais l'exception accent).
 titre      --t-mono, var(--fg)
 texte      --t-small, var(--fg)
 
@@ -382,18 +410,43 @@ s'affichent en entier (icône, titre, texte), empilés vers le haut depuis le
 bas de l'écran, gap 10px, dans l'ordre 1, 2, 3 de haut en bas. Seul le
 carton 3 est cliquable (lien /contact, même soulignement du titre au
 tap/focus que sur desktop) ; un tap sur les cartons 1 ou 2 ferme la pile.
-Un calque plein écran (UN seul élément flouté, transparent, sans teinte,
-sous la pile et au-dessus de la page) apparaît derrière ; pendant
+Un calque plein écran (UN seul élément flouté, sous la pile et au-dessus de
+la page) apparaît derrière, teinté d'un VOILE (voir ci-dessous) ; pendant
 l'ouverture, les cartons perdent leur propre backdrop-filter — la page est
 déjà floutée par le calque, pas de flou sur du flou. Fermeture : tap sur le
 calque, Escape, ou nouveau tap sur la pile. Scroll de page bloqué tant que
 la pile est dépliée (Lenis en pause). Le carton 3 sorti n'est plus dans
 l'ordre de tabulation (démonté).
+
+Voile du calque plein écran — exception à « aucune teinte » (voir
+« Couleurs »). Contrairement au panneau du menu mobile (qui a besoin d'une
+couche séparée entre flou et texte, voir « Méga-menu — mobile »), ce calque
+ne porte aucun texte : le voile et le flou vivent sur le MÊME élément —
+  background: color-mix(in srgb, var(--ground) var(--veil-ground-opacity), transparent);   /* tonalité light */
+  background: color-mix(in srgb, var(--ink) var(--veil-ink-opacity), transparent);          /* dark/accent */
+--veil-ground-opacity (55 %) et --veil-ink-opacity (65 %), variables CSS
+globales (globals.css, avec le calcul en commentaire) partagées avec le
+panneau du menu mobile. Tonalité : celle de la section tout en bas de
+l'écran (au pixel innerHeight - 1, `getBottomTone()`, src/lib/tone.ts),
+accent traité comme dark (`toVeilTone`) — un texte --ground sur un voile
+--accent ne passerait pas le contraste minimum. Mesurée UNE SEULE FOIS au
+dépliage (le scroll étant bloqué tant que la pile reste dépliée, aucun
+recalcul pendant ce temps) et appliquée aux cartons dépliés (titre, texte,
+icônes, filets) — la pile REPLIÉE garde sa propre mesure, continue,
+inchangée (tonalité de la section sous la pile, « Pile mobile » § fond ;
+pas de voile).
+Animation : le voile monte du bas vers le haut, clip-path
+inset(100% 0 0 0) → inset(0 0 0 0), 350ms, easing du site, état initial posé
+en JS (gsap.set), jamais en CSS. Fermeture : l'inverse, 250ms.
+overwrite: true sur tous les tweens (ouverture et fermeture peuvent
+s'interrompre, l'animation en cours repart proprement dans l'autre sens,
+sans saut).
+
 Accessibilité : <button> avec aria-expanded/aria-controls, surface >=
 44×44px ; focus sur le premier carton à l'ouverture, Tab piégé, Escape
 rend le focus au bouton. reduced-motion : pas de glissement, pas
 d'animation d'icône ni de sortie (apparition/disparition instantanées),
-chevron sans rotation.
+chevron sans rotation, voile présent/absent instantanément (pas de montée).
 
 z-index (bas → haut) : contenu de page, calque de la pile dépliée (52),
 pile mobile (53), méga-menu mobile (55), fond flouté de nav (58), trait de
@@ -492,9 +545,9 @@ panneau      plein écran, position fixed (inset: 0, pas top: var(--nav-h))
              — le trait à angles sous la nav et la barre elle-même
              restent visibles par-dessus lui (z-index nav > z-index
              panneau, voir plus bas)
-             fond transparent, flouté, AUCUNE teinte, même traitement que
-             la nav — -webkit-backdrop-filter PUIS backdrop-filter, dans
-             cet ordre :
+             fond transparent, flouté (AUCUNE teinte SUR CETTE COUCHE —
+             voir « voile » ci-dessous pour la couleur) — -webkit-backdrop-filter
+             PUIS backdrop-filter, dans cet ordre :
                background: transparent;
                -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
              Repli si le filtre n'est pas supporté : fond OPAQUE de la
@@ -509,28 +562,54 @@ panneau      plein écran, position fixed (inset: 0, pas top: var(--nav-h))
              celui de la nav, inchangé ; celui du bas est décrit plus
              bas)
 
-ouverture    opacité 0 → 1, 300ms, easing du site, posée en JS (gsap.set),
-             jamais d'état initial en CSS, jamais autoAlpha. Pas de
-             translateY (contrairement au panneau desktop).
-             reduced-motion : ouverture instantanée (aucun tween).
+voile        exception à « aucune teinte » (voir « Couleurs ») : une
+             couche dédiée à l'intérieur du panneau, ENTRE le flou
+             ci-dessus (qui ne bouge pas, non teinté) et le texte —
+               background: color-mix(in srgb, var(--ground) var(--veil-ground-opacity), transparent);   /* tonalité light */
+               background: color-mix(in srgb, var(--ink) var(--veil-ink-opacity), transparent);          /* dark/accent */
+             --veil-ground-opacity (55 %) et --veil-ink-opacity (65 %),
+             variables CSS globales (globals.css) partagées avec le
+             calque de la pile dépliée (« Rail droit » § « Pile
+             mobile ») : opacité minimale garantissant un contraste
+             texte/fond d'au moins 4,5:1 dans le pire cas de ce qu'il y a
+             derrière (--ink pur derrière un voile --ground, --ground pur
+             derrière un voile --ink), arrondie au 5 % supérieur — calcul
+             détaillé en commentaire au-dessus de ces deux variables.
+
+ouverture    le voile monte du bas vers le haut : clip-path
+             inset(100% 0 0 0) → inset(0 0 0 0), 350ms, easing du site.
+             Le texte du panneau (entrées, ligne du bas, trait du bas)
+             apparaît en opacité 0 → 1, 200ms, démarré 150ms après le
+             voile (durée totale 350ms). État initial posé en JS
+             (gsap.set), jamais en CSS. reduced-motion : voile et texte
+             présents instantanément, sans animation.
              Scroll de la page bloqué, Lenis en pause. Escape ferme et
              rend le focus au déclencheur. Focus piégé dans le panneau.
+
+fermeture    l'inverse : le voile redescend, 250ms, et le texte
+             disparaît. overwrite: true sur tous les tweens (ouverture
+             et fermeture peuvent s'interrompre, l'animation en cours
+             repart proprement dans l'autre sens, sans saut). Le panneau
+             reste monté le temps de cette animation, démonté une fois
+             terminée (reduced-motion : démontage immédiat).
 
 tonalité     UNE seule couleur de texte pour tout le panneau (entrées,
              ligne du bas, trait du bas) ET pour la nav qui le surplombe
              pendant ce temps (déclencheur « Fermer », logo, trait du
-             haut) : --ink sur light, --ground sur dark/accent — celle de
-             la section qui occupe la plus grande SURFACE de la fenêtre
-             visible, pas celle sous un point précis (contrairement à la
-             nav/aux cartons en temps normal, voir « Tonalités »).
+             haut) : --ink sur light, --ground sur dark — accent est
+             traité comme dark pour le voile ET le texte (un texte
+             --ground sur --accent ne passerait pas le contraste
+             minimum, voir « voile » ci-dessus). Celle de la section qui
+             se trouve tout en bas de la fenêtre visible (au pixel
+             innerHeight - 1), pas celle sous un point précis
+             (contrairement à la nav/aux cartons en temps normal, voir
+             « Tonalités »).
              Mesurée UNE SEULE FOIS à l'ouverture (le scroll étant
              bloqué tant qu'il reste ouvert, aucun recalcul pendant ce
-             temps) : `getDominantTone()` (src/lib/tone.ts) cumule, pour
-             chaque section, la hauteur de son intersection avec la
-             fenêtre visible, additionne ces hauteurs par tonalité, et
-             retourne celle au plus grand cumul — les sections occupant
-             toute la largeur du shell, leur hauteur visible est une
-             mesure fidèle de leur surface à l'écran.
+             temps) : `getBottomTone()` (src/lib/tone.ts) lit
+             directement le DOM et retourne la tonalité de la section
+             dont le haut est le dernier franchi avant ce pixel, puis
+             `toVeilTone()` y remplace accent par dark.
 
 entrées      4 entrées de premier niveau, dans cet ordre, tailles et
              espacements inchangés (40px, lh 40px, ls +.02em, poids 400,

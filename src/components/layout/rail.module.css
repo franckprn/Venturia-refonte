@@ -61,7 +61,10 @@
   width: 210px;
   min-height: 44px;
   padding: 14px;
-  border: 1px solid var(--line-accent);
+  /* var(--fg), pas --line-accent : filet à la couleur du texte du
+     carton, cartons 1 et 2 (CLAUDE.md, « Rail droit ») — le carton 3
+     (action) reste sur --accent, voir .cardAction plus bas. */
+  border: 1px solid var(--fg);
   border-radius: 4px;
   text-decoration: none;
   /* Transparent et flouté, AUCUNE teinte, desktop uniquement (CLAUDE.md,
@@ -73,6 +76,9 @@
   background: transparent;
   -webkit-backdrop-filter: blur(24px); /* obligatoire, Safari */
   backdrop-filter: blur(24px);
+  /* Même transition de tonalité que le texte (.cardTitle/.cardText
+     plus bas) : le filet suit --fg au même rythme. */
+  transition: border-color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
 /* Repli si le filtre n'est pas supporté : fond OPAQUE de la tonalité en
@@ -87,6 +93,17 @@
 /* Le seul carton qui porte une action : filet rouge plein, rien d'autre. */
 .cardAction {
   border-color: var(--accent);
+}
+
+/* Carré de l'icône du carton 3 : inchangé (--line-accent, icône à la
+   couleur du texte) — ignore l'exception de tonalité accent plus bas
+   (.cardIcon), qui ne concerne que les cartons 1 et 2. `.card.cardAction`
+   (trois classes de spécificité) plutôt que `.cardAction` seul : gagne
+   sur `[data-tone="accent"] .cardIcon` quel que soit l'ordre des règles
+   dans le fichier, au lieu de dépendre d'un classement précis. */
+.card.cardAction .cardIcon {
+  border-color: var(--line-accent);
+  color: var(--fg);
 }
 
 /* Soulignement du titre au survol/focus du carton 3, desktop
@@ -134,13 +151,20 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  border: 1px solid var(--line-accent);
+  /* var(--fg), pas --line-accent : filet du carré à la couleur du
+     texte du carton, cartons 1 et 2 (CLAUDE.md, « Rail droit ») — le
+     carton 3 (action) garde --line-accent, voir .card.cardAction
+     .cardIcon plus haut. */
+  border: 1px solid var(--fg);
   border-radius: 4px;
-  /* var(--fg), pas --ink en dur : icône adaptée à la tonalité sous CE
-     carton (CLAUDE.md, « Tonalités »). Le filet --line-accent, lui, ne
-     change jamais. */
-  color: var(--fg);
-  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+  /* Le DESSIN de l'icône (currentColor du SVG, .cardIconSvg) : --accent,
+     PAS --fg — distinct du filet du carré ci-dessus, qui lui suit le
+     texte. Exception plus bas quand le carton est sur une section
+     accent : le rouge de l'icône ne se verrait plus sur un fond rouge. */
+  color: var(--accent);
+  transition:
+    color 150ms cubic-bezier(0, 0.55, 0.45, 1),
+    border-color 150ms cubic-bezier(0, 0.55, 0.45, 1);
   /* Masque la flèche du carton 3 quand elle sort du carré pour revenir
      par l'autre côté (RailIcons.tsx, IconArrowRight) — posé sur ce SEUL
      conteneur, jamais sur un ancêtre du carton : sur .card, .stickyWrap
@@ -148,6 +172,16 @@
      (CLAUDE.md, « Rail droit »). Sans effet sur l'horloge et l'étoile,
      qui tournent sur elles-mêmes sans sortir du cadre. */
   overflow: hidden;
+}
+
+/* Carton 1 ou 2 sur une section de tonalité accent : l'icône (le
+   dessin, pas le filet du carré) suit le texte plutôt que --accent —
+   un rouge sur rouge disparaîtrait (CLAUDE.md, « Rail droit »). Ne
+   s'applique jamais au carton 3 (voir .card.cardAction .cardIcon,
+   déclaré avec une spécificité plus grande pour l'ignorer dans tous
+   les cas). */
+[data-tone="accent"] .cardIcon {
+  color: var(--fg);
 }
 
 .cardIconSvg {

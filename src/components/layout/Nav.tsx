@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { nav } from "@/content/nav";
-import { DEFAULT_TONE, getDominantTone, useSectionTone, type Tone } from "@/lib/tone";
+import { DEFAULT_TONE, getBottomTone, toVeilTone, useSectionTone, type Tone } from "@/lib/tone";
 import { MegaMenu } from "./MegaMenu";
 import { Logo } from "./Logo";
 import styles from "./nav.module.css";
@@ -56,11 +56,13 @@ export function Nav() {
   // true (voir navTone plus bas) — false au premier rendu ne provoque
   // aucun flash, "open" démarre lui-même toujours à false.
   const [isMobileViewport, setIsMobileViewport] = useState(false);
-  // Tonalité du panneau mobile, mesurée UNE SEULE FOIS à l'instant de
-  // l'ouverture (voir toggleImmediate) — jamais recalculée tant qu'il
-  // reste ouvert, le scroll étant bloqué (CLAUDE.md, « Menu mobile »
-  // § 3). Valeur de repli sans incidence : lue seulement quand `open &&
-  // isMobileViewport` (navTone plus bas).
+  // Tonalité du voile (panneau mobile + nav qui le surplombe), mesurée
+  // UNE SEULE FOIS à l'instant de l'ouverture (voir toggleImmediate) —
+  // jamais recalculée tant qu'il reste ouvert, le scroll étant bloqué
+  // (CLAUDE.md, « Méga-menu — mobile »). Déjà passée par `toVeilTone`
+  // (accent traité comme dark) : ne vaut jamais "accent" ici. Valeur de
+  // repli sans incidence : lue seulement quand `open && isMobileViewport`
+  // (navTone plus bas).
   const [mobileTone, setMobileTone] = useState<Tone>(DEFAULT_TONE);
 
   const menuId = useId();
@@ -85,10 +87,10 @@ export function Nav() {
 
   // Panneau mobile ouvert : la nav qui le surplombe (fond flouté, trait,
   // logo, « Fermer ») partage la MÊME couleur unique que le panneau —
-  // celle de la section qui occupe la plus grande surface derrière lui,
-  // mesurée à l'ouverture (`mobileTone`, voir toggleImmediate) — plus de
-  // "light" forcé (CLAUDE.md, « Menu mobile » § 3). Le méga-menu
-  // desktop, lui, ne recouvre pas la barre : rien à forcer.
+  // celle de la section tout en bas de l'écran, mesurée à l'ouverture
+  // (`mobileTone`, voir toggleImmediate) — plus de "light" forcé
+  // (CLAUDE.md, « Méga-menu — mobile »). Le méga-menu desktop, lui, ne
+  // recouvre pas la barre : rien à forcer.
   const navTone: Tone = open && isMobileViewport ? mobileTone : liveTone;
 
   function clearTimers() {
@@ -126,7 +128,7 @@ export function Nav() {
     // scroll) : la position de scroll au clic est déjà la position
     // finale, pas besoin d'attendre un effet.
     if (willOpen && isMobileViewport) {
-      setMobileTone(getDominantTone());
+      setMobileTone(toVeilTone(getBottomTone()));
     }
     setOpen(willOpen);
     if (willOpen) setShouldFocusOnOpen(true);

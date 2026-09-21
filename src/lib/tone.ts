@@ -131,42 +131,47 @@ export function subscribeTone(el: HTMLElement, onChange: (tone: Tone) => void): 
 }
 
 /**
- * Tonalité de la section qui occupe la plus grande surface de la
- * fenêtre visible, À L'INSTANT DE L'APPEL — pour le panneau du menu
- * mobile (CLAUDE.md, « Menu mobile »), mesurée une seule fois à
- * l'ouverture (le scroll est bloqué tant qu'il reste ouvert, donc aucun
- * recalcul pendant que le panneau est affiché). Contrairement à
- * `toneAt`/`runProbes` ci-dessus (le centre vertical d'UN point), ici on
- * cumule la hauteur visible de CHAQUE section par tonalité — les
- * sections occupant toute la largeur du shell, leur hauteur visible est
- * une mesure fidèle de leur surface à l'écran — et on retourne la
- * tonalité au plus grand cumul. Lecture directe du DOM (pas le cache de
- * `bounds`, recalculé seulement au scroll/resize) : appelée rarement
- * (un clic), la précision prime sur l'économie d'un cache déjà
- * potentiellement périmé.
+ * Tonalité de la section qui se trouve tout en bas de la fenêtre
+ * visible (au pixel `innerHeight - 1`), À L'INSTANT DE L'APPEL — pour
+ * le panneau du menu mobile ET le calque plein écran de la pile mobile
+ * dépliée (CLAUDE.md, « Méga-menu — mobile » et « Rail droit » §
+ * « Pile mobile ») : ces deux surfaces reçoivent un voile teinté qui
+ * prend cette couleur, mesurée UNE SEULE FOIS à l'ouverture (le scroll
+ * est bloqué tant que l'un ou l'autre reste ouvert, donc aucun recalcul
+ * pendant ce temps). Remplace `getDominantTone` (mesure de surface
+ * majoritaire, supprimée : un fond flou sans teinte laissait passer
+ * n'importe quel mélange crème/charbon derrière, illisible en haut du
+ * panneau comme du bas — la couleur du bas de l'écran, seule, garantit
+ * que le voile qui MONTE depuis le bas parte de la bonne teinte).
+ * Lecture directe du DOM (pas le cache de `bounds`, recalculé seulement
+ * au scroll/resize) : appelée rarement (un clic), la précision prime
+ * sur l'économie d'un cache déjà potentiellement périmé.
  */
-export function getDominantTone(): Tone {
+export function getBottomTone(): Tone {
   const sections = Array.from(document.querySelectorAll<HTMLElement>("section[data-tone]"));
-  const viewportHeight = window.innerHeight;
-  const areaByTone = new Map<Tone, number>();
+  const y = window.innerHeight - 1;
+  let tone: Tone = DEFAULT_TONE;
+  let bestTop = -Infinity;
 
   for (const el of sections) {
-    const rect = el.getBoundingClientRect();
-    const visible = Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0);
-    if (visible <= 0) continue;
-    const tone = (el.dataset.tone as Tone) ?? DEFAULT_TONE;
-    areaByTone.set(tone, (areaByTone.get(tone) ?? 0) + visible);
-  }
-
-  let best: Tone = DEFAULT_TONE;
-  let bestArea = -1;
-  areaByTone.forEach((area, tone) => {
-    if (area > bestArea) {
-      bestArea = area;
-      best = tone;
+    const top = el.getBoundingClientRect().top;
+    if (top <= y && top > bestTop) {
+      bestTop = top;
+      tone = (el.dataset.tone as Tone) ?? DEFAULT_TONE;
     }
-  });
-  return best;
+  }
+  return tone;
+}
+
+/**
+ * Le voile teinté du panneau du menu mobile et du calque de la pile
+ * dépliée n'a que deux couleurs possibles (--ground ou --ink) :
+ * `accent` s'y traite comme `dark` — un texte --ground sur un voile
+ * --accent ne passerait pas le contraste minimum (CLAUDE.md, « Méga-menu
+ * — mobile »).
+ */
+export function toVeilTone(tone: Tone): "light" | "dark" {
+  return tone === "light" ? "light" : "dark";
 }
 
 /**

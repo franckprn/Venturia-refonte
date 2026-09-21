@@ -45,18 +45,23 @@ const FOCUSABLE_SELECTOR =
  * d'éléments focusables/dupliqués dans le DOM, et le piège de focus
  * n'a jamais besoin de filtrer une moitié cachée.
  *
- * Ouverture, posée en JS (gsap.set) — jamais en CSS, jamais autoAlpha
- * (visibility:hidden sortirait les liens de l'ordre de tabulation) :
- * desktop translateY(-10px)→0 + opacité 0→1, 300ms, easing du site ;
- * mobile opacité SEULE 0→1, même durée (CLAUDE.md, « Menu mobile »
- * § 2). prefers-reduced-motion : desktop garde sa transition sans la
- * translation, mobile saute directement à l'état final (aucun tween).
- * Pas d'animation de sortie (non demandée) : le panneau se démonte.
+ * Desktop : ouverture posée en JS (gsap.set) — jamais en CSS, jamais
+ * autoAlpha (visibility:hidden sortirait les liens de l'ordre de
+ * tabulation) — translateY(-10px)→0 + opacité 0→1, 300ms, easing du
+ * site. prefers-reduced-motion : garde la transition sans la
+ * translation. Pas d'animation de sortie (non demandée) : le panneau
+ * se démonte directement.
  *
- * Pendant l'ouverture : scroll de page bloqué, Lenis mis en pause
- * (voir lib/lenis.ts — no-op tant que Lenis n'est pas initialisé
- * ailleurs dans l'app), focus piégé (Tab boucle dans le panneau),
- * Escape délégué au parent.
+ * Mobile : voile teinté + texte, tous deux animés (CLAUDE.md,
+ * « Méga-menu — mobile ») — voir `mobilePresent`/l'effet de voile plus
+ * bas. Contrairement au desktop, la fermeture EST animée : le panneau
+ * reste monté (`mobilePresent`) le temps que le voile redescende, puis
+ * se démonte.
+ *
+ * Pendant l'ouverture (les deux structures) : scroll de page bloqué,
+ * Lenis mis en pause (voir lib/lenis.ts — no-op tant que Lenis n'est
+ * pas initialisé ailleurs dans l'app), focus piégé (Tab boucle dans le
+ * panneau), Escape délégué au parent.
  */
 export function MegaMenu({
   id,
@@ -73,7 +78,17 @@ export function MegaMenu({
   // l'ancien `expandedIndex` généraliste : Réalisations et À propos ne
   // se déplient plus (CLAUDE.md, « Menu mobile » § 4).
   const [servicesOpen, setServicesOpen] = useState(false);
+  // Le panneau MOBILE reste monté au-delà de `open` passé à false, le
+  // temps de jouer sa fermeture animée (voile qui redescend) — `open`
+  // seul ne peut pas piloter le démontage comme sur desktop (« pas
+  // d'animation de sortie ») : ici il y en a une (CLAUDE.md, « Méga-menu
+  // — mobile »). Coupé à `false` par l'effet de voile plus bas, dans
+  // l'onComplete du tween de fermeture (ou immédiatement en
+  // reduced-motion).
+  const [mobilePresent, setMobilePresent] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const veilRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
@@ -83,43 +98,121 @@ export function MegaMenu({
     return () => mq.removeEventListener("change", update);
   }, []);
 
-  // Réinitialise l'accordéon mobile à chaque fermeture, pour une
-  // réouverture toujours dans le même état. Ajustée pendant le rendu
-  // (motif documenté par React pour dériver un état à partir d'un
-  // changement de prop), pas dans un effet : un effet appellerait
-  // setState de façon inconditionnelle à chaque montage/fermeture,
-  // provoquant un rendu en cascade évitable.
+  // Réinitialise l'accordéon mobile à chaque fermeture, et monte le
+  // panneau mobile dès qu'il s'ouvre. Ajustée pendant le rendu (motif
+  // documenté par React pour dériver un état à partir d'un changement
+  // de prop), pas dans un effet : un effet appellerait setState de
+  // façon inconditionnelle à chaque montage/fermeture, provoquant un
+  // rendu en cascade évitable. La fermeture, elle, NE remet PAS
+  // `mobilePresent` à false ici : c'est l'effet de voile plus bas qui
+  // le fait, une fois l'animation de fermeture terminée.
   const [prevOpen, setPrevOpen] = useState(open);
   if (open !== prevOpen) {
     setPrevOpen(open);
-    if (!open) setServicesOpen(false);
+    if (!open) {
+      setServicesOpen(false);
+    } else if (!isDesktop) {
+      setMobilePresent(true);
+    }
   }
 
-  // Entrée, posée en JS uniquement (jamais d'état initial en CSS, jamais
-  // autoAlpha) : desktop translateY(-10px)→0 + opacité (inchangé) ;
-  // mobile opacité SEULE, 0→1 — CLAUDE.md, « Menu mobile » § 2, distinct
-  // du glissement desktop. reduced-motion : mobile saute directement à
-  // l'état final (aucun tween), ouverture instantanée ; desktop garde sa
-  // transition existante, seule la translation y est neutralisée.
+  // Desktop uniquement : entrée posée en JS (gsap.set) — jamais en CSS,
+  // jamais autoAlpha (visibility:hidden sortirait les liens de l'ordre
+  // de tabulation) — translateY(-10px)→0 + opacité 0→1, 300ms. Pas de
+  // sortie animée (non demandée) : le panneau se démonte directement
+  // (voir le rendu plus bas). Le mobile a son propre effet, ci-dessous.
   useEffect(() => {
-    if (!open) return;
+    if (!open || !isDesktop) return;
     const panel = panelRef.current;
     if (!panel) return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    gsap.set(panel, { opacity: 0, y: reduced ? 0 : -10 });
+    gsap.to(panel, { opacity: 1, y: 0, duration: 0.3, ease: VENTURIA_EASE });
+  }, [open, isDesktop]);
 
-    if (isDesktop) {
-      gsap.set(panel, { opacity: 0, y: reduced ? 0 : -10 });
-      gsap.to(panel, { opacity: 1, y: 0, duration: 0.3, ease: VENTURIA_EASE });
+  // Mobile : voile teinté + texte du panneau (CLAUDE.md, « Méga-menu —
+  // mobile »). Deux couches distinctes au-dessus du flou (non teinté,
+  // inchangé, porté par .mobilePanel) :
+  //   - le voile (`veilRef`) monte du bas vers le haut en clip-path,
+  //     inset(100% 0 0 0) → inset(0 0 0 0), 350ms à l'ouverture, 250ms
+  //     (inverse) à la fermeture ;
+  //   - le texte (`contentRef`) apparaît en opacité 0 → 1, 200ms,
+  //     démarré 150ms après le voile (durée totale 350ms) ; il
+  //     disparaît symétriquement à la fermeture.
+  // État initial posé en JS (gsap.set), jamais en CSS. overwrite: true
+  // sur tous les tweens : une ouverture/fermeture qui interrompt
+  // l'animation en cours repart proprement dans l'autre sens, sans
+  // saut. Le panneau reste monté (`mobilePresent`) jusqu'à la fin de la
+  // fermeture (onComplete), puis se démonte. reduced-motion : voile et
+  // texte présents/absents instantanément, sans tween — démontage
+  // immédiat à la fermeture.
+  useEffect(() => {
+    if (isDesktop) return;
+    const veil = veilRef.current;
+    const content = contentRef.current;
+    if (!veil || !content) return;
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (open) {
+      if (reduced) {
+        gsap.set(veil, { clipPath: "inset(0% 0% 0% 0%)" });
+        gsap.set(content, { opacity: 1 });
+        return;
+      }
+      gsap.set(veil, { clipPath: "inset(100% 0% 0% 0%)" });
+      gsap.set(content, { opacity: 0 });
+      gsap.to(veil, {
+        clipPath: "inset(0% 0% 0% 0%)",
+        duration: 0.35,
+        ease: VENTURIA_EASE,
+        overwrite: true,
+      });
+      gsap.to(content, {
+        opacity: 1,
+        duration: 0.2,
+        delay: 0.15,
+        ease: VENTURIA_EASE,
+        overwrite: true,
+      });
       return;
     }
+
+    // Fermeture : rien à jouer si le panneau n'a jamais été monté.
+    if (!mobilePresent) return;
 
     if (reduced) {
-      gsap.set(panel, { opacity: 1 });
+      // Démontage instantané, mais PAS d'appel direct à setState dans
+      // le corps de l'effet (cascade de rendus) : durée 0, le
+      // démontage passe par le même onComplete que la fermeture
+      // animée, juste sans mouvement perceptible.
+      gsap.set(content, { opacity: 0 });
+      gsap.to(veil, {
+        clipPath: "inset(100% 0% 0% 0%)",
+        duration: 0,
+        onComplete: () => setMobilePresent(false),
+      });
       return;
     }
-    gsap.set(panel, { opacity: 0 });
-    gsap.to(panel, { opacity: 1, duration: 0.3, ease: VENTURIA_EASE });
+    gsap.to(veil, {
+      clipPath: "inset(100% 0% 0% 0%)",
+      duration: 0.25,
+      ease: VENTURIA_EASE,
+      overwrite: true,
+      onComplete: () => setMobilePresent(false),
+    });
+    gsap.to(content, {
+      opacity: 0,
+      duration: 0.25,
+      ease: VENTURIA_EASE,
+      overwrite: true,
+    });
+    // mobilePresent n'a besoin d'être lu qu'à l'instant où `open` bascule
+    // à false (le garde ci-dessus) — pas à chaque fois qu'il change
+    // lui-même (l'onComplete ci-dessus le fait passer à false, ce qui
+    // ne doit pas relancer ce même tween).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, isDesktop]);
 
   // Focus initial (clic/clavier seulement), scroll bloqué, Lenis en
@@ -177,7 +270,14 @@ export function MegaMenu({
     return () => document.removeEventListener("keydown", handleKeydown);
   }, [open, onEscape]);
 
-  if (!open) return null;
+  // Desktop : rien à monter hors ouverture (pas de sortie animée). Mobile :
+  // reste monté tant que `mobilePresent` (fermeture en cours, voir
+  // l'effet de voile plus haut) — voir le commentaire de tête de fichier.
+  if (isDesktop) {
+    if (!open) return null;
+  } else if (!open && !mobilePresent) {
+    return null;
+  }
 
   return isDesktop ? (
     <div className={styles.desktopPanelWrap}>
@@ -229,8 +329,28 @@ export function MegaMenu({
       ref={panelRef}
       data-megamenu
       data-tone={tone}
+      aria-hidden={!open}
       className={styles.mobilePanel}
     >
+      {/* Voile teinté (CLAUDE.md, « Méga-menu — mobile ») : couche
+          dédiée, ENTRE le flou (porté par .mobilePanel, non teinté,
+          inchangé) et le texte (.mobileContent ci-dessous). Anime son
+          propre clip-path à l'ouverture/fermeture (voir l'effet plus
+          haut) — le flou, lui, ne bouge pas. data-tone répété ici (même
+          valeur que .mobilePanel) : cette couche est un ENFANT, pas
+          l'élément qui porte data-tone — les couleurs (--fg/--tone-bg)
+          s'hériteraient, mais un attribut CSS ne cascade pas, il faut
+          le poser sur l'élément lui-même pour que [data-tone=...] le
+          sélectionne. */}
+      <div ref={veilRef} className={styles.mobileVeil} data-tone={tone} aria-hidden="true" />
+
+      {/* Texte du panneau : opacité animée séparément du voile (voir
+          l'effet plus haut) — regroupe la zone défilante ET la ligne du
+          bas dans un seul flex column, pour que .mobileScroll/
+          .mobileBottom se comportent exactement comme avant (avant
+          cette refonte, c'était .mobilePanel lui-même qui portait ce
+          flex column). */}
+      <div ref={contentRef} className={styles.mobileContent}>
       {/* Zone défilante : seule elle scrolle si l'accordéon ouvert
           déborde — .mobileBottom (ligne heure/ville + trait) reste à sa
           position fixe en bas, CLAUDE.md « Menu mobile » § 5. */}
@@ -297,6 +417,7 @@ export function MegaMenu({
         {/* Même filet que nav.module.css .rule, retourné (branches vers
             le haut) — voir megamenu.module.css .mobileBottomRule. */}
         <div className={styles.mobileBottomRule} aria-hidden="true" />
+      </div>
       </div>
     </div>
   );

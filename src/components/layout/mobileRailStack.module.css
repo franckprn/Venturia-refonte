@@ -33,26 +33,44 @@
   color: var(--fg);
 }
 
+/* Voile teinté (CLAUDE.md, « Rail droit » § « Pile mobile ») : clip-path
+   posé en JS (MobileRailStack.tsx, gsap.set/.to), jamais en CSS — seul
+   le défaut FERMÉ (inset(100% 0 0 0), rien de visible) vit ici, pour
+   qu'un calque toujours monté (jamais démonté/remonté) reste
+   invisible tant qu'aucun JS n'a joué l'ouverture. Le flou et la
+   teinte vivent sur ce même élément (pas de couche séparée : ce calque
+   ne porte aucun texte à protéger d'un flou animé, contrairement au
+   panneau du menu mobile — voir MegaMenu.tsx). */
 .overlay {
   display: none;
   position: fixed;
   inset: 0;
   z-index: 52;
-  background: transparent;
-  opacity: 0;
+  clip-path: inset(100% 0% 0% 0%);
   pointer-events: none;
   -webkit-backdrop-filter: blur(24px); /* obligatoire, Safari */
   backdrop-filter: blur(24px);
-  transition: opacity 300ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
 .overlay[data-open="true"] {
-  opacity: 1;
   pointer-events: auto;
 }
 
+.overlay[data-tone="light"] {
+  background: color-mix(in srgb, var(--ground) var(--veil-ground-opacity), transparent);
+}
+
+.overlay[data-tone="dark"] {
+  background: color-mix(in srgb, var(--ink) var(--veil-ink-opacity), transparent);
+}
+
+/* Fallback OPAQUE (jamais transparent sans flou) — attribute-qualifié
+   pour rester au moins aussi spécifique que les règles de teinte
+   ci-dessus, sinon elles l'emporteraient malgré l'ordre des règles. */
 @supports not (backdrop-filter: blur(1px)) {
-  .overlay {
+  .overlay[data-tone="light"],
+  .overlay[data-tone="dark"],
+  .overlay[data-tone="accent"] {
     background: var(--tone-bg);
   }
 }
@@ -113,7 +131,14 @@
   width: 100%;
   min-width: 0;
   padding: 14px;
-  border: 1px solid var(--line-accent);
+  /* var(--fg), pas --line-accent : filet à la couleur du texte du
+     carton, cartons 1 et 2 — même règle que le rail desktop
+     (rail.module.css, CLAUDE.md « Rail droit »). Le carton 3 (action)
+     reste sur --accent, voir .cardAction plus bas. Suit la tonalité DU
+     VOILE dans la pile dépliée, celle de la pile elle-même repliée
+     (--fg résolu différemment selon data-tone porté par .wrap, voir
+     MobileRailStack.tsx — même mécanisme, rien à faire ici). */
+  border: 1px solid var(--fg);
   border-radius: 4px;
   background: transparent;
   color: var(--fg);
@@ -121,13 +146,25 @@
   overflow: hidden;
   transition:
     height 300ms cubic-bezier(0, 0.55, 0.45, 1),
-    color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+    color 150ms cubic-bezier(0, 0.55, 0.45, 1),
+    border-color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
 /* Filet fixe, ne suit jamais la tonalité (comme sur le rail desktop —
    CLAUDE.md, « Tonalités »). */
 .cardAction {
   border-color: var(--accent);
+}
+
+/* Carré de l'icône du carton 3 : inchangé (--line-accent, icône à la
+   couleur du texte) — ignore l'exception de tonalité accent plus bas
+   (.cardIcon), qui ne concerne que les cartons 1 et 2. `.card.cardAction`
+   (trois classes) plutôt que `.cardAction` seul : gagne sur
+   `[data-tone="accent"] .cardIcon` quel que soit l'ordre des règles
+   dans le fichier — même raisonnement que rail.module.css. */
+.card.cardAction .cardIcon {
+  border-color: var(--line-accent);
+  color: var(--fg);
 }
 
 .cardIcon {
@@ -137,11 +174,31 @@
   width: 44px;
   height: 44px;
   flex: none;
-  border: 1px solid var(--line-accent);
+  /* var(--fg), pas --line-accent : filet du carré à la couleur du
+     texte du carton, cartons 1 et 2. */
+  border: 1px solid var(--fg);
   border-radius: 4px;
-  color: var(--fg);
+  /* Le DESSIN de l'icône (currentColor du SVG, .cardIconSvg) : --accent,
+     PAS --fg — distinct du filet du carré ci-dessus. Exception plus
+     bas quand le carton est sur une section (ou un voile) de tonalité
+     accent : le rouge de l'icône ne se verrait plus sur un fond rouge. */
+  color: var(--accent);
   overflow: hidden;
-  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+  transition:
+    color 150ms cubic-bezier(0, 0.55, 0.45, 1),
+    border-color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+/* Carton 1 ou 2 sur une section (pile repliée) ou un voile (pile
+   dépliée) de tonalité accent : l'icône (le dessin, pas le filet du
+   carré) suit le texte plutôt que --accent. En pratique, la pile
+   DÉPLIÉE ne porte jamais data-tone="accent" (le voile traite déjà
+   accent comme dark, CLAUDE.md « Rail droit » § « Pile mobile ») :
+   cette règle ne s'applique donc qu'à la pile REPLIÉE. Ne s'applique
+   jamais au carton 3 (voir .card.cardAction .cardIcon ci-dessus,
+   spécificité plus grande). */
+[data-tone="accent"] .cardIcon {
+  color: var(--fg);
 }
 
 .cardIconSvg {

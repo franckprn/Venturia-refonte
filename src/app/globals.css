@@ -13,6 +13,26 @@
   --line: color-mix(in srgb, var(--ink) 16%, transparent);
   --line-accent: color-mix(in srgb, var(--accent) 20%, transparent);
 
+  /* Voile teinté du panneau du menu mobile et du calque de la pile
+     mobile dépliée (CLAUDE.md, « Méga-menu — mobile » et « Rail droit »
+     § « Pile mobile ») — les deux seules surfaces à en porter un ; nav,
+     cartons du rail desktop et pile repliée restent sans teinte.
+     Opacité minimale garantissant un contraste texte/fond d'au moins
+     4,5:1 dans le pire cas de ce qu'il y a derrière le flou, arrondie
+     au 5 % supérieur :
+       voile --ground, texte --ink, pire cas derrière = --ink pur
+         → X minimal ≈ 53,1 % → 55 %
+       voile --ink, texte --ground, pire cas derrière = --ground pur
+         → X minimal ≈ 62,3 % → 65 %
+     (--ground #DEDCD3, --ink #1A1614 ; luminances relatives WCAG
+     0.7142 et 0.0084 — contraste plein 13,08:1. Le voile
+     — color-mix(in srgb, base X%, transparent) — composé sur le pire
+     fond équivaut à un mélange base/fond pondéré par X ; X est le plus
+     petit taux qui fait remonter le contraste à 4,5:1 face au texte de
+     la couche.) Ajuster à l'œil si besoin. */
+  --veil-ground-opacity: 55%;
+  --veil-ink-opacity: 65%;
+
   /* Typographie — valeurs desktop (>= 768px) */
   --t-mono: 13px;
   --t-small: 15px;
