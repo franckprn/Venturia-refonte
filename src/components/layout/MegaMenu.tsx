@@ -9,16 +9,22 @@ import { pauseLenis, resumeLenis } from "@/lib/lenis";
 import { nav, type NavCaseStudy, type NavEntry } from "@/content/nav";
 import { realisations } from "@/content/realisations";
 import { services } from "@/content/services";
-import type { Tone } from "@/lib/tone";
+import { toVeilTone, type Tone } from "@/lib/tone";
 import { LocalTime } from "./LocalTime";
 import styles from "./megamenu.module.css";
 
 type MegaMenuProps = {
   id: string;
   open: boolean;
-  /** Tonalité unique du panneau MOBILE (entrées, ligne du bas, trait du
-   *  bas — voir CLAUDE.md, « Menu mobile » § 3), mesurée par Nav.tsx à
-   *  l'ouverture. Ignorée par le panneau desktop, toujours --ground. */
+  /** Tonalité qui pilote le voile/contour/texte des DEUX panneaux
+   *  (Nav.tsx `navTone`) : sur mobile, celle du bas de l'écran mesurée
+   *  UNE FOIS à l'ouverture (voir CLAUDE.md, « Méga-menu — mobile »
+   *  § tonalité) ; sur desktop, la tonalité VIVANTE de la section sous
+   *  le centre de la barre (celle de la nav elle-même, « Méga-menu —
+   *  desktop »). Passée telle quelle à `data-tone` sur chaque panneau
+   *  (pilote `--fg`, CLAUDE.md « Tonalités ») ; `toVeilTone(tone)` en
+   *  dérive la variante à deux valeurs (accent traité comme dark) pour
+   *  la couche de voile des deux panneaux. */
   tone: Tone;
   /** Focus déplacé dans le panneau seulement pour une ouverture clic/
    *  clavier — jamais pour un simple survol souris (ça déplacerait le
@@ -287,10 +293,18 @@ export function MegaMenu({
           id={id}
           ref={panelRef}
           data-megamenu
+          data-tone={tone}
           className={styles.desktopPanel}
           onPointerEnter={onPointerEnter}
           onPointerLeave={onPointerLeave}
         >
+          {/* Voile teinté (CLAUDE.md, « Méga-menu — desktop ») : même
+              mécanisme et même classe partagée que le panneau mobile
+              (.veil ci-dessous) — ENTRE le flou (porté par
+              .desktopPanel, non teinté) et le contenu (.columns,
+              au-dessus par z-index). accent traité comme dark
+              (`toVeilTone`), comme le panneau mobile. */}
+          <div className={styles.veil} data-tone={toVeilTone(tone)} aria-hidden="true" />
           <div className={styles.columns}>
             <div className={styles.column}>
               <p className={styles.columnTitle}>{nav.servicesColumn.title}</p>
@@ -341,13 +355,16 @@ export function MegaMenu({
           dédiée, ENTRE le flou (porté par .mobilePanel, non teinté,
           inchangé) et le texte (.mobileContent ci-dessous). Anime son
           propre clip-path à l'ouverture/fermeture (voir l'effet plus
-          haut) — le flou, lui, ne bouge pas. data-tone répété ici (même
-          valeur que .mobilePanel) : cette couche est un ENFANT, pas
-          l'élément qui porte data-tone — les couleurs (--fg/--tone-bg)
+          haut) — le flou, lui, ne bouge pas. Classe .veil PARTAGÉE avec
+          le panneau desktop (même mécanisme, CLAUDE.md « Méga-menu —
+          desktop ») : sur mobile `tone` est déjà passé par toVeilTone
+          (Nav.tsx, mesuré une fois à l'ouverture) — data-tone répété ici
+          (même valeur que .mobilePanel) : cette couche est un ENFANT,
+          pas l'élément qui porte data-tone — les couleurs (--fg/--tone-bg)
           s'hériteraient, mais un attribut CSS ne cascade pas, il faut
           le poser sur l'élément lui-même pour que [data-tone=...] le
           sélectionne. */}
-      <div ref={veilRef} className={styles.mobileVeil} data-tone={tone} aria-hidden="true" />
+      <div ref={veilRef} className={styles.veil} data-tone={tone} aria-hidden="true" />
 
       {/* Texte du panneau : opacité animée séparément du voile (voir
           l'effet plus haut) — regroupe la zone défilante ET la ligne du

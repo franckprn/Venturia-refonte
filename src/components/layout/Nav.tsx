@@ -89,8 +89,13 @@ export function Nav() {
   // logo, « Fermer ») partage la MÊME couleur unique que le panneau —
   // celle de la section tout en bas de l'écran, mesurée à l'ouverture
   // (`mobileTone`, voir toggleImmediate) — plus de "light" forcé
-  // (CLAUDE.md, « Méga-menu — mobile »). Le méga-menu desktop, lui, ne
-  // recouvre pas la barre : rien à forcer.
+  // (CLAUDE.md, « Méga-menu — mobile »). Hors ouverture mobile, `navTone`
+  // vaut `liveTone` (section sous le centre de la barre) — c'est CETTE
+  // valeur, transmise telle quelle au méga-menu (voir plus bas), qui
+  // pilote aussi le voile/contour/texte du panneau DESKTOP (CLAUDE.md,
+  // « Méga-menu — desktop ») : il suit la nav, pas une mesure séparée. Le
+  // panneau desktop ne recouvre pas la barre, donc rien à forcer côté nav
+  // elle-même.
   const navTone: Tone = open && isMobileViewport ? mobileTone : liveTone;
 
   function clearTimers() {
@@ -234,7 +239,7 @@ export function Nav() {
       <MegaMenu
         id={menuId}
         open={open}
-        tone={mobileTone}
+        tone={navTone}
         shouldFocusOnOpen={shouldFocusOnOpen}
         onEscape={closeAndRefocus}
         onNavigate={closeOnNavigate}

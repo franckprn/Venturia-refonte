@@ -2,12 +2,34 @@
  * Méga-menu — CLAUDE.md, sections « Méga-menu — desktop » et
  * « Méga-menu — mobile », appliquées à la lettre.
  *
- * Panneau DESKTOP : fond --ground OPAQUE, aucun backdrop-filter — le
- * filtre le plus coûteux du navigateur, et source d'artefacts Safari
- * iOS avec du position: fixed. Panneau MOBILE : exception explicite
- * (comme la nav et les cartons du rail, voir CLAUDE.md « Couleurs ») —
- * transparent et flouté en permanence, exactement le même traitement
- * que .navBlur (nav.module.css), voir .mobilePanel plus bas.
+ * Panneau DESKTOP et panneau MOBILE : même traitement, exception
+ * explicite à l'interdiction générale du backdrop-filter (comme la nav
+ * et les cartons du rail, voir CLAUDE.md « Couleurs ») — transparent et
+ * flouté en permanence (-webkit-backdrop-filter AVANT le standard,
+ * comme .navBlur dans nav.module.css), plus un VOILE teinté partagé
+ * (classe .veil, ci-dessous) qui reprend --veil-ground-opacity/
+ * --veil-ink-opacity (globals.css). Le desktop suit la tonalité VIVANTE
+ * de la nav (Nav.tsx `navTone`, transmise telle quelle en prop `tone`) ;
+ * le mobile suit celle du bas de l'écran, mesurée une fois à l'ouverture
+ * (voir Nav.tsx `toggleImmediate`). Le panneau desktop commence au même
+ * `top` que le trait sous la nav (var(--nav-h), CLAUDE.md « Barre de
+ * navigation ») et reste toujours DERRIÈRE le bloc nav en z-index (55
+ * < 58/59/60) — jamais de flou sur du flou : dans la zone de contenu,
+ * .navBlur ne floute déjà rien entre le trait et son propre bas (c'est
+ * l'« encoche » qui laisse le contenu défiler net) ; c'est cette même
+ * bande nette que le panneau vient flouter à son tour, jamais une bande
+ * déjà floutée par la nav.
+ *
+ * Contour du panneau desktop RACCORDÉ au trait de la nav
+ * (nav.module.css .rule) : même formule de couleur
+ * (color-mix(in srgb, var(--fg) 16%, transparent)), même épaisseur
+ * (1px), tirée du MÊME `--fg` (même `data-tone`, posé par la même
+ * valeur `navTone`) — donc littéralement la même couleur calculée, pas
+ * une coïncidence visuelle. Le trait dessine le haut (+ le congé 4px
+ * des deux coins hauts + ses deux branches de 12px) ; le panneau ne
+ * porte donc AUCUNE border-top (double ligne sinon) et reprend le même
+ * congé de 4px, mais aux deux coins DU BAS seulement (border-radius:
+ * 0 0 4px 4px) — l'inverse exact du trait (4px 4px 0 0).
  *
  * Plusieurs nombres de cette page (21px/18px/40px pour le texte, les
  * ls +.02em, le lh 40px) ne correspondent à AUCUN token --t-* existant
@@ -15,10 +37,11 @@
  * .benefit dans services.module.css réutilise --t-lead à une taille
  * qui n'est pas la sienne. Figés ici à dessein, pas des oublis.
  *
- * rgba(255,255,255,.2) sur les tags de la carte cas client : un filet
- * blanc pensé pour rester lisible sur n'importe quelle photo, pas une
- * des trois couleurs de la palette — même exception déjà en place sur
- * .tag dans dernier-accompagnement.module.css.
+ * Contour des tags de la carte cas client (.caseTag) à la couleur du
+ * TEXTE (var(--ground)) : tout badge posé sur une photo suit son texte
+ * (même règle sur .tag dans dernier-accompagnement.module.css) —
+ * l'ancien filet blanc rgba(255,255,255,.2) ne sert plus nulle part,
+ * retiré.
  *
  * .desktopPanelWrap/.desktopPanelInner centrent le panneau sans aucun
  * `vw` (même technique que nav.module.css .ruleWrap/.ruleInner) : les
@@ -48,17 +71,72 @@
   padding-right: var(--shell-rail);
 }
 
+/* Transparent + flouté, comme .navBlur/.mobilePanel (exception explicite,
+   CLAUDE.md « Couleurs ») — plus de fond --ground opaque. position:
+   relative : containing block du voile absolu (.veil ci-dessous).
+   Contour RACCORDÉ au trait de la nav (voir le commentaire d'en-tête) :
+   aucune border-top, radius seulement aux deux coins du bas. */
 .desktopPanel {
+  position: relative;
   width: 100%;
   max-height: 55vh;
   overflow-y: auto;
   padding: 20px;
-  background: var(--ground);
-  border: 1px solid var(--line-accent);
-  border-radius: 4px;
+  background: transparent;
+  -webkit-backdrop-filter: blur(24px); /* obligatoire, Safari, avant le standard */
+  backdrop-filter: blur(24px);
+  border-left: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+  border-radius: 0 0 4px 4px;
+  color: var(--fg);
+  transition:
+    border-color 150ms cubic-bezier(0, 0.55, 0.45, 1),
+    color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
+/* Repli si le filtre n'est pas supporté : fond OPAQUE de la tonalité en
+   cours, jamais transparent sans flou (CLAUDE.md « Couleurs »). */
+@supports not (backdrop-filter: blur(1px)) {
+  .desktopPanel {
+    background: var(--tone-bg);
+  }
+}
+
+/* Voile teinté PARTAGÉ entre le panneau desktop et le panneau mobile
+   (CLAUDE.md, « Méga-menu — desktop » et « Méga-menu — mobile ») :
+   absolute + inset 0 dans le containing block du panneau (desktop :
+   .desktopPanel ci-dessus ; mobile : .mobilePanel plus bas, déjà
+   position: fixed) — reste plaqué sur la fenêtre visible même si le
+   panneau desktop défile en interne (overflow-y: auto), jamais sur le
+   contenu défilé. Deux seules variantes (light/dark, accent traité
+   comme dark par `toVeilTone` côté JS) : mêmes variables globales que
+   le calque de la pile mobile dépliée, --veil-ground-opacity (55 %) et
+   --veil-ink-opacity (65 %), calcul détaillé en commentaire dans
+   globals.css. */
+.veil {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.veil[data-tone="light"] {
+  background: color-mix(in srgb, var(--ground) var(--veil-ground-opacity), transparent);
+}
+
+.veil[data-tone="dark"] {
+  background: color-mix(in srgb, var(--ink) var(--veil-ink-opacity), transparent);
+}
+
+/* z-index 1, au-dessus du voile (z-index 0) : sans ça, .columns
+   (non positionné) peindrait quand même AVANT le voile dans l'ordre de
+   pile CSS (un descendant positionné avec z-index passe toujours
+   après/au-dessus d'un descendant non positionné du même bloc, quel
+   que soit l'ordre dans le DOM) — le voile masquerait le texte. */
 .columns {
+  position: relative;
+  z-index: 1;
   display: flex;
   gap: 20px;
   justify-content: space-between;
@@ -78,7 +156,10 @@
   font-size: var(--t-mono);
   line-height: var(--t-mono-lh);
   letter-spacing: var(--t-mono-ls);
-  color: var(--ink);
+  /* var(--fg), pas --ink fixe : suit la tonalité, comme la nav
+     (CLAUDE.md « Méga-menu — desktop »). */
+  color: var(--fg);
+  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
 .entryList {
@@ -104,7 +185,10 @@
   line-height: 1.4;
   letter-spacing: 0.02em;
   font-weight: 400;
-  color: var(--ink);
+  /* var(--fg), pas --ink fixe : suit la tonalité, comme la nav
+     (CLAUDE.md « Méga-menu — desktop »). */
+  color: var(--fg);
+  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
 .entrySecteurs {
@@ -114,8 +198,9 @@
   line-height: 1.4;
   letter-spacing: 0.02em;
   font-weight: 400;
-  color: var(--ink);
+  color: var(--fg);
   opacity: 0.7;
+  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
 .entryLink {
@@ -126,7 +211,10 @@
 
 .entryLink:hover,
 .entryLink:focus-visible {
-  border-bottom-color: var(--ink);
+  /* currentColor, pas --ink fixe : le texte suit désormais --fg
+     (.entryServices/.entrySecteurs ci-dessus), le soulignement doit
+     rester visible sur les trois tonalités. */
+  border-bottom-color: currentColor;
 }
 
 .entryLink:focus-visible {
@@ -195,7 +283,11 @@
 }
 
 .caseTag {
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* Contour à la couleur du texte (var(--ground), même valeur que
+     `color` ci-dessous) : tout badge posé sur une photo suit son texte
+     (voir le commentaire d'en-tête et dernier-accompagnement.module.css
+     .tag). */
+  border: 1px solid var(--ground);
   border-radius: 3px;
   padding: 8px 13px;
   font-family: var(--font-mono), ui-monospace, monospace;
@@ -217,11 +309,11 @@
    de la nav est désactivé pendant ce temps
    (nav.module.css .navBlur[data-suspended]).
 
-   Exception à « aucune teinte » portée par un ENFANT dédié, .mobileVeil
-   (ci-dessous), pas par .mobilePanel lui-même : le voile teinté anime
-   son propre clip-path (montée du bas vers le haut, MegaMenu.tsx) sans
-   jamais faire bouger le flou, qui reste posé en continu tant que le
-   panneau est monté.
+   Exception à « aucune teinte » portée par un ENFANT dédié, .veil
+   (classe partagée avec le panneau desktop, définie plus haut), pas par
+   .mobilePanel lui-même : le voile teinté anime son propre clip-path
+   (montée du bas vers le haut, MegaMenu.tsx) sans jamais faire bouger le
+   flou, qui reste posé en continu tant que le panneau est monté.
 
    overflow hidden sur la racine, .mobileContent (juste après le voile)
    reprend le flex column que portait .mobilePanel avant cette
@@ -252,25 +344,12 @@
   }
 }
 
-/* Voile teinté (CLAUDE.md, « Méga-menu — mobile ») : ENTRE le flou
-   ci-dessus (qui ne bouge pas) et .mobileContent (le texte, ci-dessous)
-   — absolute, hors du flux, jamais redimensionné par son contenu.
-   clip-path posé en JS (MegaMenu.tsx) : aucun défaut ici, le panneau
-   n'existe dans le DOM que pendant l'ouverture/la fermeture animée. */
-.mobileVeil {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.mobileVeil[data-tone="light"] {
-  background: color-mix(in srgb, var(--ground) var(--veil-ground-opacity), transparent);
-}
-
-.mobileVeil[data-tone="dark"] {
-  background: color-mix(in srgb, var(--ink) var(--veil-ink-opacity), transparent);
-}
+/* Voile teinté : classe .veil PARTAGÉE avec le panneau desktop, définie
+   plus haut (position absolute, deux variantes light/dark) — ENTRE le
+   flou ci-dessus (qui ne bouge pas) et .mobileContent (le texte,
+   ci-dessous). clip-path posé en JS (MegaMenu.tsx) : aucun défaut ici,
+   le panneau n'existe dans le DOM que pendant l'ouverture/la fermeture
+   animée. */
 
 /* Regroupe la zone défilante et la ligne du bas dans le même flex
    column que portait .mobilePanel avant cette refonte (rien ne bouge

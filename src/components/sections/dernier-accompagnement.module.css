@@ -97,7 +97,11 @@
 }
 
 .tag {
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* Contour à la couleur du texte (var(--ground), même valeur que
+     `color` ci-dessous) : tout badge posé sur une photo suit son texte
+     (même règle sur .caseTag dans megamenu.module.css). Remplace
+     l'ancien filet blanc rgba(255,255,255,.2). */
+  border: 1px solid var(--ground);
   border-radius: 3px;
   padding: 8px 13px;
   font-family: var(--font-mono), ui-monospace, monospace;

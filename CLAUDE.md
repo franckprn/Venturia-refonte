@@ -28,24 +28,24 @@ du charbon « pour la lisibilité » sans le lui demander.
 Toute couleur dérivée de la palette s'écrit en color-mix sur un token,
 jamais en rgba figé : une valeur en dur ne suit pas un changement de token.
 
-Tous les fonds sont opaques, sauf cinq exceptions explicites : la barre de
+Tous les fonds sont opaques, sauf six exceptions explicites : la barre de
 nav (desktop ET mobile — voir « Barre de navigation »), les cartons du rail en
 desktop, la pile mobile du rail (repliée et dépliée), le calque plein écran
-derrière la pile dépliée (voir « Rail droit » § « Pile mobile ») et le panneau
-du menu mobile (voir « Méga-menu — mobile »). Ailleurs, aucun backdrop-filter :
-c'est le filtre le plus coûteux du navigateur, il recompose tout
-l'arrière-plan à chaque frame et provoque des artefacts sur Safari iOS quand
-il coexiste avec du position: fixed — le méga-menu DESKTOP (fixed lui aussi)
-en reste donc exclu. Un aplat --ground rend la même chose partout ailleurs.
+derrière la pile dépliée (voir « Rail droit » § « Pile mobile »), le panneau
+du menu mobile et le panneau du méga-menu DESKTOP (voir « Méga-menu —
+desktop » et « Méga-menu — mobile »). Ailleurs, aucun backdrop-filter : c'est
+le filtre le plus coûteux du navigateur, il recompose tout l'arrière-plan à
+chaque frame et provoque des artefacts sur Safari iOS quand il coexiste avec
+du position: fixed. Un aplat --ground rend la même chose partout ailleurs.
 
-Parmi ces cinq exceptions, deux seulement portent en plus un VOILE teinté
-par-dessus leur flou : le panneau du menu mobile et le calque plein écran
-derrière la pile dépliée (voir ces deux sections pour le détail — tonalité,
-variables d'opacité, animation de montée). Sous un flou transparent sans
-teinte, le fond derrière ces deux surfaces plein écran mélange crème et
-charbon (et bientôt des photos) sans qu'aucune couleur de texte n'y reste
-lisible partout. La nav, les cartons du rail en desktop et la pile mobile
-REPLIÉE restent, eux, sans teinte.
+Parmi ces six exceptions, trois portent en plus un VOILE teinté par-dessus
+leur flou : le panneau du menu mobile, le calque plein écran derrière la pile
+dépliée et le panneau du méga-menu desktop (voir ces sections pour le détail —
+tonalité, variables d'opacité, animation). Sous un flou transparent sans
+teinte, le fond derrière ces surfaces mélange crème et charbon (et parfois des
+photos) sans qu'aucune couleur de texte n'y reste lisible partout. La nav, les
+cartons du rail en desktop et la pile mobile REPLIÉE restent, eux, sans
+teinte.
 
 Dans une section en négatif, un paragraphe long passe à 80 % d'opacité :
 sur fond sombre, un texte clair paraît optiquement plus gras et vibre sur
@@ -452,8 +452,9 @@ d'animation d'icône ni de sortie (apparition/disparition instantanées),
 chevron sans rotation, voile présent/absent instantanément (pas de montée).
 
 z-index (bas → haut) : contenu de page, calque de la pile dépliée (52),
-pile mobile (53), méga-menu mobile (55), fond flouté de nav (58), trait de
-nav (59), barre de nav (60), carton du rail desktop figé (65, >= 1024px
+pile mobile (53), méga-menu — mobile ET desktop, même valeur, jamais
+montés en même temps (55), fond flouté de nav (58), trait de nav (59),
+barre de nav (60), carton du rail desktop figé (65, >= 1024px
 uniquement — partage sa position avec la bande floutée latérale du trait,
 voir plus haut).
 
@@ -498,9 +499,46 @@ panneau      position fixed, top = hauteur de la nav, left 54px
              largeur = celle de la zone de contenu, fluide (jusqu'à 1616px
              à 1920px de large)
              padding 20px
-             fond --ground, opaque — pas de backdrop-filter
-             border 1px solid var(--line-accent) sur les quatre côtés
-             radius 4px, sans box-shadow
+             fond transparent et flouté, exception explicite à
+             l'interdiction générale du backdrop-filter (voir
+             « Couleurs ») — même traitement que le panneau du menu
+             mobile : background: transparent;
+             -webkit-backdrop-filter: blur(24px); backdrop-filter:
+             blur(24px); (préfixe AVANT le standard). Repli en fond
+             OPAQUE de la tonalité en cours si le filtre n'est pas
+             supporté (@supports not (backdrop-filter: blur(1px))),
+             jamais transparent sans flou.
+             voile teinté par-dessus le flou, exception à « aucune
+             teinte » (voir « Couleurs ») : une couche dédiée, ENTRE le
+             flou (qui ne bouge pas) et le contenu — mêmes variables que
+             le panneau du menu mobile, --veil-ground-opacity (55 %) et
+             --veil-ink-opacity (65 %), color-mix sur --ground ou --ink
+             selon la tonalité. Tonalité : celle de la section sous le
+             centre vertical de la barre — la MÊME mesure vivante que la
+             nav elle-même (pas une mesure séparée), accent traité comme
+             dark (comme le voile mobile, un texte --ground sur un voile
+             --accent ne passerait pas le contraste minimum).
+             texte du panneau (titres de colonne, entrées) : var(--fg),
+             comme la nav — --ink sur light, --ground sur dark et
+             accent, transition color 150ms, cubic-bezier(0,.55,.45,1).
+             contour RACCORDÉ au trait sous la nav : même couleur
+             (color-mix(in srgb, var(--fg) 16%, transparent), tirée du
+             MÊME --fg que le trait), même épaisseur 1px. Le trait
+             dessine le haut du contour (bord supérieur, congé 4px des
+             deux coins hauts, deux branches de 12px) : le panneau ne
+             porte donc PAS de bord supérieur — une seule ligne continue,
+             jamais de double trait. Bords gauche et droit du panneau :
+             prolongent au pixel près les branches du trait, sans
+             décalage ni chevauchement (mêmes variables de shell des
+             deux côtés). Coins du bas du panneau : même congé de 4px
+             que le trait, radius 0 0 4px 4px (l'inverse du trait, qui
+             est 4px 4px 0 0) — sans box-shadow.
+             Le panneau ne passe jamais derrière le bloc nav en z-index
+             (55 < 58/59/60, voir « z-index » en fin de fichier) et ne
+             floute jamais une zone déjà floutée par la nav : dans la
+             zone de contenu, le flou de la nav (.navBlur) s'arrête déjà
+             au trait — c'est cette bande nette, pas une bande déjà
+             floutée, que le panneau vient flouter à son tour.
              hauteur naturelle, plafond 55vh
 animation    translateY(-10px) → 0, opacity 0 → 1, 300ms, cubic-bezier(0,.55,.45,1)
 
@@ -515,9 +553,9 @@ colonnes     display flex, gap 20px, justify-content: space-between
 
 rythme       titre de colonne en haut, 40px de vide, première entrée
              pas vertical : 44px colonne 1, 33px colonne 2
-typo         titre de colonne  --t-mono, --ink
-             colonne 1  21px, lh 1.4, ls +.02em, poids 400, --ink
-             colonne 2  18px, lh 1.4, ls +.02em, poids 400, --ink à 70 %
+typo         titre de colonne  --t-mono, var(--fg)
+             colonne 1  21px, lh 1.4, ls +.02em, poids 400, var(--fg)
+             colonne 2  18px, lh 1.4, ls +.02em, poids 400, var(--fg) à 70 %
              (colonne 2 volontairement secondaire)
 
 carte cas client
@@ -525,10 +563,19 @@ carte cas client
              image object-fit: cover, padding interne 12px
              haut gauche : « Inoko » 13px puis « Mobilier de van, Toulouse »
              en --t-mono, --ground
-             bas : deux tags --t-mono --ground,
-             border 1px rgba(255,255,255,.2), radius 3px, padding 8px 13px, gap 10px
+             bas : deux tags --t-mono --ground, border 1px solid
+             var(--ground) (voir « badges sur photo » ci-dessous),
+             radius 3px, padding 8px 13px, gap 10px
              dégradé linear-gradient(180deg, rgba(10,6,5,.45), transparent 30%,
              transparent 70%, rgba(10,6,5,.45)) sous le texte
+
+badges sur photo
+             tout badge posé SUR UNE PHOTO (carte cas client ci-dessus,
+             et les tags de la section « Dernier accompagnement » de la
+             home) porte un contour à LA COULEUR DE SON TEXTE (1px solid
+             var(--ground) pour ces deux-là, leur texte étant --ground).
+             Un badge qui n'est pas sur une photo suit sa propre règle,
+             inchangée.
 
 comportement desktop : survol, 120ms de délai à l'entrée, 200ms à la sortie
              clavier et tactile : clic
@@ -558,9 +605,8 @@ panneau      plein écran, position fixed (inset: 0, pas top: var(--nav-h))
              transparent sans flou.
              UNE seule surface floutée : pendant que ce panneau est
              ouvert, le flou propre de la nav (.navBlur) est désactivé —
-             jamais de flou sur du flou, jamais deux surfaces floutées
-             côte à côte (voir « Couleurs », exceptions au
-             backdrop-filter).
+             jamais de flou sur du flou (voir « Couleurs », exceptions
+             au backdrop-filter).
              sans radius ni filet propre (le filet visible en haut est
              celui de la nav, inchangé ; celui du bas est décrit plus
              bas)
