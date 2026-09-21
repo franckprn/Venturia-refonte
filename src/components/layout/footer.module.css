@@ -28,6 +28,20 @@
   padding-bottom: 32px;
 }
 
+/* Sous 1024px, la pile mobile du rail est fixée par-dessus le bas de
+   l'écran (MobileRailStack.tsx, CLAUDE.md « Rail droit » § « Pile
+   mobile ») : la barre légale ci-dessous (.legalBar) a besoin d'un
+   espace supplémentaire pour ne jamais se retrouver cachée derrière,
+   même tout en bas de page. --mobile-pile-space (globals.css) est
+   mesuré en JS (hauteur réelle de la pile REPLIÉE, trait compris — elle
+   varie avec le texte des cartons) ; le repli ci-dessous n'est qu'une
+   valeur plausible pour le rendu sans JS. */
+@media (max-width: 1023px) {
+  .section {
+    padding-bottom: calc(32px + var(--mobile-pile-space, 100px));
+  }
+}
+
 .section::before {
   content: "";
   position: absolute;
@@ -237,10 +251,9 @@
   color: var(--ground);
 }
 
-/* Seul le « ? », déjà --accent, réagit au survol/focus — le reste du
-   titre ne change jamais de couleur, et aucun soulignement nulle part. */
+/* Titre entièrement --ground, « ? » compris : plus de --accent ici. */
 .giantMark {
-  color: var(--accent);
+  color: var(--ground);
   transition: color 200ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 

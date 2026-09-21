@@ -25,7 +25,7 @@
   font-size: var(--t-mono);
   line-height: var(--t-mono-lh);
   letter-spacing: var(--t-mono-ls);
-  color: var(--accent);
+  color: var(--ink);
 }
 
 .title {
@@ -110,16 +110,51 @@
 .figures {
   grid-column: 1 / -1;
   margin-top: 32px;
-  border-top: 1px solid var(--line);
 }
 
+/* position: relative + padding-inline: 12px pour les angles (voir plus
+   bas) : le padding-block existant (24px) suffisait déjà verticalement,
+   seul l'horizontal manquait pour que la branche des angles ne colle
+   pas au texte. --corner-len : une seule valeur commune aux trois
+   blocs (12px). */
 .figureRow {
+  --corner-len: 12px;
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 20px;
   padding-block: 24px;
-  border-bottom: 1px solid var(--line);
+  padding-inline: 12px;
+}
+
+/* Angles façon trait de nav (voir nav.module.css .rule), un L par
+   pseudo-élément aux bords de la boîte du bloc — les trois blocs en
+   portent. Décoratifs (content vide, jamais lus par un lecteur
+   d'écran). */
+.figureRow::before,
+.figureRow::after {
+  content: "";
+  position: absolute;
+  width: var(--corner-len);
+  height: var(--corner-len);
+  pointer-events: none;
+}
+
+.figureRow::before {
+  top: 0;
+  left: 0;
+  border-top: 1px solid var(--ink);
+  border-left: 1px solid var(--ink);
+  border-radius: 4px 0 0 0;
+}
+
+.figureRow::after {
+  bottom: 0;
+  right: 0;
+  border-bottom: 1px solid var(--ink);
+  border-right: 1px solid var(--ink);
+  border-radius: 0 0 4px 0;
 }
 
 .figureValue {
@@ -129,7 +164,7 @@
   font-size: var(--t-title);
   line-height: var(--t-title-lh);
   letter-spacing: var(--t-title-ls);
-  color: var(--accent);
+  color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 
@@ -196,6 +231,54 @@
 
   .link {
     grid-column: 7 / 13;
+  }
+}
+
+/* 1024–1279px : la colonne de texte est trop étroite à ces largeurs
+   pour que son contenu tienne dans la hauteur de la photo (légendes
+   sur 3 lignes) — l'alignement haut/milieu/bas ci-dessous casserait
+   (mesuré : jusqu'à ~36px de dépassement). Repli simple : pas de
+   stretch, les 3 blocs s'empilent depuis le haut (comportement par
+   défaut de .split, align-items: start), gap fixe 32px. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .figures {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+}
+
+/* >= 1280px : assez de largeur pour que le texte tienne dans la
+   hauteur de la photo — la colonne des chiffres peut s'y aligner.
+   align-self: stretch l'étire à la hauteur de la ligne de grille
+   (fixée par .visualSlot, le plus haut des deux items), puis 3 lignes
+   (1fr / auto / 1fr) répartissent les 3 blocs à l'intérieur. Les 2
+   pistes 1fr reçoivent TOUJOURS la même part d'espace restant l'une
+   que l'autre, que les blocs 1 et 3 aient ou non la même hauteur —
+   contrairement à un simple `justify-content: space-between` en flex
+   (qui ne centre le bloc 2 exactement que si bloc 1 et bloc 3 font la
+   même hauteur). Bloc 1 collé en haut de sa piste, bloc 3 collé en bas
+   de la sienne, bloc 2 au milieu de la piste du milieu (elle-même
+   toujours équidistante des deux 1fr) : les trois alignements
+   demandés tiennent quelles que soient les hauteurs réelles des
+   légendes. */
+@media (min-width: 1280px) {
+  .figures {
+    align-self: stretch;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .figureRow:nth-child(1) {
+    align-self: start;
+  }
+
+  .figureRow:nth-child(2) {
+    align-self: center;
+  }
+
+  .figureRow:nth-child(3) {
+    align-self: end;
   }
 }
 

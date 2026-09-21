@@ -44,7 +44,7 @@ export type MobileMenuItem =
 
 export const nav = {
   brand: "Venturia",
-  trigger: "Ce que je fais",
+  trigger: "Services",
 
   topLinks: [
     { label: "Réalisations", href: "/realisations", isLink: true },
@@ -86,7 +86,7 @@ export const nav = {
       { type: "link", label: "À propos", href: "/a-propos", isLink: true },
     ] as MobileMenuItem[],
     city: "Toulouse",
-    writeLabel: "M'écrire",
+    writeLabel: "Écrire un mail",
     writeHref: "/contact",
     /** Pas de vrai numéro fourni : placeholder visible, jamais inventé. */
     phonePlaceholder: "[TÉLÉPHONE À FOURNIR]",

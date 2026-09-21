@@ -6,7 +6,7 @@ export const contact = {
   title: "On en parle ?",
   intro:
     "Décrivez votre situation en deux lignes. On répond dans la journée, " +
-    "et on dit quand ce n'est pas pour nous.",
+    "et on vous oriente ailleurs quand un autre est mieux placé.",
 
   email: {
     address: "hey@venturia.fr",

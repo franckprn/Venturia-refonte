@@ -1,0 +1,368 @@
+/* ------------------------------------------------------------------ *
+ * Pile de cartons du rail, MOBILE UNIQUEMENT (< 1024px — CLAUDE.md,
+ * « Rail droit » § « Pile mobile »). Rien ici ne s'applique à
+ * >= 1024px : `.wrap` et `.overlay` sont display: none par défaut.
+ *
+ * Cartons 2 et 3 réversibles : démontés pour de vrai quand sortis (pas
+ * de trio d'éléments permanents comme dans la première version). Le
+ * rôle visuel de chaque carton MONTÉ dans la pile repliée — `front`
+ * (affiché en entier, en ligne), `peek` (réduit à un pic de 6px) ou
+ * `exiting` (en train de sortir, hors flux) — est calculé en JS et posé
+ * en `data-role` (MobileRailStack.tsx), PAS déduit d'un `:last-child` :
+ * un carton "exiting" doit sortir du flux normal (position absolute,
+ * pour glisser par-dessus en `translateY` sans repousser les autres)
+ * tout en restant un enfant DOM le temps de son animation de sortie —
+ * `:last-child` ne peut pas exprimer cette distinction à trois états.
+ *
+ * Une seule surface floutée pour toute la pile repliée (`.blurLayer`,
+ * absolute inset:0 dans `.stackOuter`) — jamais un backdrop-filter par
+ * carton : c'est le défaut du trio de bandes floutées de l'ancienne nav
+ * (voir nav.module.css) que ce fichier évite délibérément. Les cartons
+ * eux-mêmes restent `background: transparent` sans backdrop-filter,
+ * dépliés comme repliés (le calque plein écran s'en charge à l'ouverture
+ * — « pas de flou sur du flou »).
+ * ------------------------------------------------------------------ */
+
+.wrap {
+  display: none;
+  position: fixed;
+  left: 20px;
+  right: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  z-index: 53;
+  color: var(--fg);
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 52;
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(24px); /* obligatoire, Safari */
+  backdrop-filter: blur(24px);
+  transition: opacity 300ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.overlay[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .overlay {
+    background: var(--tone-bg);
+  }
+}
+
+@media (max-width: 1023px) {
+  .wrap,
+  .overlay {
+    display: block;
+  }
+}
+
+/* ------------------------------- Pile elle-même ------------------------ */
+
+.stackOuter {
+  position: relative;
+}
+
+.blurLayer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 4px;
+  background: transparent;
+  -webkit-backdrop-filter: blur(24px); /* obligatoire, Safari */
+  backdrop-filter: blur(24px);
+  pointer-events: none;
+}
+
+/* Dépliée : le calque plein écran (.overlay) floute déjà tout derrière
+   la pile — désactivée ici pour ne pas flouter deux fois. */
+.wrap[data-open="true"] .blurLayer {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .blurLayer {
+    background: var(--tone-bg);
+  }
+}
+
+.stack {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.wrap[data-open="true"] .stack {
+  gap: 10px;
+}
+
+/* ---------------------------------- Carton ------------------------------ */
+
+.card {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--line-accent);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--fg);
+  text-decoration: none;
+  overflow: hidden;
+  transition:
+    height 300ms cubic-bezier(0, 0.55, 0.45, 1),
+    color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+/* Filet fixe, ne suit jamais la tonalité (comme sur le rail desktop —
+   CLAUDE.md, « Tonalités »). */
+.cardAction {
+  border-color: var(--accent);
+}
+
+.cardIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border: 1px solid var(--line-accent);
+  border-radius: 4px;
+  color: var(--fg);
+  overflow: hidden;
+  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.cardIconSvg {
+  width: 20px;
+  height: 20px;
+  transition: stroke 150ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.cardTitle {
+  margin: 0;
+  min-width: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--fg);
+  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+/* Résumé une ligne, pile REPLIÉE uniquement (voir plus bas) : masqué
+   par défaut, révélé seulement pour le carton `front` — jamais dans la
+   pile dépliée (qui montre déjà .cardText en entier) ni sur le rail
+   desktop (qui ne le lit même pas, voir Rail.tsx). */
+.cardResume {
+  display: none;
+  margin: 0;
+  min-width: 0;
+  font-size: var(--t-small);
+  line-height: var(--t-small-lh);
+  letter-spacing: var(--t-small-ls);
+  color: var(--fg);
+  opacity: 0.8;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.cardText {
+  margin: 0;
+  font-size: var(--t-small);
+  line-height: var(--t-small-lh);
+  letter-spacing: var(--t-small-ls);
+  color: var(--fg);
+  transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+/* Chevron de dépliage. Toujours en position absolue, JAMAIS
+   display: none — un élément display: none ne transitionne pas : s'il
+   ne devenait visible qu'au moment précis où la pile se déplie, sa
+   rotation de 200ms n'aurait littéralement aucune frame pour se jouer.
+   Sa visibilité est donc portée par `opacity` (qui, elle, transitionne)
+   sur un élément toujours présent, positionné hors du flux pour ne
+   jamais pousser le titre/résumé — voir le padding-right réservé sur
+   `front`/`exiting` ci-dessous, qui laisse la place pour lui. */
+.cardChevron {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 16px;
+  height: 16px;
+  color: var(--fg);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) rotate(0deg);
+  transition:
+    transform 200ms cubic-bezier(0, 0.55, 0.45, 1),
+    opacity 200ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.wrap[data-open="false"] .card[data-role="front"] .cardChevron,
+.wrap[data-open="false"] .card[data-role="exiting"] .cardChevron {
+  opacity: 1;
+}
+
+/* ------------------------- Repliée : front / peek / exiting ------------- */
+
+/* `front` et `exiting` partagent le même dessin : icône à gauche,
+   titre puis résumé empilés à droite, chevron superposé (voir
+   .cardChevron) encore plus à droite — seule la mise en boîte (flux
+   normal vs hors flux, voir plus bas) distingue les deux. padding-right
+   élargi (34px = 14 de base + 16 du chevron + 4 de respiration) pour
+   que le titre/résumé s'arrêtent avant lui, jamais dessous. */
+.wrap[data-open="false"] .card[data-role="front"],
+.wrap[data-open="false"] .card[data-role="exiting"] {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  column-gap: 14px;
+  row-gap: 2px;
+  align-items: center;
+  height: auto;
+  padding: 10px 34px 10px 14px;
+  overflow: hidden;
+}
+
+.wrap[data-open="false"] .card[data-role="front"] .cardIcon,
+.wrap[data-open="false"] .card[data-role="exiting"] .cardIcon {
+  grid-row: 1 / 3;
+}
+
+.wrap[data-open="false"] .card[data-role="front"] .cardTitle,
+.wrap[data-open="false"] .card[data-role="exiting"] .cardTitle {
+  grid-row: 1;
+  grid-column: 2;
+  align-self: end;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.wrap[data-open="false"] .card[data-role="front"] .cardResume,
+.wrap[data-open="false"] .card[data-role="exiting"] .cardResume {
+  display: block;
+  grid-row: 2;
+  grid-column: 2;
+  align-self: start;
+}
+
+.wrap[data-open="false"] .card[data-role="front"] .cardText,
+.wrap[data-open="false"] .card[data-role="exiting"] .cardText {
+  display: none;
+}
+
+/* `exiting` seul : hors flux (position absolute, ancré là où `front`
+   se tient au repos) et devant tout le reste — c'est ce qui laisse les
+   cartons restants (désormais `front`/`peek`) reprendre IMMÉDIATEMENT
+   leur mise en page finale en dessous, pendant que celui-ci glisse
+   par-dessus vers le bas (translateY, GSAP) jusqu'à disparaître. */
+.wrap[data-open="false"] .card[data-role="exiting"] {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 2;
+}
+
+/* Carton(s) `peek` : réduits à un pic de 6px (bord haut + congés
+   seulement, jamais un fond plein) — CLAUDE.md : « décalés vers le haut
+   de 6px chacun (12px au maximum avec trois cartons) ». Empilés en flux
+   normal (pas de translation/marge négative) : chaque pic de 6px vient
+   directement au-dessus du suivant, sans superposition à masquer. */
+.wrap[data-open="false"] .card[data-role="peek"] {
+  height: 6px;
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+}
+
+.wrap[data-open="false"] .card[data-role="peek"] .cardIcon,
+.wrap[data-open="false"] .card[data-role="peek"] .cardTitle,
+.wrap[data-open="false"] .card[data-role="peek"] .cardResume,
+.wrap[data-open="false"] .card[data-role="peek"] .cardText,
+.wrap[data-open="false"] .card[data-role="peek"] .cardChevron {
+  visibility: hidden;
+}
+
+/* ------------------------------- Dépliée --------------------------------- */
+
+.wrap[data-open="true"] .card {
+  height: auto;
+  overflow: visible;
+  display: grid;
+  position: static;
+}
+
+.wrap[data-open="true"] .cardChevron {
+  /* Même liste de fonctions transform que l'état de repos
+     (translateY + rotate), seul l'angle change : une interpolation
+     propre fonction-par-fonction pendant les 200ms, plutôt que de
+     dépendre du repli en matrice du navigateur si les deux listes
+     différaient en forme. */
+  transform: translateY(-50%) rotate(180deg);
+  opacity: 0;
+}
+
+/* Seul le carton 3 (action) est cliquable, dépliée ou non — même
+   soulignement du titre au tap/focus que sur desktop (rail.module.css
+   .cardAction .cardTitle), sans le survol (pas de souris tactile). */
+.cardAction .cardTitle {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: transparent;
+  transition:
+    color 150ms cubic-bezier(0, 0.55, 0.45, 1),
+    text-decoration-color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.cardAction:active .cardTitle,
+.cardAction:focus-visible .cardTitle {
+  text-decoration-color: currentColor;
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --------------------------------- Bouton -------------------------------- */
+
+/* Superposé à toute la pile repliée (pics + front), transparent : un
+   tap n'importe où sur la pile la déplie TOUJOURS, quel que soit le
+   carton du dessus. Surface tactile >= 44px assurée par la hauteur du
+   front card (icône 44px + padding) qu'il recouvre. */
+.toggle {
+  position: absolute;
+  inset: 0;
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Pas de @media prefers-reduced-motion ici : la règle globale
+   (globals.css) écrase déjà toutes les durées de transition à 0.01ms —
+   ouverture/fermeture, glissement des pics et rotation du chevron
+   deviennent instantanés sans rien de spécifique à ce fichier. */

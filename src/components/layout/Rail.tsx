@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef, type ComponentType } from "react";
+import { useEffect, useRef, type ComponentType, type RefAttributes, type RefObject } from "react";
 import Link from "next/link";
 import { railCards, type RailCardContent } from "@/content/rail";
+import { onHeroTitleDone } from "@/lib/heroTitleSignal";
 import { useSectionTone, type Tone } from "@/lib/tone";
-import { IconArrowRight, IconClock, IconSparkle } from "./RailIcons";
+import { useStickOnce } from "@/lib/useStickOnce";
+import { IconArrowRight, IconClock, IconSparkle, type RailIconHandle } from "./RailIcons";
 import styles from "./rail.module.css";
 
 // Une icône par carton, dans l'ordre de content/rail.ts (CLAUDE.md,
@@ -32,11 +34,12 @@ type RailSlotProps = {
  *   cartons suivants) fait tenir l'empilement PERMANENT — un slot qui
  *   s'arrêterait à la fin de sa section ferait repartir le carton
  *   (un relais, pas un empilement, voir CLAUDE.md « Rail droit »).
- * - Mobile : trois instances séparées, chacune physiquement placée
- *   juste après sa section dans le JSX, retombent naturellement « aux
- *   mêmes endroits du flux » une fois que Shell repasse en bloc — un
- *   <aside> unique en fin de DOM les aurait tous groupés après le pied
- *   de page, ce qui ne peut pas satisfaire ce point du CLAUDE.md.
+ * - Mobile (< 1024px) : ce carton sort du flux (`.slot` passe à
+ *   `display: none`, voir rail.module.css) — remplacé par la pile
+ *   fixée en bas de l'écran (components/layout/MobileRailStack.tsx),
+ *   qui lit le même content/rail.ts. `measureRef` continue d'exister
+ *   ici (sonde de tonalité inoffensive, useStickOnce se désactive
+ *   lui-même sous 1024px) mais ne rend plus rien visuellement.
  *
  * Seules les HAUTEURS des cartons 1 et 2 sont mesurées (elles varient
  * avec leur texte, jamais leur position) : écrites dans --rail-h1 et
@@ -48,11 +51,43 @@ type RailSlotProps = {
  * de sonde au moteur partagé (src/lib/tone.ts) — la tonalité de la
  * section sous le centre vertical du carton, propre à CE carton,
  * indépendante de la nav et des deux autres.
+ *
+ * Animation de l'icône (desktop uniquement, CLAUDE.md « Rail droit ») :
+ * `measureRef` sert aussi de repère à `useStickOnce` (cartons 2 et 3,
+ * mesure directe du figement — voir ce hook) ; le carton 1 démarre sur
+ * `onHeroTitleDone`, le signal de fin d'animation du h1 du Hero. Les
+ * trois se rejoignent sur `iconRef.current?.play()` (RailIcons.tsx).
  */
 export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
   const card = railCards[cardIndex];
   const measureRef = useRef<HTMLDivElement>(null);
+  const iconRef = useRef<RailIconHandle>(null);
   const tone = useSectionTone(measureRef);
+
+  // Carton 1 : l'horloge démarre juste après la fin de l'animation du
+  // h1 du Hero (jamais un délai estimé), en desktop et hors
+  // prefers-reduced-motion — vérifiés ici même : si le h1 ne s'anime
+  // pas, HeroReveal n'appelle jamais markHeroTitleDone et ce callback
+  // n'est jamais invoqué de toute façon.
+  useEffect(() => {
+    if (cardIndex !== 0) return;
+    const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!isDesktop || reduced) return;
+    return onHeroTitleDone(() => {
+      iconRef.current?.play();
+    });
+  }, [cardIndex]);
+
+  // Cartons 2 et 3 : l'icône démarre au moment exact où le carton se
+  // fige (mesure directe, jamais ScrollTrigger — voir useStickOnce.ts).
+  useStickOnce(
+    measureRef,
+    () => {
+      iconRef.current?.play();
+    },
+    cardIndex === 1 || cardIndex === 2,
+  );
 
   useEffect(() => {
     // Le 3ᵉ carton n'a personne après lui à positionner : rien à mesurer.
@@ -87,6 +122,7 @@ export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
           card={card}
           action={cardIndex === 2}
           Icon={RAIL_ICONS[cardIndex]}
+          iconRef={iconRef}
           tone={tone}
         />
       </div>
@@ -98,34 +134,69 @@ function RailCardArticle({
   card,
   action,
   Icon,
+  iconRef,
   tone,
 }: {
   card: RailCardContent;
   action: boolean;
-  Icon: ComponentType<{ className?: string }>;
+  Icon: ComponentType<{ className?: string } & RefAttributes<RailIconHandle>>;
+  iconRef: RefObject<RailIconHandle | null>;
   tone: Tone;
 }) {
   const className = [styles.card, action ? styles.cardAction : ""].filter(Boolean).join(" ");
   const content = (
     <>
       <span className={styles.cardIcon}>
-        <Icon className={styles.cardIconSvg} />
+        <Icon ref={iconRef} className={styles.cardIconSvg} />
       </span>
       <p className={styles.cardTitle}>{card.title}</p>
       <p className={styles.cardText}>{card.text}</p>
     </>
   );
 
+  // Carton 3 (action) uniquement : la flèche se rejoue à chaque survol
+  // et à chaque focus clavier (focus-visible seulement — pas un focus
+  // souris), en plus de son déclenchement au figement (useStickOnce,
+  // ci-dessus). Le drapeau anti-empilement vit dans IconArrowRight :
+  // ces déclenchements peuvent arriver sans risque pendant une
+  // animation en cours. Desktop + hors prefers-reduced-motion vérifiés
+  // ici, à chaque appel (léger, jamais dans une boucle de scroll).
+  const triggerHover = !action
+    ? undefined
+    : () => {
+        const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (isDesktop && !reduced) iconRef.current?.play();
+      };
+  const triggerFocusVisible = !action
+    ? undefined
+    : (event: React.FocusEvent<HTMLElement>) => {
+        if (event.currentTarget.matches(":focus-visible")) triggerHover?.();
+      };
+
   if (card.href) {
     return (
-      <Link href={card.href} className={className} data-rail-card data-tone={tone}>
+      <Link
+        href={card.href}
+        className={className}
+        data-rail-card
+        data-tone={tone}
+        onMouseEnter={triggerHover}
+        onFocus={triggerFocusVisible}
+      >
         {content}
       </Link>
     );
   }
 
   return (
-    <article className={className} data-rail-card data-tone={tone}>
+    <article
+      className={className}
+      data-rail-card
+      data-tone={tone}
+      onMouseEnter={triggerHover}
+      onFocus={triggerFocusVisible}
+    >
       {content}
     </article>
   );

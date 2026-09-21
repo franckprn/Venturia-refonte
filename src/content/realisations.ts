@@ -47,7 +47,7 @@ export const realisations: RealisationsContent = {
     {
       value: 12,
       prefix: "×",
-      caption: "COMMANDES PAR MOIS, DE 1 À 12 EN 6 MOIS",
+      caption: "COMMANDES MENSUELLES, DE 1 À 12 EN 6 MOIS",
     },
     {
       value: 15,

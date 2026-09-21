@@ -89,6 +89,40 @@
   border-color: var(--accent);
 }
 
+/* Soulignement du titre au survol/focus du carton 3, desktop
+   uniquement (l'animation des icônes du rail est DESKTOP UNIQUEMENT,
+   voir CLAUDE.md « Rail droit ») — seul le titre, pas le texte en
+   dessous. Couleur currentColor : suit --fg, comme le reste du carton
+   (« Tonalités »). Transition sur text-decoration-color seule (jamais
+   sur text-decoration ni underline-offset), transparent → currentColor,
+   pour une apparition progressive sans redessiner le trait. */
+@media (min-width: 1024px) {
+  .cardAction .cardTitle {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    text-decoration-color: transparent;
+    transition:
+      color 150ms cubic-bezier(0, 0.55, 0.45, 1),
+      text-decoration-color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+  }
+
+  .cardAction:hover .cardTitle,
+  .cardAction:focus-visible .cardTitle {
+    text-decoration-color: currentColor;
+  }
+}
+
+/* prefers-reduced-motion : le soulignement reste, sans transition
+   (CLAUDE.md « Animations » — bascule instantanée). Combinée plutôt
+   qu'imbriquée dans le bloc desktop ci-dessus, pour ne pas dépendre du
+   support de l'imbrication native des @media par la chaîne CSS. */
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+  .cardAction .cardTitle {
+    transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+  }
+}
+
 .card:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -107,6 +141,13 @@
      change jamais. */
   color: var(--fg);
   transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+  /* Masque la flèche du carton 3 quand elle sort du carré pour revenir
+     par l'autre côté (RailIcons.tsx, IconArrowRight) — posé sur ce SEUL
+     conteneur, jamais sur un ancêtre du carton : sur .card, .stickyWrap
+     ou .slot, ça désactiverait position: sticky silencieusement
+     (CLAUDE.md, « Rail droit »). Sans effet sur l'horloge et l'étoile,
+     qui tournent sur elles-mêmes sans sortir du cadre. */
+  overflow: hidden;
 }
 
 .cardIconSvg {
@@ -137,40 +178,15 @@
   transition: color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
-/* Mobile/tablette (< 1024px) : pas de rail, pas de sticky — bloc pleine
-   largeur dans le flux, à l'endroit où le slot a été placé dans le
-   JSX (voir page.tsx, juste après chaque section déclencheuse). */
+/* Mobile/tablette (< 1024px) : ces cartons sortent complètement du flux
+   — remplacés par la pile fixée en bas de l'écran (voir
+   components/layout/MobileRailStack.tsx et mobileRailStack.module.css,
+   CLAUDE.md « Rail droit » § « Pile mobile »). `.slot` reste monté
+   (measureRef y reste une sonde de tonalité valide, useStickOnce y
+   reste inoffensif puisqu'il se désactive lui-même sous 1024px) mais
+   n'occupe plus aucun espace ni ne rend plus rien visuellement. */
 @media (max-width: 1023px) {
   .slot {
-    grid-column: auto;
-    padding-inline: 0;
-    margin-top: 32px;
-  }
-
-  .stickyWrap {
-    position: static;
-    top: auto;
-  }
-
-  .card {
-    width: 100%;
-    /* Aucun backdrop-filter sous 1024px : cartons pleine largeur, coût
-       GPU maximal, et Safari iOS produit des artefacts quand le filtre
-       coexiste avec la nav en position: fixed (CLAUDE.md, « Rail
-       droit »). */
-    background: var(--ground);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-
-  /* Cartons mobiles hors scope de la session « Tonalités » (prochaine
-     étape, voir CLAUDE.md) : fixés --ink sur --ground quelle que soit la
-     tonalité que le moteur JS calcule pour eux (il continue de tourner
-     sans effet visuel ici — measureRef reste une sonde valide même sans
-     sticky). */
-  .cardIcon,
-  .cardTitle,
-  .cardText {
-    color: var(--ink);
+    display: none;
   }
 }

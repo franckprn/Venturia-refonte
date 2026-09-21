@@ -108,6 +108,7 @@ export function DernierAccompagnementReveal({
               rowRefs.current[i] = el;
             }}
             className={styles.figureRow}
+            data-da-bloc={i + 1}
           >
             <span
               ref={(el) => {

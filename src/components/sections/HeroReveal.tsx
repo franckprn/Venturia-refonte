@@ -5,6 +5,7 @@ import Link from "next/link";
 import { gsap } from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { VENTURIA_EASE } from "@/lib/ease";
+import { markHeroTitleDone } from "@/lib/heroTitleSignal";
 import { hero } from "@/content/hero";
 import styles from "./hero.module.css";
 
@@ -29,6 +30,13 @@ gsap.registerPlugin(SplitText);
  *
  * Sous-titre et CTA montent de 16px, fondu compris (ce ne sont pas
  * l'élément LCP), 200ms après le début de l'animation du h1.
+ *
+ * `onComplete` du tween du h1 appelle `markHeroTitleDone()`
+ * (src/lib/heroTitleSignal.ts) : c'est le signal sur lequel le carton 1
+ * du rail se branche pour démarrer l'animation de son horloge
+ * (CLAUDE.md, « Rail droit ») — jamais un délai estimé. Cet effet
+ * entier est sauté en prefers-reduced-motion, donc le signal ne part
+ * jamais dans ce cas non plus : pas d'animation d'horloge.
  */
 export function HeroReveal() {
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -50,8 +58,10 @@ export function HeroReveal() {
         wordsClass: "hero-word",
         aria: "auto",
       });
-      // Filet de sécurité : garder « Bien plus » en rouge même si
-      // SplitText a aplati le <span> imbriqué.
+      // Filet de sécurité : re-marquer « Bien plus » même si SplitText
+      // a aplati le <span> imbriqué — la classe ne porte plus de
+      // couleur (h1 entièrement --ink), gardée pour ne pas changer le
+      // découpage.
       split.words.slice(0, 2).forEach((w) => w.classList.add(styles.accent));
 
       gsap.set(split.words, { yPercent: 100 });
@@ -62,6 +72,7 @@ export function HeroReveal() {
         duration: 0.4,
         stagger: 0.06,
         ease: VENTURIA_EASE,
+        onComplete: markHeroTitleDone,
       });
 
       gsap.to([subtitleEl, actionsEl], {

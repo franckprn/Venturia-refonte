@@ -47,8 +47,11 @@
   text-wrap: wrap;
 }
 
+/* Couleur --accent retirée du h1 (le titre est entièrement --ink,
+   hérité de .title) : la classe reste posée sur « Bien plus » et sur
+   les 2 premiers mots SplitText (HeroReveal), sans plus porter de
+   déclaration de couleur — le découpage ne change pas. */
 .accent {
-  color: var(--accent);
 }
 
 /* Mots découpés par SplitText (mask: "words") : .hero-word-mask est le
@@ -97,9 +100,21 @@
   min-height: 44px;
   padding: 16px 32px;
   border-radius: 4px;
-  background: var(--accent);
+  border: 1px solid var(--ink);
+  background: var(--ground);
   color: var(--ink);
-  transition: transform 150ms cubic-bezier(0, 0.55, 0.45, 1);
+  transition:
+    background-color 150ms cubic-bezier(0, 0.55, 0.45, 1),
+    color 150ms cubic-bezier(0, 0.55, 0.45, 1),
+    transform 150ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+/* Le filet reste --ink dans tous les états : seuls le fond et le texte
+   s'inversent au survol/focus. */
+.ctaPrimary:hover,
+.ctaPrimary:focus-visible {
+  background: var(--ink);
+  color: var(--ground);
 }
 
 .ctaPrimary:active {
@@ -127,9 +142,15 @@
   flex: none;
 }
 
-.ctaPrimary:focus-visible,
 .ctaSecondary:focus-visible {
   outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Outline --ground, pas --ink : au focus, le fond du bouton devient
+   --ink (voir plus haut) — un contour --ink y serait invisible. */
+.ctaPrimary:focus-visible {
+  outline: 2px solid var(--ground);
   outline-offset: 2px;
 }
 

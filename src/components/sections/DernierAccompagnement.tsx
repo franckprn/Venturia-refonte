@@ -40,7 +40,7 @@ export function DernierAccompagnement() {
       <DernierAccompagnementReveal
         figures={r.figures}
         visual={
-          <div className={styles.visual}>
+          <div className={styles.visual} data-da-photo>
             {hasImage ? (
               <Image
                 src={r.image as string}

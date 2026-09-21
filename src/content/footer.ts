@@ -25,7 +25,7 @@ export const footer = {
       "Dites-nous ce que vous voulez construire.",
       "On répond dans la journée.",
     ] as [string, string],
-    write: { label: "Nous écrire", href: "/contact" },
+    write: { label: "Écrire un mail", href: "/contact" },
     email: { label: "hey@venturia.fr", href: "mailto:hey@venturia.fr" },
   },
 

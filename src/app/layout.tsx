@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/layout/Nav";
@@ -26,6 +26,14 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Venturia",
   description: "[TEXTE À FOURNIR]",
+};
+
+// viewportFit: "cover" — sans lui, env(safe-area-inset-bottom) vaut
+// toujours 0 sur iPhone (encoche/barre de home) : la pile mobile du
+// rail (MobileRailStack.tsx, CLAUDE.md « Rail droit » § « Pile
+// mobile ») en dépend pour ne jamais se coller sous la zone gestuelle.
+export const viewport: Viewport = {
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

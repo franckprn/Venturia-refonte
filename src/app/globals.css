@@ -66,6 +66,15 @@
      que le JS n'a pas mesuré la vraie hauteur. */
   --rail-h1: 160px;
   --rail-h2: 160px;
+
+  /* Hauteur réelle de la pile mobile du rail REPLIÉE, trait compris
+     (CLAUDE.md, « Rail droit » § « Pile mobile ») : mesurée en JS
+     (components/layout/MobileRailStack.tsx) puis écrite ici — la
+     valeur ci-dessous n'est qu'un repli pour le rendu sans JS (même
+     logique que --rail-h1/--rail-h2 ci-dessus), lue par
+     footer.module.css pour réserver l'espace en bas de page sous
+     1024px. Sans effet au-dessus de 1024px (la pile n'y existe pas). */
+  --mobile-pile-space: 100px;
 }
 
 /* Typographie — bascule mobile à 767px (breakpoint typo, distinct du shell) */
