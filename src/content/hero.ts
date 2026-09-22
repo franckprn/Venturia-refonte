@@ -9,11 +9,9 @@ export type HeroContent = {
   /** Seconde ligne du <h1>. Le saut est un <br /> explicite dans
    *  HeroReveal, aux deux largeurs — pas laissé au navigateur. */
   titleLine2: string;
-  /** Les deux lignes du sous-titre : le saut est explicite, pas laissé
-   *  au navigateur (voir le <br /> dans HeroReveal). */
-  subtitleLine1: string;
-  subtitleLine2: string;
-  ctaPrimary: { label: string; href: string };
+  /** Sous-titre, une seule phrase (plus de second CTA « Comment
+   *  améliorer mon référencement ? », retiré — voir CLAUDE.md § 1). */
+  subtitle: string;
   ctaSecondary: { label: string; href: string };
 };
 
@@ -21,12 +19,8 @@ export const hero: HeroContent = {
   titleAccent: "Bien plus",
   titleLine1Rest: "que",
   titleLine2: "du référencement",
-  subtitleLine1: "On développe la visibilité de votre site.",
-  subtitleLine2: "Vous, vous voyez arriver des commandes.",
-  ctaPrimary: {
-    label: "Comment améliorer mon référencement ?",
-    href: "/contact",
-  },
+  subtitle:
+    "On fait venir les bons visiteurs sur votre boutique en ligne, et on les accompagne jusqu'à la commande.",
   ctaSecondary: {
     label: "Ce que ça donne concrètement",
     href: "/realisations",

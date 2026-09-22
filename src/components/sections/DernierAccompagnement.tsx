@@ -26,6 +26,11 @@ export function DernierAccompagnement() {
         {r.title}
       </h2>
 
+      {/* Mise en page provisoire (style de paragraphe existant du
+          site) : la mise en page dédiée de cette section fait l'objet
+          d'un prompt suivant. */}
+      <p className={styles.paragraph}>{r.paragraph}</p>
+
       <DernierAccompagnementReveal
         figures={r.figures}
         visual={

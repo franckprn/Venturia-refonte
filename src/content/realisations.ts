@@ -6,8 +6,8 @@
 // formatFigureValue() est le seul endroit qui décide comment elle
 // s'affiche — le HTML initial et le compteur en cours d'animation
 // passent tous les deux par cette fonction, donc ils rendent toujours
-// la même chose. Le séparateur de milliers est une espace insécable
-// ( ), jamais une espace normale.
+// la même chose. Le séparateur de milliers est une espace fine
+// insécable (U+202F), jamais une espace normale.
 
 export type RealisationFigure = {
   /** Compte de 0 à cette valeur à l'entrée dans le viewport. */
@@ -26,6 +26,11 @@ export type RealisationsContent = {
   label: string;
   /** --t-title, --ink. */
   title: string;
+  /** Paragraphe affiché sous le titre, avec le style de paragraphe
+   *  existant du site (voir .paragraph, dernier-accompagnement.module.css).
+   *  Mise en page provisoire : la mise en page dédiée de cette section
+   *  fera l'objet d'un prompt suivant. */
+  paragraph: string;
   /** Les deux tags posés sur le visuel. */
   tags: [string, string];
   figures: [RealisationFigure, RealisationFigure, RealisationFigure];
@@ -40,23 +45,31 @@ export type RealisationsContent = {
 };
 
 export const realisations: RealisationsContent = {
-  label: "DERNIER ACCOMPAGNEMENT",
-  title: "Inoko — mobilier modulable pour van, Toulouse",
+  label: "ACCOMPAGNEMENT",
+  title: "Inoko — Mobilier pour van à Toulouse",
+  paragraph:
+    "En janvier, Inoko faisait une vente par mois via Leboncoin, son seul " +
+    "canal de vente. On a retravaillé ses pages produits les plus " +
+    "recherchées et créé une page de référence sur le lit peigne : " +
+    "trois produits sont passés premiers sur Google, et les commandes " +
+    "ont afflué. Ensuite, on a lancé des campagnes Google Ads, rentables " +
+    "dès la deuxième semaine.",
   tags: ["SEO", "GOOGLE ADS"],
   figures: [
     {
       value: 12,
       prefix: "×",
-      caption: "COMMANDES MENSUELLES, DE 1 À 12 EN 6 MOIS",
+      caption: "COMMANDES MENSUELLES",
+    },
+    {
+      value: 10000,
+      suffix: " €",
+      caption: "DE CHIFFRE D'AFFAIRES MENSUEL, CONTRE 1 000 € AU DÉPART",
     },
     {
       value: 15,
       suffix: " €",
       caption: "DE CHIFFRE D'AFFAIRES POUR 1 € INVESTI EN GOOGLE ADS",
-    },
-    {
-      value: 1700,
-      caption: "VISITEURS PAR MOIS, CONTRE 80 AU DÉPART",
     },
   ],
   linkLabel: "Voir comment",
@@ -71,6 +84,6 @@ export function formatFigureValue(
 ): string {
   const grouped = Math.round(figure.value)
     .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    .replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   return `${figure.prefix ?? ""}${grouped}${figure.suffix ?? ""}`;
 }

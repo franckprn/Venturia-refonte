@@ -95,7 +95,13 @@ export function ServicesRowsReveal({ services }: ServicesRowsRevealProps) {
             {service.number} — {service.name}
           </p>
           <p className={styles.phrase}>{service.phrase}</p>
-          <p className={styles.paragraph}>{service.paragraph}</p>
+          <div className={styles.paragraphs}>
+            {service.paragraphs.map((paragraph, i) => (
+              <p key={i} className={styles.paragraph}>
+                {paragraph}
+              </p>
+            ))}
+          </div>
           <Link href={service.href} className={styles.link}>
             {servicesLinkLabel}
             <svg

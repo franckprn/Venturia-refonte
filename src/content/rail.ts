@@ -18,22 +18,32 @@ export const railCards: [RailCardContent, RailCardContent, RailCardContent] = [
     title: "Combien de temps",
     resume: "Délais des premiers résultats",
     text:
-      "Le référencement met 1 à 3 mois avant les premiers résultats. Les " +
-      "annonces payantes, quelques jours.",
+      "Le référencement demande quelques mois : chez Inoko, les " +
+      "commandes ont afflué dès le quatrième mois. La publicité, elle, " +
+      "peut être rentable en deux semaines.",
   },
   {
     title: "Le GEO, en une phrase",
     resume: "Être cité par les IA",
     text:
-      "Être cité par ChatGPT et Perplexity quand quelqu'un leur pose une " +
-      "question sur votre métier.",
+      "Être cité par ChatGPT et Perplexity quand quelqu'un leur pose " +
+      "une question sur ce que vous vendez.",
   },
   {
-    title: "On discute ?",
+    title: "On discute ?",
     resume: "20 minutes, sans engagement",
     text:
-      "20 minutes, sans engagement. On regarde votre situation, vous " +
-      "repartez avec un plan.",
+      "20 minutes, sans engagement. On étudie votre site avant l'appel, " +
+      "puis on vous dit ce qu'on ferait, dans quel ordre.",
     href: "/contact",
   },
 ];
+
+/** aria-label du bouton de dépliage et de la région dépliée de la pile
+ *  mobile (MobileRailStack.tsx) — texte non affiché, lu seulement par
+ *  les technologies d'assistance. */
+export const railStackLabels = {
+  /** Complété par le titre du carton du dessus (« Voir plus : {titre} »). */
+  togglePrefix: "Voir plus : ",
+  expandedRegion: "Repères, dépliés",
+};

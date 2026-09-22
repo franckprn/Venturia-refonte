@@ -26,18 +26,24 @@ export type NavCaseStudy = {
   isLink: boolean;
 };
 
-// Contenu du CLAUDE.md, « Méga-menu — desktop » : trois services
-// seulement dans cette colonne (pas Publicité) — différent, à dessein,
-// de la colonne SERVICES du footer qui en liste quatre.
+// Méga-menu desktop, colonne SERVICES : les 4 services, dans le même
+// ordre que la section Services de la home (Référencement, Publicité,
+// Site internet, Automatisation).
 const SERVICES_ENTRIES: NavEntry[] = [
   { label: "Référencement", href: "/services/referencement", isLink: false },
+  { label: "Publicité", href: "/services/publicite", isLink: false },
   { label: "Site internet", href: "/services/site-internet", isLink: false },
   { label: "Automatisation", href: "/services/automatisation-n8n", isLink: false },
 ];
 
 export const nav = {
-  brand: "Venturia",
   trigger: "Services",
+
+  /** aria-label de la <nav> qui regroupe le déclencheur du méga-menu et
+   *  les entrées de premier niveau (Nav.tsx). */
+  ariaLabel: "Navigation principale",
+  /** aria-label du lien logo, retour à l'accueil (Nav.tsx). */
+  logoAriaLabel: "Venturia, retour à l'accueil",
 
   topLinks: [
     { label: "Réalisations", href: "/realisations", isLink: true },
@@ -54,8 +60,8 @@ export const nav = {
     entries: [
       { label: "E-commerce", href: "/secteurs/e-commerce", isLink: false },
       {
-        label: "Professions artisanales",
-        href: "/secteurs/professions-artisanales",
+        label: "Marques artisanales",
+        href: "/secteurs/marques-artisanales",
         isLink: false,
       },
     ],

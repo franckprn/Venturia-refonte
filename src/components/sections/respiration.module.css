@@ -16,6 +16,12 @@
  * première section — sans cette réécriture les deux valeurs
  * coexisteraient plutôt que la seconde remplaçant la première selon
  * l'ordre d'import des modules CSS, ce qui n'est pas garanti.
+ *
+ * Une seule phrase, pleine largeur (mise en page A, CLAUDE.md § 3) :
+ * .text occupe TOUTE la grille de contenu (grid-column: 1 / -1),
+ * contrairement à l'ancienne version à trois blocs qui répartissait
+ * ses colonnes (1-10, 1-7…). Plus de point de coupe mobile dédié : le
+ * texte, plus long qu'avant, s'enveloppe naturellement.
  * ------------------------------------------------------------------ */
 
 .section {
@@ -44,14 +50,8 @@
   }
 }
 
-.block1,
-.block3 {
-  grid-column: 1 / 10;
-  /* Sans ça, une piste 1fr contenant un seul item grandit pour tenir
-     son contenu non enveloppé (« les automatisations traitent le
-     reste. » sur une seule ligne) au lieu de respecter les 9 colonnes
-     — c'est le <br /> qui décide des retours à la ligne, pas la
-     largeur de la piste. */
+.text {
+  grid-column: 1 / -1;
   min-width: 0;
   margin: 0;
   font-family: var(--font-display), system-ui, sans-serif;
@@ -59,23 +59,8 @@
   font-size: var(--t-hero);
   line-height: var(--t-hero-lh);
   letter-spacing: var(--t-hero-ls);
-}
-
-.block2 {
-  grid-column: 1 / 7;
-  min-width: 0;
-  margin: 0;
-  margin-top: 32px;
-  max-width: 68ch;
-  opacity: 0.8;
-  font-size: var(--t-lead);
-  line-height: var(--t-lead-lh);
-  letter-spacing: var(--t-lead-ls);
-  font-weight: var(--t-lead-weight);
-}
-
-.block3 {
-  margin-top: 48px;
+  /* Pas de text-wrap: balance : à réserver aux titres, coûteux sur un
+     texte de cette longueur (CLAUDE.md, « Détails faciles à oublier »). */
 }
 
 .accent {
@@ -92,41 +77,4 @@
 
 .line {
   display: inline-block;
-}
-
-/* Point de coupe mobile de la ligne 2 du bloc 1, distinct du desktop :
-   masqué par défaut, affiché sous 768px — le <br /> apparaît ou
-   disparaît, le texte lui-même n'est jamais dupliqué dans le DOM. */
-.mobileBreak {
-  display: none;
-}
-
-@media (max-width: 767px) {
-  .mobileBreak {
-    display: inline;
-  }
-}
-
-@media (min-width: 1024px) {
-  .block1,
-  .block3 {
-    grid-column: 1 / 10;
-  }
-
-  .block2 {
-    grid-column: 1 / 7;
-    margin-top: 48px;
-  }
-
-  .block3 {
-    margin-top: 64px;
-  }
-}
-
-@media (max-width: 1023px) {
-  .block1,
-  .block2,
-  .block3 {
-    grid-column: 1 / -1;
-  }
 }

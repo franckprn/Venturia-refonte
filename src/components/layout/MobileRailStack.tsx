@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useId, useRef, useState, type RefObject } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
-import { railCards } from "@/content/rail";
+import { railCards, railStackLabels } from "@/content/rail";
 import { VENTURIA_EASE } from "@/lib/ease";
 import { onHeroTitleDone } from "@/lib/heroTitleSignal";
 import { pauseLenis, resumeLenis } from "@/lib/lenis";
@@ -461,7 +461,7 @@ export function MobileRailStack({ anchors }: MobileRailStackProps) {
             ref={stackRef}
             className={styles.stack}
             role={open ? "region" : undefined}
-            aria-label={open ? "Repères, dépliés" : undefined}
+            aria-label={open ? railStackLabels.expandedRegion : undefined}
           >
             {mountedIndexes.map((index) => {
               const role =
@@ -497,7 +497,7 @@ export function MobileRailStack({ anchors }: MobileRailStackProps) {
             hidden={open}
             aria-expanded={open}
             aria-controls={stackId}
-            aria-label={`Voir plus : ${frontTitle}`}
+            aria-label={`${railStackLabels.togglePrefix}${frontTitle}`}
             onClick={() => {
               // Mesurée AVANT setOpen (donc avant que le scroll de page
               // ne se bloque) : la position de scroll au tap est déjà

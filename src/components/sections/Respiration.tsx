@@ -8,14 +8,9 @@ import { RespirationReveal } from "./RespirationReveal";
 // par <Section> sans prop `rail`, exactement comme les autres sections
 // qui n'en portent pas (voir page.tsx).
 //
-// Copy réelle dans content/respiration.ts, à reprendre au caractère
-// près : ne rien reformuler.
+// Une seule phrase, pleine largeur (mise en page A) — voir
+// RespirationReveal. Copy réelle dans content/respiration.ts, à
+// reprendre au caractère près : ne rien reformuler.
 export function Respiration() {
-  return (
-    <RespirationReveal
-      block1={respiration.block1}
-      block2={respiration.block2}
-      block3={respiration.block3}
-    />
-  );
+  return <RespirationReveal content={respiration} />;
 }

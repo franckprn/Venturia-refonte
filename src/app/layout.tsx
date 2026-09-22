@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/layout/Nav";
+import { homeMeta } from "@/content/meta";
 
 // Polices auto-hébergées par next/font (servies depuis notre domaine,
 // aucun <link> vers fonts.googleapis.com).
@@ -23,9 +24,12 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
+// Métadonnées de la home (content/meta.ts) : la seule page du Shell
+// sans son propre export `metadata` (contrairement à /contact) — celles
+// du layout racine lui servent donc de valeurs par défaut.
 export const metadata: Metadata = {
-  title: "Venturia",
-  description: "[TEXTE À FOURNIR]",
+  title: homeMeta.title,
+  description: homeMeta.description,
 };
 
 // viewportFit: "cover" — sans lui, env(safe-area-inset-bottom) vaut

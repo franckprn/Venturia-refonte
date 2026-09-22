@@ -9,59 +9,48 @@ import styles from "./respiration.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
-type RespirationRevealProps = RespirationContent;
+type RespirationRevealProps = {
+  content: RespirationContent;
+};
 
 /**
- * Révélation ligne par ligne au scroll (`ScrollTrigger`, `start: "top
- * 75%"`, `once: true`) : chaque ligne translate de 100% vers 0 dans un
- * cache immobile à overflow hidden — jamais de fondu. 5 lignes en tout
- * (2 + 2 + 1), stagger 80ms entre elles, SAUF avant la ligne du bloc 3
- * qui démarre 200ms après la fin (pas le début) de la dernière ligne
- * du bloc 2 : le silence avant la chute.
+ * Révélation unique à l'entrée dans le viewport (`ScrollTrigger`, `start:
+ * "top 75%"`, `once: true`) : le texte translate de 100% vers 0 dans un
+ * cache immobile à overflow hidden — jamais de fondu.
+ *
+ * Simplifié depuis une ancienne version à trois blocs (trois phrases
+ * distinctes, révélées ligne par ligne avec un stagger) : le contenu
+ * réel de Franck est une seule phrase, donc une seule ligne masquée —
+ * plus de stagger, plus de multi-refs, plus de <br /> de point de
+ * coupe mobile dédié (le texte s'enveloppe naturellement).
  *
  * Garde-fous du CLAUDE.md :
  * - l'état masqué (yPercent: 100) est posé par GSAP en JS uniquement,
- *   jamais en CSS : sans JS, les trois blocs sont lisibles tout de
- *   suite, rien n'est parqué à opacity 0.
+ *   jamais en CSS : sans JS, le texte est lisible tout de suite, rien
+ *   n'est parqué à opacity 0.
  * - prefers-reduced-motion : aucun état initial posé, rien ne bouge.
  */
-export function RespirationReveal({ block1, block2, block3 }: RespirationRevealProps) {
-  // block1/block2/block3 doivent être des enfants DIRECTS de .body (la
-  // grille 12 colonnes de la section) pour que leur grid-column ait un
-  // effet — pas d'enfant unique wrapper : le composant rend un
-  // fragment, .block1 lui-même sert de déclencheur au ScrollTrigger.
+export function RespirationReveal({ content }: RespirationRevealProps) {
   const triggerRef = useRef<HTMLParagraphElement>(null);
-  const lineRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const lineRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const root = triggerRef.current;
-    const lines = lineRefs.current;
-    if (!root || lines.length !== 5 || lines.some((l) => !l)) return;
+    const line = lineRef.current;
+    if (!root || !line) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = gsap.context(() => {
-      gsap.set(lines, { yPercent: 100 });
+      gsap.set(line, { yPercent: 100 });
 
       ScrollTrigger.create({
         trigger: root,
         start: "top 75%",
         once: true,
         onEnter: () => {
-          // Lignes 0-3 (bloc 1 + bloc 2) : cascade continue, 80ms
-          // d'écart.
-          gsap.to(lines.slice(0, 4), {
+          gsap.to(line, {
             yPercent: 0,
             duration: 0.4,
-            stagger: 0.08,
-            ease: VENTURIA_EASE,
-          });
-
-          // Ligne 4 (bloc 3) : 200ms après la FIN de la ligne 3 (qui
-          // démarre à 3×80ms et dure 400ms → finit à 640ms).
-          gsap.to(lines[4], {
-            yPercent: 0,
-            duration: 0.4,
-            delay: 3 * 0.08 + 0.4 + 0.2,
             ease: VENTURIA_EASE,
           });
         },
@@ -72,75 +61,14 @@ export function RespirationReveal({ block1, block2, block3 }: RespirationRevealP
   }, []);
 
   return (
-    <>
-      <p ref={triggerRef} className={styles.block1}>
-        <span className={styles.mask}>
-          <span
-            ref={(el) => {
-              lineRefs.current[0] = el;
-            }}
-            className={styles.line}
-          >
-            {block1.line1}
-          </span>
+    <p ref={triggerRef} className={styles.text}>
+      <span className={styles.mask}>
+        <span ref={lineRef} className={styles.line}>
+          {content.before}
+          <span className={styles.accent}>{content.accent}</span>
+          {content.after}
         </span>
-        <br />
-        <span className={styles.mask}>
-          <span
-            ref={(el) => {
-              lineRefs.current[1] = el;
-            }}
-            className={styles.line}
-          >
-            {block1.line2Before}
-            {" "}
-            {/* Point de coupe mobile fixé par Franck, pas par le
-                navigateur : <br /> masqué en CSS à partir de 768px,
-                affiché en dessous — le texte n'est jamais dupliqué. */}
-            <br className={styles.mobileBreak} />
-            {block1.line2After}
-          </span>
-        </span>
-      </p>
-
-      <p className={styles.block2}>
-        <span className={styles.mask}>
-          <span
-            ref={(el) => {
-              lineRefs.current[2] = el;
-            }}
-            className={styles.line}
-          >
-            {block2[0]}
-          </span>
-        </span>
-        <br />
-        <span className={styles.mask}>
-          <span
-            ref={(el) => {
-              lineRefs.current[3] = el;
-            }}
-            className={styles.line}
-          >
-            {block2[1]}
-          </span>
-        </span>
-      </p>
-
-      <p className={styles.block3}>
-        <span className={styles.mask}>
-          <span
-            ref={(el) => {
-              lineRefs.current[4] = el;
-            }}
-            className={styles.line}
-          >
-            {block3.before}
-            <span className={styles.accent}>{block3.accent}</span>
-            {block3.after}
-          </span>
-        </span>
-      </p>
-    </>
+      </span>
+    </p>
   );
 }

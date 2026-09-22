@@ -100,16 +100,10 @@ export function HeroReveal() {
       </h1>
 
       <p ref={subtitleRef} className={styles.subtitle}>
-        {hero.subtitleLine1}
-        <br />
-        {hero.subtitleLine2}
+        {hero.subtitle}
       </p>
 
       <div ref={actionsRef} className={styles.actions}>
-        <Link href={hero.ctaPrimary.href} className={styles.ctaPrimary}>
-          {hero.ctaPrimary.label}
-        </Link>
-
         <Link href={hero.ctaSecondary.href} className={styles.ctaSecondary}>
           <svg
             className={styles.ctaArrow}

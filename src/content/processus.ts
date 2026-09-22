@@ -1,8 +1,10 @@
-// Contenu provisoire de la section Processus (home) — à faire valider
-// par Franck avant mise en ligne.
+// Contenu réel de la section Processus (home), fourni par Franck. À
+// reprendre au caractère près : ne rien reformuler.
 
 export type ProcessusStep = {
-  /** Utilisé aussi comme texte des numéros dans le schéma SVG. */
+  /** Utilisé aussi comme texte des numéros dans le schéma SVG — le
+   *  schéma ne rend AUCUN autre texte (ni `label` ni `description`),
+   *  voir ProcessusSchemaReveal.tsx. */
   number: string;
   /** --t-mono, --ink. Écrit en capitales dans le contenu (pas de
    *  text-transform CSS). */
@@ -12,29 +14,28 @@ export type ProcessusStep = {
 };
 
 export const processusLabel = "PROCESSUS";
-export const processusTitle =
-  "De la première conversation aux premières commandes";
+export const processusTitle = "De votre premier message aux premiers résultats";
 
 export const processusSteps: [ProcessusStep, ProcessusStep, ProcessusStep] = [
   {
     number: "01",
-    label: "STRATÉGIE",
+    label: "VOTRE SITE",
     description:
-      "On regarde ce que vos concurrents captent et ce que votre site " +
-      "laisse passer. Vous repartez avec un plan écrit.",
+      "Vous nous envoyez votre site et votre objectif. On l'étudie " +
+      "avant de vous appeler.",
   },
   {
     number: "02",
-    label: "DÉVELOPPEMENT",
+    label: "L'APPEL",
     description:
-      "Le site, le référencement, les automatisations. Vous voyez " +
-      "avancer chaque semaine.",
+      "En 20 minutes, on vous explique ce qu'on ferait sur votre " +
+      "boutique, dans quel ordre, et quand arrivent les premiers résultats.",
   },
   {
     number: "03",
-    label: "CROISSANCE",
+    label: "LE SUIVI",
     description:
-      "Une fois que ça marche, on augmente le volume. C'est l'étape la " +
-      "plus longue, et c'est celle qui rapporte.",
+      "Vous suivez vos chiffres sur un tableau de bord partagé, et " +
+      "vous recevez chaque mois un rapport détaillé.",
   },
 ];

@@ -174,12 +174,12 @@ export function Nav() {
       />
 
       <header ref={headerRef} className={styles.nav} data-tone={navTone}>
-        <nav className={styles.items} aria-label="Navigation principale">
+        <nav className={styles.items} aria-label={nav.ariaLabel}>
           <div className={styles.leftCluster}>
             <Link
               href="/"
               className={styles.logoLink}
-              aria-label="Venturia, retour à l'accueil"
+              aria-label={nav.logoAriaLabel}
             >
               <Logo className={styles.logoIcon} />
             </Link>

@@ -90,6 +90,16 @@
   color: var(--ink);
 }
 
+/* Conteneur des paragraphes (content/services.ts, `paragraphs: string[]`) :
+   un <p> par entrée, espacés par le `gap` d'un flex (CLAUDE.md, « Shell
+   de page » : « Espacer au gap d'un flex ou d'une grille plutôt qu'aux
+   marges individuelles »), valeur 16px de l'échelle du site. */
+.paragraphs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .paragraph {
   margin: 0;
   font-size: var(--t-body);
@@ -184,7 +194,7 @@
      de la phrase et le paragraphe, un cran plus ouvert que le
      name→phrase (12px), toutes deux des valeurs de l'échelle du site
      (CLAUDE.md, « Shell de page »). */
-  .paragraph {
+  .paragraphs {
     grid-column: 7 / 13;
     grid-row: 3;
     margin-top: 8px;
@@ -196,10 +206,11 @@
      grille 7 côté "fin de span", c-a-d la fin de la colonne 6, pas le
      début de la colonne 7 (vérifié par sonde CSS Grid, voir l'audit
      deux-colonnes — une différence de 20px selon le sens). align-self:
-     end aligne le bas de la boîte du lien sur le bas de la boîte du
-     paragraphe (même grid-row) : comme .link et .paragraph partagent
-     exactement le même --t-body/--t-body-lh, aligner leurs boîtes
-     aligne aussi leurs lignes de base — sans mesure JS. */
+     end aligne le bas de la boîte du lien sur le bas de la boîte de
+     .paragraphs (même grid-row), donc sur le bas du DERNIER <p> (le
+     flex column n'ajoute aucun padding) : comme .link et .paragraph
+     partagent exactement le même --t-body/--t-body-lh, aligner ces
+     boîtes aligne aussi leurs lignes de base — sans mesure JS. */
   .link {
     grid-column: 1 / 7;
     grid-row: 3;

@@ -34,8 +34,8 @@ export const footer = {
       entries: [
         { label: "E-commerce", href: "/secteurs/e-commerce", isLink: false },
         {
-          label: "Professions artisanales",
-          href: "/secteurs/professions-artisanales",
+          label: "Marques artisanales",
+          href: "/secteurs/marques-artisanales",
           isLink: false,
         },
       ],
@@ -61,11 +61,6 @@ export const footer = {
     text: "ON PEUT VOUS AIDER",
     /** Rendu séparément, en --accent — voir Footer.tsx. */
     mark: "?",
-  },
-
-  cta: {
-    label: "Réserver 20 minutes",
-    href: "/contact",
   },
 
   legal: {
