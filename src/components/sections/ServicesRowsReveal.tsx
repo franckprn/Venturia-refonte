@@ -5,7 +5,7 @@ import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { VENTURIA_EASE } from "@/lib/ease";
-import type { Service } from "@/content/services";
+import { servicesLinkLabel, type Service } from "@/content/services";
 import styles from "./services.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -25,30 +25,35 @@ type ServicesRowsRevealProps = {
  * `prefers-reduced-motion` : aucune animation d'entrée, la fonction
  * s'arrête avant de rien parquer.
  *
- * Les états de survol/focus (fond, couleurs, filets, opacité des
- * lignes voisines) sont entièrement en CSS — voir services.module.css —
- * ce composant ne gère que l'entrée.
+ * La cible de l'animation est le conteneur `.row` (plus le <a> comme
+ * avant) : seul le lien « En savoir plus → » est cliquable désormais,
+ * étiré à toute la ligne via son ::after (voir services.module.css et
+ * CLAUDE.md, « Services (home) » § « Ligne cliquable ») — un seul <a>
+ * par ligne, une seule tabulation clavier par service.
+ *
+ * `opacity` seule, jamais `autoAlpha` : `autoAlpha` bascule aussi
+ * `visibility`, qui retirerait le lien du parcours clavier tant que le
+ * ScrollTrigger n'a pas déclenché — un Tab ne peut pas donner le focus
+ * à un élément `visibility:hidden`, donc il saute la ligne, et sans
+ * focus dessus le navigateur ne la fait jamais défiler dans la vue
+ * pour déclencher la révélation : boucle bloquée. En opacity seule, la
+ * ligne reste focusable (juste transparente) : le focus clavier
+ * l'amène dans la vue, ce qui déclenche le ScrollTrigger normalement.
+ *
+ * Les états de survol/focus (soulignement du lien) sont entièrement en
+ * CSS — voir services.module.css — ce composant ne gère que l'entrée.
  */
 export function ServicesRowsReveal({ services }: ServicesRowsRevealProps) {
   const listRef = useRef<HTMLDivElement>(null);
-  const rowRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const list = listRef.current;
-    const rows = rowRefs.current.filter((el): el is HTMLAnchorElement => el !== null);
+    const rows = rowRefs.current.filter((el): el is HTMLDivElement => el !== null);
     if (!list || rows.length !== services.length) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = gsap.context(() => {
-      // opacity seule, jamais autoAlpha : autoAlpha bascule aussi
-      // `visibility`, qui retirerait ces liens du parcours au clavier
-      // tant que le ScrollTrigger n'a pas déclenché — un Tab ne peut
-      // pas donner le focus à un élément visibility:hidden, donc il
-      // saute la ligne, et sans focus dessus le navigateur ne la fait
-      // jamais défiler dans la vue pour déclencher la révélation :
-      // boucle bloquée. En opacity seule, la ligne reste focusable
-      // (juste transparente) : le focus clavier l'amène dans la vue,
-      // ce qui déclenche le ScrollTrigger normalement.
       gsap.set(rows, { opacity: 0, y: 16 });
 
       ScrollTrigger.create({
@@ -64,10 +69,8 @@ export function ServicesRowsReveal({ services }: ServicesRowsRevealProps) {
             ease: VENTURIA_EASE,
             onComplete: () => {
               // opacity posée en style inline par GSAP l'emporterait
-              // sinon sur la règle CSS d'atténuation au survol
-              // (.list:has(...) .row:not(:hover) { opacity: .4 }) : un
-              // style inline bat toujours une règle de feuille de
-              // style, quelle que soit sa spécificité.
+              // sinon sur une règle CSS future — même précaution que
+              // l'ancienne version, gardée par cohérence.
               gsap.set(rows, { clearProps: "opacity" });
             },
           });
@@ -81,34 +84,38 @@ export function ServicesRowsReveal({ services }: ServicesRowsRevealProps) {
   return (
     <div ref={listRef} className={styles.list}>
       {services.map((service, i) => (
-        <Link
+        <div
           key={service.href}
-          href={service.href}
           ref={(el) => {
             rowRefs.current[i] = el;
           }}
           className={styles.row}
         >
-          <span className={styles.number}>{service.number}</span>
-          <span className={styles.name}>{service.name}</span>
-          <span className={styles.phrase}>{service.phrase}</span>
-          <svg
-            className={styles.arrow}
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M3 10h14M11 4l6 6-6 6"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
+          <p className={styles.heading}>
+            {service.number} — {service.name}
+          </p>
+          <p className={styles.phrase}>{service.phrase}</p>
+          <p className={styles.paragraph}>{service.paragraph}</p>
+          <Link href={service.href} className={styles.link}>
+            {servicesLinkLabel}
+            <svg
+              className={styles.linkArrow}
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M2.5 8H13M9 3.5L13.5 8L9 12.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Link>
+        </div>
       ))}
     </div>
   );

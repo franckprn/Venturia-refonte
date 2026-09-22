@@ -162,6 +162,110 @@ Titre de section → contenu : 32px mobile / 48px desktop.
 Échelle : 4 · 8 · 12 · 16 · 20 · 24 · 32 · 48 · 64 · 96 · 128 · 160.
 Espacer au `gap` d'un flex ou d'une grille plutôt qu'aux marges individuelles.
 
+## Règle des deux axes
+
+Dans la zone de contenu (hors rail), tout bloc démarre sur l'un de deux
+axes de la grille 12 colonnes : l'axe gauche (début de la colonne 1) ou
+l'axe droit (début de la colonne 7) — jamais posé « au hasard » entre
+les deux. Seule exception : une série d'éléments égaux, répartie en
+tiers (colonnes 1, 5, 9) ou en quarts (colonnes 1, 4, 7, 10) — voir
+Processus (tiers) et le bloc de fin (quarts, colonnes de liens).
+
+Aucune grille interne à padding : quand une section redéclare sa propre
+grille 12 colonnes en interne (plutôt que de poser ses blocs
+directement sur celle de `<Section>`), elle doit avoir EXACTEMENT le
+même nombre de colonnes et le même gap que la grille partagée, et
+AUCUN padding horizontal — un padding-inline sur cette grille interne
+décale ses lignes de colonnes par rapport à la grille partagée (mesuré :
+l'ancienne grille de Services, avec `padding: 0 24px`, dérivait de plus
+en plus de l'axe gauche à mesure que l'écran s'élargissait). Le
+padding-block reste possible : il n'affecte pas les colonnes. Modèle de
+référence : `.split` dans `dernier-accompagnement.module.css` (visuel
+colonnes 1-5, chiffres colonnes 7-12, aucun padding-inline, lignes
+alignées au pixel avec la grille partagée).
+
+## Services (home)
+
+Quatre lignes, une par service (`content/services.ts` : `number`,
+`name`, `phrase`, `paragraph`, `href`), chacune sur les deux axes —
+voir « Règle des deux axes ». `.row` redéclare sa propre grille 12
+colonnes (comme `.split`), sans padding-inline (padding-block:32px
+entre les lignes, ça n'affecte pas les colonnes) :
+
+  moitié gauche (colonnes 1-6)
+    numéro + nom (« 01 — Référencement »), --t-title, Bricolage
+    Grotesque 600, pas d'italique, axe gauche.
+    12px plus bas : la phrase courte, --t-body, axe gauche.
+    Le lien « En savoir plus → » : calé contre le bord droit de la
+    moitié gauche (fin de la colonne 6, avant la gouttière — pas le
+    début de la colonne 7), ligne de base alignée sur celle de la
+    DERNIÈRE ligne du paragraphe.
+
+  moitié droite (colonnes 7-12)
+    le paragraphe, --t-body, axe droit, `max-width: 42ch` (cible
+    45-75 caractères/ligne ; mesuré 50,8 en régime deux axes, quelle
+    que soit la largeur — le plafond en `ch` absorbe la croissance de
+    l'écran). Commence sous le niveau de la phrase courte (effet
+    d'escalier), jamais au niveau du nom : techniquement, `.heading`
+    et `.phrase` occupent les lignes de grille 1 et 2, `.paragraph`
+    la ligne 3 — 12px de row-gap partout, +8px de margin-top propre au
+    paragraphe (20px au total entre le bas de la phrase et le
+    paragraphe, contre 12px entre le nom et la phrase).
+
+  ligne de base du lien = ligne de base du paragraphe
+    `.link` occupe la MÊME ligne de grille 3 que `.paragraph` (colonne
+    1-7, `justify-self: end`, `align-self: end`) — puisque `.link` et
+    `.paragraph` partagent exactement le même `--t-body`/`--t-body-lh`,
+    aligner le bas de leurs boîtes aligne aussi leurs lignes de base,
+    sans mesure JS (même principe que `.figures` dans dernier
+    accompagnement : `align-self` sur une grille commune, pas un calcul
+    de position). Le lien porte `padding-block: 12px` +
+    `margin-block: -12px` (zone cliquable élargie à 44px de haut sans
+    déplacer sa boîte de marge — donc sans casser l'alignement).
+
+  repli en une seule colonne : sous 1280px, pas 1024px
+    Mesuré : à 1024px, forcer les deux moitiés donnerait 43,6
+    caractères/ligne (paragraphe sur 350px de large) — sous le seuil de
+    45. À 1280px : 50,8 caractères/ligne — dans la cible. Le repli est
+    donc décalé à 1280px (au-delà de la bascule rail/shell à 1024px,
+    qui reste inchangée pour le reste du site). Sous 1280px : numéro +
+    nom, phrase courte, paragraphe, puis le lien sous le paragraphe —
+    tout empilé sur l'axe gauche, dans cet ordre.
+
+  ligne cliquable
+    Toute la ligne est cliquable, mais un SEUL vrai `<a>` existe par
+    ligne (le lien « En savoir plus → ») — jamais d'autre élément
+    interactif imbriqué. Sa zone cliquable est étendue à toute la ligne
+    par un lien étiré : `.row { position: relative }`,
+    `.link::after { content:""; position:absolute; inset:0 }`. Le
+    survol de n'importe quel point de la ligne déclenche donc
+    `.link:hover` (le `::after` fait partie du `<a>`) : seul le texte
+    « En savoir plus → » se souligne — pas d'inversion de fond, pas
+    d'atténuation des lignes voisines. `cursor: pointer` sur `.row`.
+    Un clic n'importe où dans la ligne (y compris au milieu du
+    paragraphe) navigue vers `service.href`. Une seule tabulation
+    clavier par ligne (un seul `<a>`).
+
+  lien « En savoir plus → »
+    Soulignement au survol ET au focus clavier (`:focus-visible`),
+    `text-decoration-color: transparent → currentColor`, 150ms,
+    l'easing du site — repris tel quel du titre du carton 3 du rail
+    (`rail.module.css .cardAction .cardTitle`), pas un nouveau motif.
+    `prefers-reduced-motion` : pas de transition, le soulignement
+    apparaît directement. Couleur du texte : celle du reste de la
+    section (`var(--ink)`, cette section n'a jamais d'autre tonalité).
+    Exception assumée à la règle « lien vers une page inexistante =
+    `<span>` » (voir plus bas, « AVANT MISE EN LIGNE ») : les 4 pages
+    `/services/*` seront créées avant la mise en ligne.
+
+AVANT MISE EN LIGNE : les 4 pages `/services/referencement`,
+`/services/publicite`, `/services/site-internet` et l'Automatisation
+doivent exister. L'adresse de l'Automatisation n'est PAS à choisir
+librement : elle doit rester identique à celle du site en ligne
+aujourd'hui (`https://venturia.fr/services/automations/`, barre finale
+comprise) — cette page a déjà du trafic Google, changer son adresse le
+perdrait. Les trois autres adresses sont provisoires.
+
 ## Barre de navigation
 
 position fixed, top, hauteur 64px, TOUJOURS visible : ne se cache jamais au
