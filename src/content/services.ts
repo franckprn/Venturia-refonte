@@ -10,9 +10,9 @@
 // finale comprise. Les trois autres sont provisoires (pages à créer).
 
 export type Service = {
-  /** --t-title, Bricolage Grotesque 600, avec `name` (pas de style propre). */
-  number: string;
-  /** --t-title, Bricolage Grotesque 600. */
+  /** --t-title, Bricolage Grotesque 600. Sert aussi de nom accessible au
+   *  lien étiré de la ligne (aria-label) : le texte visible « En savoir
+   *  plus → » a été retiré, voir ServicesRowsReveal.tsx. */
   name: string;
   /** Phrase courte, --t-body, moitié gauche. */
   phrase: string;
@@ -26,12 +26,8 @@ export type Service = {
 export const servicesLabel = "EXPERTISES";
 export const servicesTitle = "Quatre façons de travailler ensemble";
 
-/** Libellé du lien de chaque ligne, identique pour les 4 services. */
-export const servicesLinkLabel = "En savoir plus";
-
 export const services: [Service, Service, Service, Service] = [
   {
-    number: "01",
     name: "Référencement",
     phrase: "Être trouvé sur Google, et cité par les IA.",
     paragraphs: [
@@ -46,7 +42,6 @@ export const services: [Service, Service, Service, Service] = [
     href: "/services/referencement",
   },
   {
-    number: "02",
     name: "Publicité",
     phrase: "Plus de commandes, sans attendre.",
     paragraphs: [
@@ -59,7 +54,6 @@ export const services: [Service, Service, Service, Service] = [
     href: "/services/publicite",
   },
   {
-    number: "03",
     name: "Site internet",
     phrase: "Un site à votre image, pensé pour convertir.",
     paragraphs: [
@@ -73,7 +67,6 @@ export const services: [Service, Service, Service, Service] = [
     href: "/services/site-internet",
   },
   {
-    number: "04",
     name: "Automatisation",
     phrase: "Des systèmes adaptés à votre façon de travailler.",
     paragraphs: [
