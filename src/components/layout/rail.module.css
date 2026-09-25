@@ -51,6 +51,19 @@
   z-index: 65;
 }
 
+/* Carton 1 uniquement : remplace la gouttière générique (padding-top
+   de .slot ci-dessus) par l'écart MESURÉ jusqu'au haut de la photo
+   Inoko (--rail-card1-offset, Rail.tsx + repli 20px sans JS,
+   globals.css) — son point de départ (avant figement) est aligné au
+   pixel sur le haut de la photo, pas sur le haut de la section. Le
+   figement lui-même (stickyWrap1, top: var(--rail-stick)) est
+   inchangé : ce padding ne fait que retarder l'instant où le sticky
+   s'accroche, pas la position une fois accroché (même logique que la
+   gouttière qu'il remplace, voir le commentaire de .slot ci-dessus). */
+.slot1 {
+  padding-top: var(--rail-card1-offset);
+}
+
 .stickyWrap {
   position: sticky;
 }

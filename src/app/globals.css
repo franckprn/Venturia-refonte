@@ -87,6 +87,14 @@
   --rail-h1: 160px;
   --rail-h2: 160px;
 
+  /* Écart mesuré entre le haut de la section Dernier accompagnement et
+     le haut de sa photo (Rail.tsx, carton 1 — CLAUDE.md, « Rail
+     droit ») : le carton 1 s'aligne sur la photo, pas sur la section.
+     Repli sans JS = la gouttière générique (--shell-rail-pad, 20px) que
+     ce carton utilisait avant cette mesure — pas pixel-parfait sans JS,
+     mais jamais 0 ni une valeur absurde. */
+  --rail-card1-offset: 20px;
+
   /* Espacement vertical des sections (CLAUDE.md, « Shell de page ») :
      96px mobile / 160px desktop, posé par <Section> (padding-block, haut
      ET bas) — pas de valeur en dur par section. Hero et Respiration en

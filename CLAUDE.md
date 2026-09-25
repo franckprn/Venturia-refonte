@@ -208,19 +208,35 @@ token), en `display: flex; flex-direction: column` — le contenu
 (`.body`) est le seul enfant, l'espace en trop tombe donc SOUS lui,
 jamais au-dessus (pas de centrage vertical).
 
-H1 (« Bien plus que / du référencement ») : dès 1024px, sur les 12
-colonnes entières (`grid-column: 1 / -1`), la ligne la plus longue («
-du référencement ») occupant EXACTEMENT cette largeur, du bord gauche
-de la colonne 1 au bord droit de la colonne 12, à toute largeur
-d'écran. Taille calculée sur la largeur de la grille, jamais sur
-100vw : un wrapper DÉDIÉ (`.titleWrap`, jamais le h1 lui-même, jamais
-un ancêtre des cartons du rail) porte `container-type: inline-size`,
-le h1 un `font-size: calc(<constante> * 1cqi)`. La constante est un
-calibrage géométrique (letter-spacing en em ⇒ la largeur du texte
-scale linéairement avec le font-size, donc un seul multiplicateur reste
-exact à toute largeur de conteneur) — à recalibrer seulement si le
-texte, la police, la graisse ou l'approche du h1 changent. Sous 1024px :
-pleine largeur du contenu, taille fixe (--t-hero).
+H1 (« Bien plus que / du référencement ») : dès 1024px, calé sur les
+COLONNES 1 À 10 (pas les 12 entières), la ligne la plus longue (« du
+référencement ») occupant EXACTEMENT cette largeur, du bord gauche de
+la colonne 1 au bord droit de la colonne 10, à toute largeur d'écran —
+les colonnes 11-12 restent vides à droite du titre. Taille calculée sur
+la largeur de la grille, jamais sur 100vw : un wrapper DÉDIÉ
+(`.titleWrap`, jamais le h1 lui-même, jamais un ancêtre des cartons du
+rail) porte `container-type: inline-size` (toujours sur les 12
+colonnes, `grid-column: 1 / -1` — seule la TAILLE du texte cible 10
+colonnes, pas la largeur du conteneur cqi lui-même), le h1 un
+`font-size: calc(<constante> * 1cqi)`.
+
+La constante (`--hero-title-cqi`, hero.module.css) est un calibrage
+GÉOMÉTRIQUE, pas un pourcentage : largeur des colonnes 1-10 = 10×(largeur
+d'1 colonne) + 9×(gap, 20px), une fonction AFFINE de la largeur du
+conteneur (les 9 gouttières sont des px fixes, ils ne grandissent pas
+avec l'écran) — alors qu'un multiplicateur cqi ne peut produire qu'une
+largeur de texte PUREMENT PROPORTIONNELLE à cette largeur (letter-spacing
+en em ⇒ la largeur du texte scale linéairement avec le font-size, donc
+avec 1cqi). Une droite proportionnelle ne peut pas épouser exactement
+une droite affine à toute largeur : la valeur actuelle (9.7846) minimise
+l'écart maximal mesuré sur 1024-1728px (± 1,1px aux deux bornes, sous
+0,3px à 1280/1440px) plutôt que d'être exacte à un seul point puis dériver
+ailleurs — voir le calcul complet en commentaire, hero.module.css. À
+recalibrer si le texte, la police, la graisse, l'approche du h1 OU la
+géométrie de la grille (colonnes/gap/marges) changent. Sous 1024px :
+pleine largeur du contenu, taille fixe (--t-hero) — `--hero-title-cqi`
+ne s'applique pas du tout à cette largeur (mécanisme entièrement
+différent, aucun rapport avec ce calibrage).
 
 Sous-titre + CTA (`.bottom`) : dès 1024px, colonnes 7-12 (axe droit),
 en bas du Hero — `.body` passe en grille 3 lignes
@@ -240,10 +256,77 @@ depuis le haut par défaut, donc le texte n'est jamais centré
 verticalement — il démarre en haut de la section, sur les 12 colonnes,
 aligné à gauche, sans JS ni flex nécessaires pour ça.
 
-Tout le texte en --ground (plus de --accent dans cette section).
 Emphase sur les deux derniers mots avant le point (« passer commande ») :
 voir « Typographie » § emphase — le texte est déjà à 800 (graisse
-maximale de Bricolage Grotesque), donc soulignement, pas gras.
+maximale de Bricolage Grotesque), donc soulignement, pas gras. Jamais de
+--accent dans cette section.
+
+Bascule de couleur plein écran, réversible dans les deux sens — RIEN
+n'est un fond en dur (ni sur `.section`, ni sur le texte) :
+  fond    `.section` ne porte AUCUN fond propre. `<RespirationBackdrop>`
+          (src/components/sections/RespirationBackdrop.tsx, ne rend
+          AUCUN DOM) anime directement `background-color` de `<html>`
+          ET `<body>` ensemble — PAS un calque `position: fixed`
+          séparé : un tel calque crée toujours son propre contexte
+          d'empilement, qui peint soit derrière le fond de `<body>`
+          (z-index négatif) soit par-dessus le contenu normal non
+          positionné (z-index positif/auto) — jamais les deux à la
+          fois (bug réel mesuré : les labels/titres non animés
+          d'Inoko, Services et toute la section Processus devenaient
+          invisibles, alors même que leur opacity/visibility/couleur
+          restaient corrects dans le DOM/CSSOM — seul un rendu pixel le
+          révèle). Animer directement le fond de la boîte racine
+          contourne le problème à la racine : un `background-color` est
+          peint AVANT toute la hiérarchie d'empilement, jamais un
+          concurrent d'empilement.
+  texte   --ink par défaut (donc correct même sans JS — la section
+          arrive avec le fond crème du site), --ground UNIQUEMENT
+          pendant que le fond est charbon — RespirationReveal.tsx,
+          MÊME trigger et MÊMES seuils que le fond (voir plus bas), un
+          second ScrollTrigger indépendant mais calculé à l'identique
+          donc synchrone. Soulignement de « passer commande » compris
+          (text-decoration-color suit).
+Seuils : quand le haut de la section touche le haut de la fenêtre
+(« top top ») — elle COMMENCE à occuper tout l'écran, sa boîte totale
+dépasse toujours 100svh (voir `box-sizing: content-box` plus bas) donc
+son bas reste sous le bas de la fenêtre à cet instant précis → bascule
+vers charbon/--ground. Quand le bas de la section touche le bas de la
+fenêtre (« bottom bottom ») — dernier instant où elle occupe encore tout
+l'écran, juste avant que Services n'apparaisse par le bas → bascule
+vers crème/--ink. `onEnter`/`onLeave`/`onEnterBack`/`onLeaveBack` : le
+seul endroit du projet qui utilise ScrollTrigger pour une bascule
+réversible liée au scroll (partout ailleurs, révélations `once: true`),
+à la demande explicite du prompt qui l'a introduite. Couleurs lues sur
+les tokens (`getComputedStyle`, --ground/--ink), jamais un hex en dur.
+
+`box-sizing: content-box` sur `.section` (override local du
+`border-box` global posé par Tailwind) : sans lui, `min-height: 100svh`
+absorbe le padding 128/200 dans son propre budget plutôt que de
+l'ajouter, et sur un écran où le texte tient sur peu de lignes, la
+boîte totale peut retomber pile à 100svh, sans aucune marge — les deux
+seuils de la bascule (« top top » / « bottom bottom ») coïncident alors
+exactement, rendant le charbon imperceptible (mesuré). `content-box`
+garantit une fenêtre de tenue réelle d'au moins 256/400px (128/200 de
+chaque côté), quel que soit le nombre de lignes du texte.
+
+La nav suit via le mécanisme `data-tone` existant (la section déclare
+toujours `tone="dark"`), mais avec un correctif : `src/lib/tone.ts`
+expose `setLiveTone(sectionId, tone)`, un registre de tonalités RÉELLES
+qui prend le pas sur la tonalité déclarée pour la section concernée —
+`<RespirationBackdrop>` l'appelle dans les MÊMES callbacks
+`onEnter`/`onLeave`/… qui animent le fond, donc synchronisé à la frame
+près. Sans ce correctif, la nav (et tout autre abonné — cartons, pile
+mobile) bascule au franchissement du HAUT de la section, sa propre
+mesure indépendante — mesuré ~32px de scroll AVANT la bascule réelle du
+fond (la moitié de la hauteur de la nav) : un texte clair sur un fond
+encore crème le temps de l'écart. Contraste mesuré (13,08:1, --ground
+sur --ink plein, la valeur de référence de globals.css) : nav/fond ET
+texte/fond, dans les deux tonalités (charbon comme crème).
+
+prefers-reduced-motion : bascule immédiate aux mêmes seuils (`gsap.set`,
+pas de tween), sans transition, pour le fond ET pour le texte. Aucune
+différence de mise en page mesurée entre les deux modes (mêmes rects
+h1/carton/nav/texte).
 
 ## Dernier accompagnement — Inoko (home)
 
@@ -415,7 +498,11 @@ droite, logo VA à gauche, inchangés.
 ## Rail droit
 
 Trois cartons, chacun rattaché à une section de la page :
-  1. au niveau du hero
+  1. au niveau de Dernier accompagnement (le cas client Inoko) — son
+     icône (l'horloge) reste liée à la fin de l'animation du h1 du
+     Hero, mais son ancrage/figement suit Inoko, comme les deux autres
+     cartons suivent leur propre section (voir « Apparition du carton
+     1 » plus bas)
   2. au niveau de la section services
   3. juste avant le CTA final
 
@@ -430,31 +517,58 @@ l'écran. Le carton suivant se fige à son tour, 20px sous le bas du
 précédent. En bas de page, les trois cartons sont visibles, empilés.
 
 Apparition du carton 1 : aucun carton visible pendant le Hero (rail
-desktop ET pile mobile). Le carton 1 reste ancré au hero (figement
-sticky inchangé, « au niveau du hero ») mais sa VISIBILITÉ suit la
-section suivante (Dernier accompagnement, le cas client Inoko) : il
-apparaît (opacity 0→1 + y 12px→0, 300ms, l'easing du site) quand cette
-section entre dans l'écran (seuil 50 % de la hauteur visible, la même
-hystérésis que les cartons 2/3 de la pile mobile — 60 % pour la sortie),
-disparaît (l'inverse) en remontant au-dessus de ce seuil. État initial
-posé en JS (gsap.set), jamais en CSS — sans JS, le repli est visible
-d'emblée (« Animations », aucun contenu parqué à opacity 0).
-prefers-reduced-motion : apparition/disparition instantanées. Sur le
-rail desktop, le carton reste monté en permanence (seule son opacité
-change) ; dans la pile mobile, il est démonté/remonté comme les cartons
-2/3 (voir « Pile mobile ») — son icône (l'horloge), elle, ne suit QUE le
-signal de fin du h1 (jamais l'entrée dans la pile) et ne rejoue jamais.
+desktop ET pile mobile) — mais plus par une opacité pilotée en JS
+(ancienne mécanique, retirée). Sur le rail desktop, le carton 1 est
+ancré à `dernier-accompagnement` exactement comme les cartons 2 et 3
+sont ancrés à leur propre section (« Implémentation » plus bas) : sa
+plage de figement (`grid-row: dernier-accompagnement-start / -1`) ne
+démarre qu'au haut de la section Inoko, donc aucune boîte n'existe dans
+les lignes de grille du Hero — rien à peindre, rien à cacher, une pure
+conséquence de la grille partagée, aucun JS de visibilité. Son point de
+figement (`top: var(--rail-stick)`, 64px, le trait de la nav) reste lui
+aussi inchangé — voir la note plus bas sur ce qui distingue encore ce
+carton des deux autres une fois figé. Sur la pile mobile, le carton 1
+continue d'entrer/sortir par hystérésis sur cette même section (comme
+avant, voir « Pile mobile ») : c'est un mécanisme DIFFÉRENT (démontage/
+remontage React) qui produit le même résultat (rien pendant le Hero) —
+son icône (l'horloge) ne suit QUE le signal de fin du h1 (jamais
+l'entrée dans la pile) et ne rejoue jamais.
 
 Écarts harmonisés à une seule valeur, 20px (la gouttière) : l'écart
 horizontal rail↔colonne 12, l'écart rail↔bord de l'écran, l'écart
 vertical entre deux cartons figés, ET l'écart entre le haut d'un carton
-(avant figement) et le haut de sa section de rattachement — ce dernier
-porté par un `padding-top` sur `.slot`, sans quoi le carton suivant
-« touche » visuellement le bas de la section précédente jusqu'à son
-figement (mesuré avant correction : le carton du GEO touchait le bas de
-Respiration). N'affecte pas le carton 1 : son figement, lui, tombe
-délibérément PILE sur le trait de la nav (voir ci-dessus), ce n'est pas
-« le haut d'une section ».
+(avant figement) et le haut de sa section de rattachement — porté par
+un `padding-top` sur `.slot`, sans quoi le carton suivant « touche »
+visuellement le bas de la section précédente jusqu'à son figement
+(mesuré avant correction : le carton du GEO touchait le bas de
+Respiration). Vrai pour les cartons 2 et 3 (`.slot`, rail.module.css) ;
+le carton 1 fait exception depuis cette session (voir juste en dessous).
+
+Carton 1, point de départ EXCEPTION à cette harmonisation : son haut
+(avant figement) est aligné au PIXEL sur le haut de la PHOTO Inoko
+(`[data-da-photo]`, dernier-accompagnement.module.css), pas sur le haut
+de la section ni sur la gouttière générique de 20px — le
+label/titre/paragraphe qui précèdent la photo n'ont pas de hauteur
+fixe (texte, variable selon la largeur d'écran et le point de rupture).
+Mesuré comme les hauteurs des cartons (--rail-h1/--rail-h2) : jamais
+codé en dur, l'écart réel entre le haut de la section et le haut de la
+photo est réécrit dans `--rail-card1-offset` (globals.css, repli 20px
+sans JS) et lu par `.slot1` (rail.module.css) EN PLACE de
+`padding-top: var(--shell-rail-pad)`. Mesuré via `offsetTop` (chaîne
+`offsetParent`), jamais `getBoundingClientRect()` : ce dernier inclut
+le `transform` GSAP de la révélation d'entrée de la photo
+(DernierAccompagnementReveal, y:24→0), donnant une position transitoire
+au lieu de la position de repos si mesuré avant que l'utilisateur
+n'ait scrollé jusque-là — `offsetTop` ignore toujours `transform`, quel
+que soit l'état de la révélation au moment de la mesure. Écart
+haut-carton/haut-photo mesuré : 0px (aux arrondis sub-pixel près) à
+1024/1440/1728px.
+
+Le POINT DE FIGEMENT du carton 1, lui, ne change pas — toujours
+particulier, inchangé par cette session : `top: var(--rail-stick)`
+(64px, le trait de la nav, directement — pas un calc() dérivé des
+cartons précédents comme pour 2 et 3), pas dérivé du haut d'une section
+ni d'une photo. Seul le POINT DE DÉPART (avant figement) a bougé.
 
 Le carton passe AU-DESSUS du bloc nav (z-index) : à cette hauteur, il
 partage sa position avec la bande floutée latérale du trait, côté rail — le
@@ -674,7 +788,13 @@ pile mobile (53), méga-menu — mobile ET desktop, même valeur, jamais
 montés en même temps (55), fond flouté de nav (58), trait de nav (59),
 barre de nav (60), carton du rail desktop figé (65, >= 1024px
 uniquement — partage sa position avec la bande floutée latérale du trait,
-voir plus haut).
+voir plus haut). La bascule de Respiration (`<RespirationBackdrop>`,
+« Respiration ») ne participe pas à cette échelle : elle anime
+directement le fond de `<html>`/`<body>`, sans calque ni z-index —
+voir ce composant pour le piège CSS que ce choix évite (un calque
+`position: fixed` séparé, à N'IMPORTE quel z-index, se fait soit
+recouvrir par le fond de `<body>` soit passer par-dessus le contenu
+normal non positionné, jamais les deux à la fois).
 
 Animation des icônes du RAIL DESKTOP (>= 1024px) — la pile mobile a ses
 propres déclencheurs, décrits ci-dessus dans « Pile mobile ».

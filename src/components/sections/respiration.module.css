@@ -1,14 +1,24 @@
 /* ------------------------------------------------------------------ *
  * Section Respiration (home, section 3) — l'opposé du Dernier
- * accompagnement qui précède : fond --ink, rien que du texte.
+ * accompagnement qui précède.
  *
  * Le <section> lui-même (via <Section>) reste dans la zone de contenu
- * normale (grid-column: 1, pas sous le rail) — c'est le FOND (box-shadow
- * + clip-path, voir .section ci-dessous) qui déborde jusqu'aux deux
- * bords de l'écran, pas le contenu. Ça évite que le texte se retrouve
- * sous les cartons du rail, qui restent figés au-dessus de cette
- * section (empilement permanent) : le fond doit passer derrière eux,
- * pas le texte à côté.
+ * normale (grid-column: 1, pas sous le rail), SANS fond propre : la
+ * bascule crème ↔ charbon plein écran anime directement le fond de
+ * `<html>`/`<body>` — <RespirationBackdrop> (RespirationBackdrop.tsx,
+ * ne rend aucun DOM), monté une fois par page.tsx, hors du Shell. Avant
+ * cette session, `.section` peignait elle-même un fond --ink en dur
+ * (box-shadow 100vmax + clip-path) : incompatible avec une bascule
+ * réversible pilotée par le scroll (CLAUDE.md, « Respiration ») —
+ * remplacé entièrement, plus aucun fond ici.
+ *
+ * Couleur du texte : --ink par défaut (CSS, donc correct même sans JS —
+ * la section arrive avec le fond crème du site, un texte --ink y reste
+ * lisible), --ground UNIQUEMENT pendant que le fond est charbon —
+ * bascule pilotée en JS par RespirationReveal.tsx, EXACTEMENT les mêmes
+ * seuils ScrollTrigger que <RespirationBackdrop> (même trigger, mêmes
+ * start/end « top top »/« bottom bottom » du `<section>`) pour rester
+ * synchronisée avec le fond dans les deux sens.
  *
  * padding-top/bottom (128/200, le token « section en négatif » du
  * CLAUDE.md) vivent ici, PAS via `.spaced` (section.module.css) :
@@ -25,6 +35,21 @@
  * SOUS le texte, jamais au-dessus : le texte n'est donc jamais centré
  * verticalement, sans JS ni flex nécessaire (CLAUDE.md § 3).
  *
+ * box-sizing: content-box, en override LOCAL du `border-box` posé
+ * globalement (Tailwind preflight) : sans lui, `min-height` compte le
+ * padding DEDANS son budget — sur un écran large où le texte tient sur
+ * peu de lignes (colonne de contenu plus étroite avec le rail qu'en
+ * pleine largeur, donc pas forcément moins de lignes), la boîte totale
+ * peut retomber pile à 100svh, sans aucun pixel de marge. Mesuré :
+ * RespirationBackdrop a besoin d'une fenêtre de scroll réelle entre
+ * « la section commence à occuper tout l'écran » et « elle arrête de
+ * l'occuper » pour que la bascule --ink soit seulement visible — avec
+ * `border-box`, cette fenêtre peut tomber à zéro pixel (les deux
+ * seuils coïncident), rendant le charbon imperceptible. `content-box`
+ * restaure le padding en plus du min-height : la boîte totale dépasse
+ * alors GARANTIE 100svh d'au moins 256/400px (128/200 de chaque côté),
+ * la fenêtre de tenue de la bascule.
+ *
  * Une seule phrase, pleine largeur (mise en page A, CLAUDE.md § 3) :
  * .text occupe TOUTE la grille de contenu (grid-column: 1 / -1),
  * contrairement à l'ancienne version à trois blocs qui répartissait
@@ -33,23 +58,15 @@
  * ------------------------------------------------------------------ */
 
 .section {
-  position: relative;
-  isolation: isolate;
-  color: var(--ground);
+  box-sizing: content-box;
+  /* --ink par défaut (fond crème par défaut) : voir le commentaire
+     d'en-tête — RespirationReveal.tsx bascule cette couleur en JS,
+     jamais en dur ici au-delà du repli sans-JS. */
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   min-height: 100svh;
   padding-top: 128px;
   padding-bottom: 128px;
-  /* Fond plein écran sans 100vw (CLAUDE.md, « Shell de page ») : le
-     box-shadow étend la même couleur unie bien au-delà des deux bords du
-     conteneur, le clip-path retaille cette extension à la hauteur exacte
-     de la section (sans lui, le débordement vertical envahirait les
-     sections voisines). Un box-shadow ne compte pas dans le scroll
-     overflow, contrairement à 100vw : aucun risque de barre de défilement
-     horizontale, quelle que soit la largeur de la barre verticale. */
-  background: var(--ink);
-  box-shadow: 0 0 0 100vmax var(--ink);
-  clip-path: inset(0 -100vmax);
 }
 
 @media (min-width: 1024px) {
@@ -77,14 +94,16 @@
    Bricolage Grotesque (200-800, voir document.fonts) — écart de graisse
    nul avec le corps du texte (lui-même à 800), largement sous les 200
    de seuil fixé par CLAUDE.md pour qu'un gras se voie. Soulignement à
-   la place, en --ground (plus de rouge dans cette section) : épaisseur
+   la place, jamais du rouge dans cette section — de la même couleur que
+   le reste du texte (--ink par défaut, bascule --ground en JS avec lui,
+   voir le commentaire d'en-tête et RespirationReveal.tsx) : épaisseur
    et décalage en em, proportionnels à --t-hero (donc à --font-display,
    800), pas des px fixes — ils suivent la bascule mobile/desktop de
    --t-hero sans règle séparée. */
 .accent {
-  color: var(--ground);
+  color: var(--ink);
   text-decoration: underline;
-  text-decoration-color: var(--ground);
+  text-decoration-color: var(--ink);
   text-decoration-thickness: 0.05em;
   text-underline-offset: 0.14em;
 }

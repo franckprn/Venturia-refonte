@@ -18,8 +18,12 @@ const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /** Section qui déclenche l'apparition du carton 1 (CLAUDE.md, « Rail
- *  droit ») — jamais visible pendant le Hero, comme sur le rail
- *  desktop (voir components/layout/Rail.tsx, CARD1_REVEAL_SECTION). */
+ *  droit ») — jamais visible pendant le Hero, ici par démontage/
+ *  remontage (hystérésis, comme les cartons 2/3) ; sur le rail desktop
+ *  (Rail.tsx), le même résultat vient de l'ancrage du carton à cette
+ *  même section (`anchor="dernier-accompagnement"`, page.tsx), qui ne
+ *  lui réserve aucune ligne de grille pendant le Hero — deux
+ *  mécanismes différents, un seul repère commun. */
 const CARD1_REVEAL_SECTION = "dernier-accompagnement";
 
 /** Cycle de vie d'un carton réversible — les 3 cartons désormais

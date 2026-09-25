@@ -67,12 +67,11 @@
 @media (min-width: 1024px) {
   .titleWrap {
     container-type: inline-size;
-    /* Calibré par mesure (Playwright) : à ce poids/approche/police fixés,
-       la largeur du texte scale linéairement avec le font-size (le
-       letter-spacing est lui-même en em) — un seul multiplicateur reste
-       donc exact à toute largeur de conteneur. Rapport de vérification
-       du prompt « rythme de la home ». */
-    --hero-title-cqi: 11.7855;
+    /* Calibrage géométrique (pas une mesure au pourcentage) — voir le
+       commentaire détaillé au-dessus de .title pour le calcul complet
+       et sa marge d'erreur résiduelle assumée (~1,1px aux bornes de la
+       plage testée). */
+    --hero-title-cqi: 9.7846;
   }
 }
 
@@ -94,15 +93,35 @@
 }
 
 /* >= 1024px : la ligne la plus longue du h1 (« du référencement »)
-   occupe EXACTEMENT la largeur des 12 colonnes (CLAUDE.md § 1) — taille
-   calculée sur la largeur de la grille (1cqi = 1 % de la largeur de
-   .titleWrap, lui-même égal aux 12 colonnes du Hero puisqu'il n'y a pas
-   de rail sur cette section), jamais sur 100vw. Le multiplicateur
-   (--hero-title-cqi) est une CONSTANTE : comme la largeur d'un texte à
-   letter-spacing en em scale exactement comme le font-size, un seul
-   calibrage (texte/police/graisse/approche fixés) reste valable à
-   n'importe quelle largeur de conteneur — mesuré par Playwright, voir
-   le rapport de vérification (< 0,01 % d'écart mesuré à 1024-1920px). */
+   occupe la largeur des colonnes 1 À 10 (pas les 12 colonnes entières —
+   CLAUDE.md, « Hero »), bord gauche de la colonne 1 au bord droit de la
+   colonne 10. Taille calculée sur la largeur de la grille (1cqi = 1 %
+   de la largeur de .titleWrap, égale aux 12 colonnes du Hero puisqu'il
+   n'y a pas de rail sur cette section), jamais sur 100vw.
+
+   Calibrage géométrique de --hero-title-cqi (PAS un pourcentage de la
+   largeur du conteneur — voir pourquoi ci-dessous) :
+   - W = largeur de .titleWrap (12 colonnes, gap 20px)
+   - largeur d'1 colonne : c = (W − 11×20) / 12
+   - largeur des colonnes 1-10 (10 colonnes + 9 gouttières internes) :
+     W10 = 10c + 9×20 = (5/6)·W − 10/3
+   - la largeur du texte scale EXACTEMENT comme le font-size (letter-
+     spacing en em) : text = k·font-size, k mesuré par Playwright
+     (8.48502, texte/police/graisse/approche fixés) ; et
+     font-size = --hero-title-cqi × W/100, donc text = --hero-title-cqi
+     × k × W/100 — une relation PUREMENT PROPORTIONNELLE à W (une droite
+     par l'origine), alors que W10(W) est AFFINE (l'ordonnée à l'origine
+     −10/3 vient des gouttières fixes en px, qui ne grandissent pas avec
+     W). AUCUN multiplicateur constant ne peut donc égaler W10(W) à
+     TOUTE largeur — seulement s'en approcher.
+   - --hero-title-cqi = 9.7846 minimise l'écart maximal sur la plage
+     testée (1024-1728px), en égalisant l'erreur aux deux bornes plutôt
+     qu'en calibrant sur un seul point : mesuré, delta = +1,04px à
+     1024px, +0,27px à 1280px, −0,22px à 1440px, −1,10px à 1728px.
+     Sous 1024px : --hero-title-cqi ne s'applique pas (h1 en --t-hero
+     fixe), aucun rapport avec ce calibrage. Recalibrer UNIQUEMENT si le
+     texte, la police, la graisse, l'approche OU la géométrie de la
+     grille (colonnes/gap/marges) changent. */
 @media (min-width: 1024px) {
   .title {
     font-size: calc(var(--hero-title-cqi) * 1cqi);

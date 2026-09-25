@@ -1,22 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, type ComponentType, type RefAttributes, type RefObject } from "react";
+import { useEffect, useRef, type ComponentType, type RefAttributes, type RefObject } from "react";
 import Link from "next/link";
-import { gsap } from "gsap";
 import { railCards, type RailCardContent } from "@/content/rail";
-import { VENTURIA_EASE } from "@/lib/ease";
 import { onHeroTitleDone } from "@/lib/heroTitleSignal";
 import { useSectionTone, type Tone } from "@/lib/tone";
-import { useSectionHysteresis, type CrossEvent } from "@/lib/useSectionHysteresis";
 import { useStickOnce } from "@/lib/useStickOnce";
 import { IconArrowRight, IconClock, IconSparkle, type RailIconHandle } from "./RailIcons";
 import styles from "./rail.module.css";
-
-/** Section qui déclenche l'apparition du carton 1 (CLAUDE.md, « Rail
- *  droit ») — pas `anchor` ("hero", le point de figement sticky du
- *  carton, inchangé) : le carton reste associé au hero, mais ne
- *  devient visible que quand la section Inoko entre dans l'écran. */
-const CARD1_REVEAL_SECTION = "dernier-accompagnement";
 
 // Une icône par carton, dans l'ordre de content/rail.ts (CLAUDE.md,
 // « Rail droit ») : horloge, étoile à quatre branches, flèche.
@@ -42,7 +33,20 @@ type RailSlotProps = {
  *   avec sa section ; « / -1 » systématique (jamais raccourci pour les
  *   cartons suivants) fait tenir l'empilement PERMANENT — un slot qui
  *   s'arrêterait à la fin de sa section ferait repartir le carton
- *   (un relais, pas un empilement, voir CLAUDE.md « Rail droit »).
+ *   (un relais, pas un empilement, voir CLAUDE.md « Rail droit »). Les
+ *   trois cartons partagent ce même mécanisme de ligne de grille, carton
+ *   1 compris (`anchor="dernier-accompagnement"`, page.tsx) : sa ligne
+ *   ne démarre qu'au haut de la section Inoko, donc rien n'est ni rendu
+ *   ni peint dans les lignes du Hero qui précèdent — aucun carton
+ *   visible pendant le Hero est une pure conséquence de la grille, plus
+ *   une opacité pilotée en JS (CLAUDE.md, « Rail droit »). Deux
+ *   différences avec 2/3, toutes deux volontaires : son `top` sticky
+ *   (`var(--rail-stick)`, 64px, la hauteur de la nav, directement — pas
+ *   un calc() dérivé des cartons précédents, stickyWrap1 plus bas) ; et
+ *   son `padding-top` (`.slot1` plutôt que la gouttière générique de
+ *   `.slot`) — voir plus bas, l'effet dédié qui l'écrit dans
+ *   `--rail-card1-offset` : son POINT DE DÉPART (avant figement) est
+ *   aligné sur le haut de la PHOTO Inoko, pas sur le haut de la section.
  * - Mobile (< 1024px) : ce carton sort du flux (`.slot` passe à
  *   `display: none`, voir rail.module.css) — remplacé par la pile
  *   fixée en bas de l'écran (components/layout/MobileRailStack.tsx),
@@ -70,80 +74,8 @@ type RailSlotProps = {
 export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
   const card = railCards[cardIndex];
   const measureRef = useRef<HTMLDivElement>(null);
-  const cardElRef = useRef<HTMLElement | null>(null);
-  const revealCtxRef = useRef<ReturnType<typeof gsap.context> | null>(null);
   const iconRef = useRef<RailIconHandle>(null);
   const tone = useSectionTone(measureRef);
-
-  // Carton 1 uniquement : aucun carton visible pendant le Hero
-  // (CLAUDE.md, « Rail droit ») — le carton reste figé « au niveau du
-  // hero » (anchor/sticky inchangés), seule sa VISIBILITÉ suit
-  // désormais la section Inoko, indépendamment du figement. État
-  // initial posé en JS (gsap.set, jamais en CSS) : sans JS, le repli
-  // est le CSS par défaut (visible) — CLAUDE.md, « Animations »,
-  // « aucun contenu parqué à opacity 0 si le JS ne charge pas ».
-  // gsap.context(() => {}) créé une seule fois au montage, puis
-  // `.add()` pour chaque tween déclenché après coup par le scroll
-  // (piège documenté : gsap.context() sans fonction ne crée pas de
-  // contexte utilisable).
-  useEffect(() => {
-    if (cardIndex !== 0) return;
-    const wrap = measureRef.current;
-    if (!wrap) return;
-    const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
-    if (!isDesktop) return;
-    const cardEl = wrap.querySelector<HTMLElement>("[data-rail-card]");
-    if (!cardEl) return;
-    cardElRef.current = cardEl;
-
-    const ctx = gsap.context(() => {});
-    revealCtxRef.current = ctx;
-
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // Masqué par défaut (avant toute mesure de scroll) : le hook de
-    // seuil ci-dessous (useSectionHysteresis) rétablit immédiatement la
-    // visibilité, sans animation, si la page est chargée alors que la
-    // section Inoko est déjà franchie (chargement en milieu de scroll).
-    ctx.add(() => {
-      gsap.set(cardEl, { opacity: 0, y: reduced ? 0 : 12 });
-    });
-
-    return () => {
-      ctx.revert();
-      revealCtxRef.current = null;
-    };
-  }, [cardIndex]);
-
-  const revealCard1 = useCallback((event: CrossEvent) => {
-    const cardEl = cardElRef.current;
-    const ctx = revealCtxRef.current;
-    if (!cardEl || !ctx) return;
-    if (!window.matchMedia("(min-width: 1024px)").matches) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (event.type === "enter") {
-      if (reduced || event.immediate) {
-        ctx.add(() => gsap.set(cardEl, { opacity: 1, y: 0 }));
-        return;
-      }
-      ctx.add(() =>
-        gsap.to(cardEl, { opacity: 1, y: 0, duration: 0.3, ease: VENTURIA_EASE, overwrite: true }),
-      );
-      return;
-    }
-
-    // event.type === "exit" — retour au Hero en remontant : le carton
-    // disparaît (CLAUDE.md, « Rail droit »).
-    if (reduced) {
-      ctx.add(() => gsap.set(cardEl, { opacity: 0, y: 0 }));
-      return;
-    }
-    ctx.add(() =>
-      gsap.to(cardEl, { opacity: 0, y: 12, duration: 0.3, ease: VENTURIA_EASE, overwrite: true }),
-    );
-  }, []);
-
-  useSectionHysteresis(CARD1_REVEAL_SECTION, revealCard1, cardIndex === 0, () => false);
 
   // Carton 1 : l'horloge démarre juste après la fin de l'animation du
   // h1 du Hero (jamais un délai estimé), en desktop et hors
@@ -187,6 +119,95 @@ export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
     return () => observer.disconnect();
   }, [cardIndex]);
 
+  // Carton 1 uniquement : son point de départ (avant figement) est aligné
+  // au pixel sur le haut de la PHOTO Inoko (`[data-da-photo]`,
+  // dernier-accompagnement.module.css), pas sur le haut de la section —
+  // le label/titre/paragraphe qui précèdent la photo n'ont pas de hauteur
+  // fixe (texte, donc variable selon la largeur d'écran). Mesuré comme
+  // --rail-h1/--rail-h2 ci-dessus : jamais codé en dur, un écart entre le
+  // haut de la section et le haut de la photo, réécrit dans
+  // --rail-card1-offset (globals.css, repli 20px sans JS — la gouttière
+  // générique) et lu par `.slot1` (rail.module.css) EN PLACE de
+  // `padding-top: var(--shell-rail-pad)`. Le figement lui-même
+  // (`top: var(--rail-stick)`, stickyWrap1) reste inchangé — seul le
+  // POINT DE DÉPART bouge. Un ResizeObserver sur la SECTION (pas la photo
+  // elle-même) : la photo ne change jamais de position par elle-même,
+  // seul un reflow du texte au-dessus (largeur d'écran) la déplace, et ce
+  // reflow change la hauteur totale de la section par construction.
+  //
+  // Piège rencontré et corrigé : `getBoundingClientRect()` sur la photo
+  // ne donne pas sa position de repos tant que sa révélation d'entrée
+  // (DernierAccompagnementReveal, `.visualSlot` : gsap.set y:24 au
+  // montage, puis gsap.to y:0 au ScrollTrigger) n'a pas joué — mesurée
+  // trop tôt (avant que l'utilisateur n'ait scrollé jusque-là), la photo
+  // est encore visuellement décalée de 24px par ce transform GSAP,
+  // faussant l'écart mesuré de 24px jusqu'à ce que la page recharge.
+  // `offsetTop` (cumulé le long de la chaîne `offsetParent`), contrairement
+  // à `getBoundingClientRect()`, ignore TOUJOURS `transform` — quel que
+  // soit l'état de la révélation au moment de la mesure, cette valeur
+  // reste celle de la position de repos, sans dépendre d'un ordre de
+  // montage entre composants ni d'un signal de fin d'animation.
+  //
+  // Recalcul garanti à deux autres moments, en plus du montage :
+  // - redimensionnement de la fenêtre : l'écart dépend de la hauteur du
+  //   label/titre/paragraphe au-dessus de la photo (texte, donc variable
+  //   avec la largeur de la colonne de contenu) — un ResizeObserver sur
+  //   la SECTION (pas la photo elle-même, qui ne bouge jamais toute
+  //   seule) suffirait déjà à le capter indirectement (le reflow du
+  //   texte change la hauteur totale de la section), mais un écouteur
+  //   `resize` direct est ajouté par prudence/clarté, au cas où un
+  //   redimensionnement change la largeur sans changer la hauteur totale
+  //   de la section (aucun reflow de ligne, donc aucun déclenchement du
+  //   ResizeObserver) — vérifié par mesure : écart < 1px après un
+  //   redimensionnement 1440 → 1024 → 1728 sans recharger la page.
+  // - chargement des polices (`document.fonts.ready`) : next/font charge
+  //   Bricolage Grotesque/Instrument Sans en `display: "swap"`
+  //   (layout.tsx) — un premier rendu peut utiliser la police de repli
+  //   avant que la vraie police ne s'échange, avec des métriques
+  //   différentes (largeur de caractère, interligne) qui déplacent la
+  //   photo. Le ResizeObserver capterait aussi ce cas SI l'échange change
+  //   la hauteur totale de la section, mais ne pas en dépendre : recalcul
+  //   explicite une fois `document.fonts.ready` résolu.
+  useEffect(() => {
+    if (cardIndex !== 0) return;
+    const section = document.getElementById("dernier-accompagnement");
+    const photo = document.querySelector<HTMLElement>("[data-da-photo]");
+    if (!section || !photo) return;
+
+    const documentTop = (el: HTMLElement | null): number => {
+      let top = 0;
+      let node: HTMLElement | null = el;
+      while (node) {
+        top += node.offsetTop;
+        node = node.offsetParent as HTMLElement | null;
+      }
+      return top;
+    };
+
+    const update = () => {
+      const offset = documentTop(photo) - documentTop(section);
+      document.documentElement.style.setProperty("--rail-card1-offset", `${offset}px`);
+    };
+    update();
+
+    const observer = new ResizeObserver(update);
+    observer.observe(section);
+    window.addEventListener("resize", update, { passive: true });
+
+    let cancelled = false;
+    document.fonts.ready.then(() => {
+      if (!cancelled) update();
+    });
+
+    return () => {
+      cancelled = true;
+      observer.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, [cardIndex]);
+
+  const slotClassName = [styles.slot, cardIndex === 0 ? styles.slot1 : ""].filter(Boolean).join(" ");
+
   const stickyClassName = [
     styles.stickyWrap,
     cardIndex === 0 ? styles.stickyWrap1 : "",
@@ -197,7 +218,7 @@ export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
     .join(" ");
 
   return (
-    <div className={styles.slot} data-rail-slot style={{ gridRow: `${anchor}-start / -1` }}>
+    <div className={slotClassName} data-rail-slot style={{ gridRow: `${anchor}-start / -1` }}>
       <div ref={measureRef} className={stickyClassName}>
         <RailCardArticle
           card={card}

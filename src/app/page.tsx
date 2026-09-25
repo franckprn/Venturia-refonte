@@ -6,6 +6,7 @@ import { Hero } from "@/components/sections/Hero";
 import heroStyles from "@/components/sections/hero.module.css";
 import { DernierAccompagnement } from "@/components/sections/DernierAccompagnement";
 import { Respiration } from "@/components/sections/Respiration";
+import { RespirationBackdrop } from "@/components/sections/RespirationBackdrop";
 import respirationStyles from "@/components/sections/respiration.module.css";
 import { Services } from "@/components/sections/Services";
 import { Processus } from "@/components/sections/Processus";
@@ -25,13 +26,20 @@ import footerStyles from "@/components/layout/footer.module.css";
 //
 // Chaque <RailSlot> est placé juste après sa section déclencheuse
 // (CLAUDE.md, « Rail droit ») :
-//   1. hero            2. services            3. processus (« juste
-//   avant le bloc de fin de page » — Processus la précède directement)
-// Ni Dernier accompagnement, ni Respiration, ni le footer n'ont de
-// carton. Respiration et le footer restent dans la zone de contenu
-// comme les autres sections (pas sous le rail) ; seul leur fond
-// (--ink) déborde jusqu'aux bords de l'écran (voir
-// respiration.module.css et footer.module.css).
+//   1. dernier accompagnement (Inoko)   2. services   3. processus
+//   (« juste avant le bloc de fin de page » — Processus la précède
+//   directement)
+// Le carton 1 s'ancre à Dernier accompagnement, pas au Hero : aucun
+// carton visible pendant le Hero est une pure conséquence de la
+// grille (sa ligne ne démarre qu'à « dernier-accompagnement-start »),
+// pas d'une opacité pilotée en JS — voir Rail.tsx et CLAUDE.md, « Rail
+// droit ». Respiration et le footer n'ont pas de carton. Respiration et
+// le footer restent dans la zone de contenu comme les autres sections
+// (pas sous le rail) ; seul le fond du footer (--ink) déborde jusqu'aux
+// bords de l'écran (voir footer.module.css) — celui de Respiration
+// passe désormais par <RespirationBackdrop> (anime directement le fond
+// de <html>/<body>, ne rend aucun DOM — voir ce composant pour le
+// pourquoi), pas par un fond en dur sur la section.
 // Sections suivantes (avis, ressources) et méga-menu : sessions
 // ultérieures.
 //
@@ -52,6 +60,7 @@ export default function Home() {
   return (
     <>
       <MobileRailStack anchors={["hero", "services", "processus"]} />
+      <RespirationBackdrop />
 
       <Shell>
         <Section
@@ -66,8 +75,6 @@ export default function Home() {
           <Hero />
         </Section>
 
-        <RailSlot cardIndex={0} anchor="hero" />
-
         <Section
           name="dernier-accompagnement"
           tone="light"
@@ -76,6 +83,8 @@ export default function Home() {
         >
           <DernierAccompagnement />
         </Section>
+
+        <RailSlot cardIndex={0} anchor="dernier-accompagnement" />
 
         <Section
           name="respiration"
