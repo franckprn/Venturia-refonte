@@ -206,50 +206,117 @@ inclut la barre d'adresse mobile). `spacing="none"` (voir « Shell de
 page ») : le hero gère son propre padding-block (96/160, au moins le
 token), en `display: flex; flex-direction: column` — le contenu
 (`.body`) est le seul enfant, l'espace en trop tombe donc SOUS lui,
-jamais au-dessus (pas de centrage vertical).
+jamais au-dessus (pas de centrage vertical). Dès 1024px, le hero ne
+DÉPASSE jamais un écran non plus (voir « Photo » plus bas pour le
+mécanisme) : hauteur du hero = hauteur de la fenêtre, vérifié exact
+(diff 0px) à 1024×768, 1280×800, 1440×900 et 1728×1117.
 
 H1 (« Bien plus que / du référencement ») : dès 1024px, calé sur les
-COLONNES 1 À 10 (pas les 12 entières), la ligne la plus longue (« du
+COLONNES 1 À 9 (pas les 12 entières), la ligne la plus longue (« du
 référencement ») occupant EXACTEMENT cette largeur, du bord gauche de
-la colonne 1 au bord droit de la colonne 10, à toute largeur d'écran —
-les colonnes 11-12 restent vides à droite du titre. Taille calculée sur
+la colonne 1 au bord droit de la colonne 9, à toute largeur d'écran —
+les colonnes 10-12 restent vides à droite du titre. Taille calculée sur
 la largeur de la grille, jamais sur 100vw : un wrapper DÉDIÉ
 (`.titleWrap`, jamais le h1 lui-même, jamais un ancêtre des cartons du
 rail) porte `container-type: inline-size` (toujours sur les 12
-colonnes, `grid-column: 1 / -1` — seule la TAILLE du texte cible 10
+colonnes, `grid-column: 1 / -1` — seule la TAILLE du texte cible 9
 colonnes, pas la largeur du conteneur cqi lui-même), le h1 un
 `font-size: calc(<constante> * 1cqi)`.
 
 La constante (`--hero-title-cqi`, hero.module.css) est un calibrage
-GÉOMÉTRIQUE, pas un pourcentage : largeur des colonnes 1-10 = 10×(largeur
-d'1 colonne) + 9×(gap, 20px), une fonction AFFINE de la largeur du
-conteneur (les 9 gouttières sont des px fixes, ils ne grandissent pas
+GÉOMÉTRIQUE, pas un pourcentage : largeur des colonnes 1-9 = 9×(largeur
+d'1 colonne) + 8×(gap, 20px), une fonction AFFINE de la largeur du
+conteneur (les 8 gouttières sont des px fixes, elles ne grandissent pas
 avec l'écran) — alors qu'un multiplicateur cqi ne peut produire qu'une
 largeur de texte PUREMENT PROPORTIONNELLE à cette largeur (letter-spacing
 en em ⇒ la largeur du texte scale linéairement avec le font-size, donc
 avec 1cqi). Une droite proportionnelle ne peut pas épouser exactement
-une droite affine à toute largeur : la valeur actuelle (9.7846) minimise
-l'écart maximal mesuré sur 1024-1728px (± 1,1px aux deux bornes, sous
-0,3px à 1280/1440px) plutôt que d'être exacte à un seul point puis dériver
-ailleurs — voir le calcul complet en commentaire, hero.module.css. À
-recalibrer si le texte, la police, la graisse, l'approche du h1 OU la
-géométrie de la grille (colonnes/gap/marges) changent. Sous 1024px :
-pleine largeur du contenu, taille fixe (--t-hero) — `--hero-title-cqi`
-ne s'applique pas du tout à cette largeur (mécanisme entièrement
-différent, aucun rapport avec ce calibrage).
+une droite affine à toute largeur : la valeur actuelle (8.7847, recalibrée
+depuis 9.7846/colonnes 1-10) minimise l'écart maximal mesuré sur
+1024-1728px — delta = +1,59px à 1024px, +0,42px à 1280px, −0,28px à
+1440px, −1,61px à 1728px (mesuré Playwright, build de prod) — plutôt que
+d'être exacte à un seul point puis dériver ailleurs. Voir le calcul
+complet en commentaire, hero.module.css. À recalibrer si le texte, la
+police, la graisse, l'approche du h1 OU la géométrie de la grille
+(colonnes/gap/marges) changent. Sous 1024px : pleine largeur du contenu,
+taille fixe (--t-hero) — `--hero-title-cqi` ne s'applique pas du tout à
+cette largeur (mécanisme entièrement différent, aucun rapport avec ce
+calibrage).
 
-Sous-titre + CTA (`.bottom`) : dès 1024px, colonnes 7-12 (axe droit),
-en bas du Hero — `.body` passe en grille 3 lignes
-(`auto 1fr auto` + `flex: 1`), la ligne du milieu (1fr) pousse `.bottom`
-contre le padding-bottom de la section. Largeur de texte du sous-titre :
+Photo (`.photo`, HeroPhoto.tsx, texte alternatif dans `content/hero.ts`
+`photoAlt`, jamais en dur dans le JSX) : dès 1024px, colonnes 1-6 (axe
+gauche) ; sous-titre + CTA (`.bottom`) colonnes 7-12 (axe droit),
+INCHANGÉ — les deux partagent la MÊME ligne de grille (`.body` passe en
+`grid-template-rows: auto auto`, plus de ligne `1fr`/`flex:1`), ce qui
+aligne leur haut par construction (0px d'écart mesuré aux 4 largeurs de
+contrôle) plutôt que par une mesure JS. Écart avec le titre : 48px de
+`margin-top`, identique sur `.photo` et `.bottom`.
+
+Contrainte principale : le hero ne dépasse jamais 100svh tant que la
+photo ne descend pas sous son plancher de 240px — c'est ELLE qui se
+comprime quand la place manque, jamais le texte. `.body` n'est plus
+flex:1 (sa hauteur naturelle peut être inférieure à l'espace
+disponible ; l'excédent tombe alors SOUS lui, voir plus haut) ; la
+hauteur de `.photo` est un `clamp()` purement géométrique (même esprit
+que le calibrage du h1, AUCUNE mesure JS) :
+  `clamp(240px, 100svh − 368px − 18,2722cqi, 33,3333cqi − 6,6667px)`
+où `368px` = padding-block du hero (320px) + écart titre→contenu
+(48px), `18,2722cqi` = hauteur des 2 lignes du titre à son line-height
+courant (2 × 1,04 × --hero-title-cqi), et `33,3333cqi − 6,6667px` = la
+hauteur au ratio 3/2 PAR DÉFAUT des colonnes 1-6 (le max du clamp, donc
+un plafond, pas une contrainte dure — voir le commentaire détaillé,
+hero.module.css). `.body` porte `container-type: inline-size` pour ces
+cqi (même largeur de référence W que `.titleWrap`, sans conflit : chaque
+élément lit son propre ancêtre-container le plus proche). object-fit:
+cover, object-position: center. Radius 4px (le maximum du site).
+
+Plancher 240px : en dessous, le hero est autorisé à dépasser un écran
+(la contrainte cède, le texte ne raccourcit jamais). Mesuré à
+1024×768 : la photo est TROP ÉTROITE à cette largeur pour qu'un ratio
+3/2 atteigne 240px (colonnes 1-6 ≈ 350px ⇒ hauteur 3/2 ≈ 233px, sous le
+plancher) — le plancher l'emporte (photo affichée à 240px, très
+légèrement plus haute qu'un 3/2 strict, imperceptible) ; il y a par
+ailleurs assez de place réelle à cette hauteur de fenêtre pour que le
+hero reste pile à 100svh malgré ça (pas de croissance observée à aucune
+des 4 largeurs de contrôle).
+
+Mesures (Playwright, build de prod) — hauteur du hero / hauteur de la
+photo :
+  1024×768   768px / 240px (plancher, voir ci-dessus)
+  1280×800   800px / 253,7px
+  1440×900   900px / 324,4px
+  1728×1117  1117px / 468,0px
+Hauteur du hero = hauteur de la fenêtre dans les 4 cas (diff 0px).
+
+Sous 1024px : ordre du DOM = titre, sous-titre + CTA, puis la photo
+pleine largeur (`grid-column: 1 / -1`), ratio 3/2 fixe (`aspect-ratio`,
+pas le clamp ci-dessus — spécifique à >= 1024px), margin-top 48px. Le
+hero peut s'allonger librement à cette largeur (pas de contrainte
+d'écran unique en mobile).
+
+Sous-titre + CTA (`.bottom`) : largeur de texte du sous-titre :
 `max-width: 42ch`, identique aux paragraphes des Services
 (services.module.css `.paragraphs`). Sous 1024px : pleine largeur, sous
-le h1, empilement normal (pas de poussée vers le bas). Le CTA lui-même
-est `<ArrowLink>` (src/components/ArrowLink.tsx, `direction="down"`) :
-filet --ink sous le texte qui s'écarte de 4px au survol/focus, flèche
-« ↓ » avant le texte — composant partagé avec le lien « Découvrir… » de
-chaque service (`direction="right"`, voir « Services (home) »), seule
-la direction change le comportement de survol.
+le h1, empilement normal. Le CTA lui-même est `<ArrowLink>`
+(src/components/ArrowLink.tsx, `direction="down"`) : filet --ink sous
+le texte qui s'écarte de 4px au survol/focus, flèche « ↓ » avant le
+texte — composant partagé avec le lien « Découvrir… » de chaque service
+(`direction="right"`, voir « Services (home) »), seule la direction
+change le comportement de survol.
+
+`next/image` avec `priority` (photo au-dessus de la ligne de
+flottaison) et `fill` (conteneur dimensionné en CSS, voir ci-dessus) ;
+`sizes` calculé pour la largeur réelle des colonnes 1-6
+(`calc(50vw - 162px)` dès 1024px) et la largeur réelle du contenu
+mobile (`calc(100vw - 40px)`). Aucune animation d'entrée sur la photo
+(HeroPhoto.tsx, composant serveur séparé de HeroReveal, qui reste seul
+à porter l'animation du h1/sous-titre/CTA) — c'est le plus gros élément
+de la page, une animation retarderait son affichage. Dans les faits, la
+photo n'est PAS l'élément LCP à 1440×900 (mesuré : le h1, par une
+surface de texte légèrement supérieure à celle de la photo à cette
+largeur) mais elle L'EST à 390px (mesuré) — voir aussi « Animations »,
+« rien d'animé sur l'élément LCP » : la précaution reste justifiée,
+l'élément qui porte ce rôle change selon la largeur d'écran.
 
 ## Respiration (home)
 

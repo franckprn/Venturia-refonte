@@ -1,6 +1,5 @@
 /* ------------------------------------------------------------------ *
- * Hero de la home. Aucune image : la composition tient sur la
- * typographie et l'espacement seuls.
+ * Hero de la home. Titre, une photo et un sous-titre/CTA.
  *
  * .section porte le padding vertical propre au hero (96/160, EN PLUS
  * des 64px de nav déjà posés par <main>) — `<Section spacing="none">`
@@ -12,26 +11,23 @@
  * jamais en dessous — c'est la seule contrainte imposée aux deux
  * exceptions (Hero, Respiration). `.section` est un flex column
  * simple (pas de grid) : à défaut de contenu qui remplit l'écran,
- * l'espace en trop tombe sous `.body` (dernier enfant), jamais au-dessus
- * — cohérent avec « le sous-titre + CTA vivent en bas du Hero » dès
- * 1024px (voir .body/.bottom plus bas), sans rien de spécial à faire à
- * ce sujet en dessous de 1024px (empilement normal, .body garde sa
- * hauteur naturelle, `flex:1`/lignes de grille ne s'appliquent qu'à
- * partir de 1024px).
+ * l'espace en trop tombe sous `.body` (dernier enfant), jamais au-dessus.
  *
  * Mobile-first ici : la base est la pile verticale pleine largeur
- * (titre, puis sous-titre + CTA empilés juste en dessous, écarts
- * 32/48 en margin-top). >= 1024px : `.body` devient une grille à 3
- * lignes (titre / 1fr / bas) qui pousse le sous-titre + CTA
- * (`.bottom`, colonnes 7-12) au bas du Hero, pendant que le titre
- * passe sur les 12 colonnes entières (voir § 1 du prompt : la ligne la
- * plus longue du h1 doit occuper exactement leur largeur).
+ * (titre, puis sous-titre + CTA, puis la photo pleine largeur en ratio
+ * 3/2 — écarts 32/48/48 en margin-top, Hero.tsx fixe cet ordre par le
+ * DOM). >= 1024px : `.body` devient une grille à 2 lignes (titre /
+ * photo+bas) — la photo occupe les colonnes 1-6 (axe gauche), le
+ * sous-titre + CTA (`.bottom`) les colonnes 7-12 (axe droit), tous deux
+ * sur la MÊME ligne de grille (leur haut coïncide par construction).
+ * Le titre passe sur les 12 colonnes entières (voir § 1 du prompt : la
+ * ligne la plus longue du h1 doit occuper exactement 9 d'entre elles).
  *
  * row-gap à 0 sur la grille 12 colonnes (bodyStyle, page.tsx) : l'écart
- * titre → sous-titre/CTA est porté par la ligne 1fr en desktop, par un
- * margin-top en mobile — jamais par le gap de la grille. Pas de badge :
- * retiré (S9), le bloc bas est le dernier élément — le padding-bottom
- * de .section referme la section sans rien d'orphelin derrière.
+ * vertical entre le titre et la ligne photo/bas est porté par un
+ * margin-top identique sur `.photo` et `.bottom` (48px), jamais par le
+ * gap de la grille — c'est ce qui garantit qu'ils démarrent au même
+ * niveau. Pas de badge : retiré (S9).
  * ------------------------------------------------------------------ */
 
 .section {
@@ -47,8 +43,23 @@
   }
 
   .body {
-    flex: 1;
-    grid-template-rows: auto 1fr auto;
+    /* Plus de flex:1 / ligne 1fr : la hauteur de .body n'est plus
+       forcée à remplir tout l'espace disponible, elle vaut sa hauteur
+       naturelle (titre + ligne photo/bas) — l'espace en trop (s'il y
+       en a) tombe SOUS elle, dans .section (flex column, voir le
+       commentaire en tête de fichier), jamais au-dessus. C'est
+       `.photo` (juste en dessous) qui absorbe activement l'espace
+       manquant en se comprimant, pour que .body ne dépasse justement
+       jamais cette hauteur disponible tant que la photo ne descend pas
+       sous son plancher de 240px (voir son commentaire). */
+    grid-template-rows: auto auto;
+    /* Conteneur cqi pour `.photo` (ligne 2, colonnes 1-6) — même
+       largeur de référence (W, les 12 colonnes) que `.titleWrap`
+       ci-dessous, seul autre container de cet arbre : les deux
+       n'entrent pas en conflit, chaque élément lit son PROPRE
+       ancêtre-container le plus proche (.titleWrap pour .title,
+       .body pour .photo). */
+    container-type: inline-size;
   }
 }
 
@@ -71,9 +82,10 @@
     container-type: inline-size;
     /* Calibrage géométrique (pas une mesure au pourcentage) — voir le
        commentaire détaillé au-dessus de .title pour le calcul complet
-       et sa marge d'erreur résiduelle assumée (~1,1px aux bornes de la
-       plage testée). */
-    --hero-title-cqi: 9.7846;
+       et sa marge d'erreur résiduelle assumée (~1,64px aux bornes de la
+       plage testée, colonnes 1-9 — recalibré depuis 9.7846/colonnes
+       1-10). */
+    --hero-title-cqi: 8.7847;
   }
 }
 
@@ -95,9 +107,9 @@
 }
 
 /* >= 1024px : la ligne la plus longue du h1 (« du référencement »)
-   occupe la largeur des colonnes 1 À 10 (pas les 12 colonnes entières —
+   occupe la largeur des colonnes 1 À 9 (pas les 12 colonnes entières —
    CLAUDE.md, « Hero »), bord gauche de la colonne 1 au bord droit de la
-   colonne 10. Taille calculée sur la largeur de la grille (1cqi = 1 %
+   colonne 9. Taille calculée sur la largeur de la grille (1cqi = 1 %
    de la largeur de .titleWrap, égale aux 12 colonnes du Hero puisqu'il
    n'y a pas de rail sur cette section), jamais sur 100vw.
 
@@ -105,21 +117,24 @@
    largeur du conteneur — voir pourquoi ci-dessous) :
    - W = largeur de .titleWrap (12 colonnes, gap 20px)
    - largeur d'1 colonne : c = (W − 11×20) / 12
-   - largeur des colonnes 1-10 (10 colonnes + 9 gouttières internes) :
-     W10 = 10c + 9×20 = (5/6)·W − 10/3
+   - largeur des colonnes 1-9 (9 colonnes + 8 gouttières internes) :
+     W9 = 9c + 8×20 = (3/4)·W − 5
    - la largeur du texte scale EXACTEMENT comme le font-size (letter-
      spacing en em) : text = k·font-size, k mesuré par Playwright
-     (8.48502, texte/police/graisse/approche fixés) ; et
-     font-size = --hero-title-cqi × W/100, donc text = --hero-title-cqi
-     × k × W/100 — une relation PUREMENT PROPORTIONNELLE à W (une droite
-     par l'origine), alors que W10(W) est AFFINE (l'ordonnée à l'origine
-     −10/3 vient des gouttières fixes en px, qui ne grandissent pas avec
-     W). AUCUN multiplicateur constant ne peut donc égaler W10(W) à
-     TOUTE largeur — seulement s'en approcher.
-   - --hero-title-cqi = 9.7846 minimise l'écart maximal sur la plage
+     (8.4845, texte/police/graisse/approche fixés, identique au
+     calibrage colonnes 1-10 — le texte/la police n'ont pas changé) ;
+     et font-size = --hero-title-cqi × W/100, donc text =
+     --hero-title-cqi × k × W/100 — une relation PUREMENT
+     PROPORTIONNELLE à W (une droite par l'origine), alors que W9(W)
+     est AFFINE (l'ordonnée à l'origine −5 vient des gouttières fixes
+     en px, qui ne grandissent pas avec W). AUCUN multiplicateur
+     constant ne peut donc égaler W9(W) à TOUTE largeur — seulement
+     s'en approcher.
+   - --hero-title-cqi = 8.7847 minimise l'écart maximal sur la plage
      testée (1024-1728px), en égalisant l'erreur aux deux bornes plutôt
-     qu'en calibrant sur un seul point : mesuré, delta = +1,04px à
-     1024px, +0,27px à 1280px, −0,22px à 1440px, −1,10px à 1728px.
+     qu'en calibrant sur un seul point : mesuré, delta = +1,64px à
+     1024px, +0,30px à 1280px, −0,23px à 1440px, −1,64px à 1728px (voir
+     CLAUDE.md, « Hero (home) », pour le détail des 4 mesures).
      Sous 1024px : --hero-title-cqi ne s'applique pas (h1 en --t-hero
      fixe), aucun rapport avec ce calibrage. Recalibrer UNIQUEMENT si le
      texte, la police, la graisse, l'approche OU la géométrie de la
@@ -150,12 +165,12 @@
 
 /* Enveloppe le sous-titre + le CTA (HeroReveal.tsx) : un seul item de
    grille pour les deux, ce qui permet de les poser ensemble sur l'axe
-   droit (colonnes 7-12) et en bas du Hero à partir de 1024px (voir
-   .body plus haut, ligne 3 de `grid-template-rows: auto 1fr auto`) —
-   sans lui, .subtitle et .actions seraient deux items séparés et
-   n'occuperaient pas forcément la même ligne de grille. En dessous de
-   1024px : bloc simple, pleine largeur, empilé sous le titre (pas de
-   grid-row/-column posés, auto-placement en ligne 2 par défaut). */
+   droit (colonnes 7-12) à partir de 1024px — sans lui, .subtitle et
+   .actions seraient deux items séparés et n'occuperaient pas forcément
+   la même ligne de grille. En dessous de 1024px : bloc simple, pleine
+   largeur, empilé sous le titre (pas de grid-row/-column posés,
+   auto-placement en ligne 2 par défaut, puis .photo en ligne 3 — voir
+   son commentaire plus bas). */
 .bottom {
   grid-column: 1 / -1;
   min-width: 0;
@@ -163,8 +178,19 @@
 
 @media (min-width: 1024px) {
   .bottom {
-    grid-row: 3;
+    /* Même ligne que .photo (voir plus bas) : les deux sont des items
+       de grille de la ligne 2, alignés en haut par défaut
+       (align-items non redéfini sur .body → stretch ; sans hauteur
+       propre autre que son contenu, .bottom se comporte visuellement
+       comme aligné en haut) — c'est ce partage de ligne, pas une
+       mesure, qui garantit que le haut de la photo tombe exactement
+       sur le haut du sous-titre. */
+    grid-row: 2;
     grid-column: 7 / -1;
+    /* Écart titre → contenu, même valeur que .photo ci-dessous (leurs
+       marges identiques sur la même ligne de grille sont ce qui les
+       aligne au pixel, pas un calcul séparé). */
+    margin-top: 48px;
   }
 }
 
@@ -249,5 +275,65 @@
 
   .ctaPrimary {
     flex: none;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Photo du Hero (HeroPhoto.tsx). Mobile-first : sous 1024px, pleine
+ * largeur, ratio 3/2 fixe, empilée après .bottom (ordre du DOM —
+ * Hero.tsx rend <HeroReveal/> puis <HeroPhoto/>, aucun grid-row/-column
+ * forcé ici en dessous de 1024px → auto-placement en ligne 3). Le hero
+ * peut s'allonger librement à cette largeur (pas de contrainte d'écran
+ * unique sous 1024px).
+ * ------------------------------------------------------------------ */
+.photo {
+  grid-column: 1 / -1;
+  margin-top: 48px;
+  position: relative;
+  aspect-ratio: 3 / 2;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* >= 1024px : colonnes 1-6 (axe gauche), même ligne de grille que
+   .bottom (colonnes 7-12, axe droit) — voir son commentaire plus haut.
+   Contrainte : le Hero ne doit JAMAIS dépasser 100svh tant que la photo
+   ne descend pas sous son plancher de 240px ; c'est elle qui se
+   comprime quand la place manque, jamais le texte (CLAUDE.md, « Hero
+   (home) »). Ratio 3/2 en desktop, c'est seulement le comportement PAR
+   DÉFAUT (place abondante) — pas une contrainte dure comme en mobile —
+   donc `aspect-ratio` est désactivé ici, remplacé par une hauteur
+   explicite `clamp()`, purement géométrique (même esprit que le
+   calibrage de --hero-title-cqi ci-dessus, aucune mesure JS) :
+
+   - .body est un container cqi (voir plus haut) : 1cqi = W/100, W =
+     largeur des 12 colonnes (identique à celle utilisée pour le titre).
+   - largeur des colonnes 1-6 (6 colonnes + 5 gouttières internes) :
+     W6 = 6×(W−11×20)/12 + 5×20 = W/2 − 10
+   - hauteur "par défaut" (ratio 3/2) à cette largeur :
+     H_ratio = (2/3)×W6 = W/3 − 20/3 = 33,3333cqi − 6,6667px
+   - hauteur DISPONIBLE réelle dans le Hero, sous le titre : la section
+     fait 100svh, padding-block 160px×2 (320px), le titre fait 2 lignes
+     à `line-height: var(--t-hero-lh)` (1,04) du font-size courant
+     (--hero-title-cqi × 1cqi), plus l'écart de 48px avant la ligne
+     photo/bas (même valeur que le margin-top de .photo et .bottom) :
+       H_dispo = 100svh − 320px − 48px − 2×1,04×--hero-title-cqi×1cqi
+               = 100svh − 368px − 18,2722cqi
+     (2×1,04×8,7847 = 18,2722)
+   - `clamp(240px, H_dispo, H_ratio)` = max(240px, min(H_dispo,
+     H_ratio)) : par défaut (H_dispo ≥ H_ratio, le cas courant), la
+     photo garde son ratio 3/2 plein ; quand la place vient à manquer
+     (H_dispo < H_ratio), elle se comprime exactement à H_dispo — ce qui
+     maintient .body à sa hauteur naturelle = 100svh − padding, donc le
+     Hero reste pile à 100svh (aucune ligne 1fr nécessaire, voir le
+     commentaire de .body) ; si même H_dispo tombe sous 240px, le
+     plancher l'emporte et le Hero est autorisé à dépasser un écran
+     (voir CLAUDE.md pour les largeurs où ce cas se produit). */
+@media (min-width: 1024px) {
+  .photo {
+    grid-row: 2;
+    grid-column: 1 / 7;
+    aspect-ratio: auto;
+    height: clamp(240px, calc(100svh - 368px - 18.2722 * 1cqi), calc(33.3333 * 1cqi - 6.6667px));
   }
 }

@@ -13,6 +13,9 @@ export type HeroContent = {
    *  améliorer mon référencement ? », retiré — voir CLAUDE.md § 1). */
   subtitle: string;
   ctaSecondary: { label: string; href: string };
+  /** Texte alternatif de la photo du Hero (jamais en dur dans le JSX —
+   *  CLAUDE.md, « Hero (home) »). */
+  photoAlt: string;
 };
 
 export const hero: HeroContent = {
@@ -25,4 +28,5 @@ export const hero: HeroContent = {
     label: "Ce que ça donne concrètement",
     href: "/realisations",
   },
+  photoAlt: "Ordinateur portable ouvert sur Google Search Console",
 };
