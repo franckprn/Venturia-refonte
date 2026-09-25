@@ -18,6 +18,18 @@
      reste collé au bord GAUCHE de la colonne, laissant 40px de vide à
      droite au lieu des 20px voulus contre le bord de l'écran. */
   padding-inline: var(--shell-rail-pad);
+  /* Écart harmonisé avec les trois autres (CLAUDE.md, « Rail droit ») :
+     la même valeur que padding-inline ci-dessus, --shell-rail-pad
+     (20px, la gouttière). Sans lui, la position NATURELLE (avant
+     figement) d'un carton commence pile à la ligne de grille de sa
+     section (`${anchor}-start`, Shell.tsx) — donc pile au bas de la
+     section précédente, zéro écart entre les deux : mesuré, le carton
+     du GEO « touchait » ainsi le bas de Respiration jusqu'à son
+     figement. Sans incidence sur le point de figement lui-même
+     (`top: var(--rail-stick…)`, stickyWrap1/2/3 plus bas) : un padding
+     sur le conteneur ne fait que retarder l'instant où le sticky
+     s'accroche, pas la position une fois accroché. */
+  padding-top: var(--shell-rail-pad);
   /* .shell pose align-items: start (shell.module.css) : sans stretch
      ici, ce slot ne ferait que la hauteur de son propre contenu au
      lieu de remplir toute sa plage de lignes — et son carton, sticky

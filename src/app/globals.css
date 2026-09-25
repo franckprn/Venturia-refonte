@@ -87,6 +87,13 @@
   --rail-h1: 160px;
   --rail-h2: 160px;
 
+  /* Espacement vertical des sections (CLAUDE.md, « Shell de page ») :
+     96px mobile / 160px desktop, posé par <Section> (padding-block, haut
+     ET bas) — pas de valeur en dur par section. Hero et Respiration en
+     sont exceptés (100svh minimum, leur propre padding reste >= ce
+     token) : voir hero.module.css et respiration.module.css. */
+  --section-space: 96px;
+
   /* Hauteur réelle de la pile mobile du rail REPLIÉE, trait compris
      (CLAUDE.md, « Rail droit » § « Pile mobile ») : mesurée en JS
      (components/layout/MobileRailStack.tsx) puis écrite ici — la
@@ -108,6 +115,14 @@
     --t-hero: 40px;
     --t-mass: 60px;
     --t-lead-weight: 500;
+  }
+}
+
+/* Espacement des sections — bascule au breakpoint du shell (1024px), pas
+   celui de la typo (767px) : CLAUDE.md, « Shell de page ». */
+@media (min-width: 1024px) {
+  :root {
+    --section-space: 160px;
   }
 }
 

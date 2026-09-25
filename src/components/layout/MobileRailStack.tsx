@@ -17,9 +17,14 @@ const RAIL_ICONS = [IconClock, IconSparkle, IconArrowRight] as const;
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-/** Cycle de vie d'un carton réversible (cartons 2 et 3 — le carton 1
- *  reste "in" en permanence, cf. CLAUDE.md « Rail droit » § « Pile
- *  mobile ») :
+/** Section qui déclenche l'apparition du carton 1 (CLAUDE.md, « Rail
+ *  droit ») — jamais visible pendant le Hero, comme sur le rail
+ *  desktop (voir components/layout/Rail.tsx, CARD1_REVEAL_SECTION). */
+const CARD1_REVEAL_SECTION = "dernier-accompagnement";
+
+/** Cycle de vie d'un carton réversible — les 3 cartons désormais
+ *  (CLAUDE.md « Rail droit » § « Pile mobile » : le carton 1 n'est
+ *  plus toujours "in", il suit lui aussi la section Inoko) :
  *    out      absent, pas dans le DOM
  *    in       présent — au repos, ou en train de jouer son animation
  *             d'entrée (le rôle CSS ne fait pas la différence, seul le
@@ -49,12 +54,12 @@ type MobileRailStackProps = {
  * le flux de la page (voir rail.module.css : `.slot` passe à
  * `display: none` sous 1024px — c'est cette pile qui les remplace).
  *
- * Cartons 2 et 3 réversibles (CLAUDE.md) : ils entrent ET sortent selon
+ * Les 3 cartons réversibles (CLAUDE.md) : ils entrent ET sortent selon
  * la position de scroll (hystérésis 50 %/60 %, voir
- * src/lib/useSectionHysteresis.ts), donc démontés pour de vrai quand
- * sortis (plus de « jamais démonté » ici) — c'est ce qui permet de
- * rejouer proprement leur icône à chaque nouvelle entrée. Le carton 1,
- * lui, reste monté en permanence.
+ * src/lib/useSectionHysteresis.ts — le carton 1 sur la section Inoko,
+ * les cartons 2 et 3 sur leurs sections respectives), donc démontés
+ * pour de vrai quand sortis — c'est ce qui permet de rejouer proprement
+ * leur icône à chaque nouvelle entrée.
  *
  * Le rôle visuel de chaque carton dans la pile REPLIÉE (front, peek ou
  * exiting) est calculé en JS et posé en `data-role`, PAS déduit du CSS
@@ -65,7 +70,7 @@ type MobileRailStackProps = {
  */
 export function MobileRailStack({ anchors }: MobileRailStackProps) {
   const [isMobile, setIsMobile] = useState(false);
-  const [status, setStatus] = useState<CardStatus[]>(["in", "out", "out"]);
+  const [status, setStatus] = useState<CardStatus[]>(["out", "out", "out"]);
   const [open, setOpen] = useState(false);
 
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -127,7 +132,7 @@ export function MobileRailStack({ anchors }: MobileRailStackProps) {
    * démonte/rejoue l'icône à tort. `overwrite: true` tue le tween
    * précédent (et son onComplete) au moment précis où le nouveau démarre.
    */
-  const crossCard = useCallback((index: 1 | 2, event: CrossEvent) => {
+  const crossCard = useCallback((index: 0 | 1 | 2, event: CrossEvent) => {
     const current = statusRef.current[index];
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -188,30 +193,57 @@ export function MobileRailStack({ anchors }: MobileRailStackProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Cartons 2 et 3 : hystérésis 50 % (entrée) / 60 % (sortie) sur le
-  // haut de leur section de rattachement (src/lib/useSectionHysteresis.ts).
-  // Suspendue tant que la pile est dépliée (`openRef`) — CLAUDE.md :
-  // « aucun carton ne peut entrer ni sortir pendant ce temps ».
+  // Les 3 cartons : hystérésis 50 % (entrée) / 60 % (sortie) sur le
+  // haut de leur section de rattachement (src/lib/useSectionHysteresis.ts)
+  // — carton 1 sur la section Inoko (jamais visible pendant le Hero,
+  // CLAUDE.md « Rail droit »), cartons 2 et 3 sur leurs sections
+  // respectives. Suspendue tant que la pile est dépliée (`openRef`) —
+  // CLAUDE.md : « aucun carton ne peut entrer ni sortir pendant ce
+  // temps ».
   const isPaused = useCallback(() => openRef.current, []);
+  useSectionHysteresis(CARD1_REVEAL_SECTION, (e) => crossCard(0, e), isMobile, isPaused);
   useSectionHysteresis(anchors[1], (e) => crossCard(1, e), isMobile, isPaused);
   useSectionHysteresis(anchors[2], (e) => crossCard(2, e), isMobile, isPaused);
 
   // Carton 1 : l'horloge démarre juste après la fin de l'animation du
   // h1 du Hero, comme sur desktop (src/lib/heroTitleSignal.ts) — jamais
-  // en reduced-motion.
+  // en reduced-motion, et JAMAIS rejouée ensuite (CLAUDE.md, « Rail
+  // droit »), contrairement aux cartons 2/3 qui rejouent leur icône à
+  // chaque nouvelle entrée. Contrairement au rail desktop, ce carton
+  // est démonté/remonté (comme 2 et 3) : le signal peut donc arriver
+  // AVANT le premier montage (cas courant — le h1 finit son animation
+  // bien avant que l'utilisateur ait scrollé jusqu'à Inoko). On retient
+  // juste que le signal est parti (`heroTitleDoneRef`) ; c'est l'effet
+  // suivant, déclenché à chaque montage du carton 1, qui joue l'icône
+  // UNE SEULE fois dès que les deux conditions sont réunies.
+  const heroTitleDoneRef = useRef(false);
+  const card1IconPlayedRef = useRef(false);
   useEffect(() => {
     if (!isMobile) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
     return onHeroTitleDone(() => {
-      iconRefs[0].current?.play();
+      heroTitleDoneRef.current = true;
+      if (statusRef.current[0] === "in" && !card1IconPlayedRef.current) {
+        card1IconPlayedRef.current = true;
+        iconRefs[0].current?.play();
+      }
     });
   }, [isMobile]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (status[0] !== "in" || !heroTitleDoneRef.current || card1IconPlayedRef.current) return;
+    card1IconPlayedRef.current = true;
+    iconRefs[0].current?.play();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
 
   // Animation d'entrée d'un carton FRAÎCHEMENT monté (status passé de
   // "out" à "in" avec pendingEnter marqué) : glisse depuis le bas
   // (translateY(100%) → 0, 300ms, easing du site) PAR-DESSUS la pile,
-  // puis joue l'icône une fois la montée terminée. La redirection
+  // puis joue l'icône une fois la montée terminée — sauf le carton 1,
+  // dont l'icône suit exclusivement le signal de fin du h1 (effet
+  // ci-dessus), jamais son entrée dans la pile. La redirection
   // "exiting" → "in" (carton déjà monté) est animée directement dans
   // crossCard, sans passer par ici.
   useEffect(() => {
@@ -228,7 +260,7 @@ export function MobileRailStack({ anchors }: MobileRailStackProps) {
           duration: 0.3,
           ease: VENTURIA_EASE,
           overwrite: true,
-          onComplete: () => iconRefs[index].current?.play(),
+          onComplete: index === 0 ? undefined : () => iconRefs[index].current?.play(),
         },
       );
     });
@@ -489,12 +521,17 @@ export function MobileRailStack({ anchors }: MobileRailStackProps) {
           {/* Bouton séparé (pas la pile elle-même) : un tap sur la pile
               repliée la déplie TOUJOURS, quel que soit le carton du
               dessus — voir le commentaire d'en-tête pour le pourquoi
-              de cette superposition plutôt qu'un changement de balise. */}
+              de cette superposition plutôt qu'un changement de balise.
+              Masqué aussi tant qu'AUCUN carton n'est monté (pendant le
+              Hero, avant que la section Inoko ait fait apparaître le
+              carton 1, CLAUDE.md « Rail droit ») : sans carton, la pile
+              n'a rien à montrer/déplier, un bouton fantôme resterait
+              sinon focusable sans cible visible. */}
           <button
             ref={toggleRef}
             type="button"
             className={styles.toggle}
-            hidden={open}
+            hidden={open || mountedIndexes.length === 0}
             aria-expanded={open}
             aria-controls={stackId}
             aria-label={`${railStackLabels.togglePrefix}${frontTitle}`}

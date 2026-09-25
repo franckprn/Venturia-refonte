@@ -3,12 +3,14 @@
  * « Rail droit » § « Pile mobile »). Rien ici ne s'applique à
  * >= 1024px : `.wrap` et `.overlay` sont display: none par défaut.
  *
- * Cartons 2 et 3 réversibles : démontés pour de vrai quand sortis (pas
- * de trio d'éléments permanents comme dans la première version). Le
- * rôle visuel de chaque carton MONTÉ dans la pile repliée — `front`
- * (affiché en entier, en ligne), `peek` (réduit à un pic de 6px) ou
- * `exiting` (en train de sortir, hors flux) — est calculé en JS et posé
- * en `data-role` (MobileRailStack.tsx), PAS déduit d'un `:last-child` :
+ * Les 3 cartons sont réversibles (le carton 1 aussi désormais : aucun
+ * carton visible pendant le Hero, il apparaît avec la section Inoko et
+ * disparaît en remontant, CLAUDE.md) : démontés pour de vrai quand
+ * sortis (pas de trio d'éléments permanents). Le rôle visuel de chaque
+ * carton MONTÉ dans la pile repliée — `front` (affiché en entier, en
+ * ligne), `peek` (réduit à un pic de 6px) ou `exiting` (en train de
+ * sortir, hors flux) — est calculé en JS et posé en `data-role`
+ * (MobileRailStack.tsx), PAS déduit d'un `:last-child` :
  * un carton "exiting" doit sortir du flux normal (position absolute,
  * pour glisser par-dessus en `translateY` sans repousser les autres)
  * tout en restant un enfant DOM le temps de son animation de sortie —

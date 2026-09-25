@@ -5,7 +5,7 @@ import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { VENTURIA_EASE } from "@/lib/ease";
-import { servicesLinkLabel, type Service } from "@/content/services";
+import type { Service } from "@/content/services";
 import styles from "./services.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -40,8 +40,17 @@ type ServicesRowsRevealProps = {
  * ligne reste focusable (juste transparente) : le focus clavier
  * l'amène dans la vue, ce qui déclenche le ScrollTrigger normalement.
  *
- * Les états de survol/focus (soulignement du lien) sont entièrement en
- * CSS — voir services.module.css — ce composant ne gère que l'entrée.
+ * Les états de survol/focus (inversion charbon/crème, flèche) sont
+ * entièrement en CSS — voir services.module.css § « survol/focus » —
+ * ce composant ne gère que l'entrée.
+ *
+ * Lien étiré (CLAUDE.md, « Services (home) » § « Ligne cliquable ») :
+ * plus de texte visible « En savoir plus → » (retiré) — le `<Link>`
+ * lui-même n'a plus de contenu, juste `aria-label={service.name}` pour
+ * garder un nom accessible (jamais un lien vide). La flèche « → »
+ * décorative vit désormais à côté du titre (`.headingRow`), pas dans le
+ * lien : elle indique que toute la ligne est cliquable, pas seulement
+ * elle-même.
  */
 export function ServicesRowsReveal({ services }: ServicesRowsRevealProps) {
   const listRef = useRef<HTMLDivElement>(null);
@@ -91,21 +100,15 @@ export function ServicesRowsReveal({ services }: ServicesRowsRevealProps) {
           }}
           className={styles.row}
         >
-          <p className={styles.heading}>
-            {service.number} — {service.name}
-          </p>
-          <p className={styles.phrase}>{service.phrase}</p>
-          <div className={styles.paragraphs}>
-            {service.paragraphs.map((paragraph, i) => (
-              <p key={i} className={styles.paragraph}>
-                {paragraph}
-              </p>
-            ))}
-          </div>
-          <Link href={service.href} className={styles.link}>
-            {servicesLinkLabel}
+          <div className={styles.headingRow}>
+            <p className={styles.heading}>{service.name}</p>
+            {/* Décorative (aria-hidden) : le nom accessible de la ligne
+                vit sur le <Link> ci-dessous (aria-label). Visible en
+                permanence sous 1024px (pas de survol tactile) ;
+                apparaît seulement au survol/focus dès 1024px — voir
+                services.module.css. */}
             <svg
-              className={styles.linkArrow}
+              className={styles.rowArrow}
               width="16"
               height="16"
               viewBox="0 0 16 16"
@@ -120,7 +123,16 @@ export function ServicesRowsReveal({ services }: ServicesRowsRevealProps) {
                 strokeLinejoin="round"
               />
             </svg>
-          </Link>
+          </div>
+          <p className={styles.phrase}>{service.phrase}</p>
+          <div className={styles.paragraphs}>
+            {service.paragraphs.map((paragraph, i) => (
+              <p key={i} className={styles.paragraph}>
+                {paragraph}
+              </p>
+            ))}
+          </div>
+          <Link href={service.href} className={styles.link} aria-label={service.name} />
         </div>
       ))}
     </div>

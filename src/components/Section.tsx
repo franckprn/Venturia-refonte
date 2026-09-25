@@ -15,6 +15,13 @@ type SectionProps = {
    *  <section> lui-même, pas par .body : c'est l'élément que le moteur
    *  de tonalités interroge (`section[data-tone]`). */
   tone: Tone;
+  /** Espacement vertical de la section (CLAUDE.md, « Shell de page ») :
+   *  "default" (padding-block: --section-space, 96/160, haut ET bas —
+   *  centralisé ici, plus de valeur en dur par section) ou "none" pour
+   *  les deux exceptions qui gèrent leur propre padding (>= le même
+   *  token) parce qu'elles imposent aussi une hauteur d'écran (100svh) :
+   *  Hero et Respiration. Par défaut "default". */
+  spacing?: "default" | "none";
   /** id d'ancre (nav interne), si différent de `name`. scroll-margin-top
    *  84px est global. */
   id?: string;
@@ -39,6 +46,7 @@ type SectionProps = {
 export function Section({
   name,
   tone,
+  spacing = "default",
   id,
   labelledBy,
   className,
@@ -51,7 +59,9 @@ export function Section({
       id={id ?? name}
       data-tone={tone}
       aria-labelledby={labelledBy}
-      className={[styles.section, className].filter(Boolean).join(" ")}
+      className={[styles.section, spacing === "default" ? styles.spaced : "", className]
+        .filter(Boolean)
+        .join(" ")}
       style={{ gridRow: `${name}-start` }}
     >
       <div className={[styles.body, bodyClassName].filter(Boolean).join(" ")} style={bodyStyle}>

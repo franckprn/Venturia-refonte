@@ -57,8 +57,10 @@ export default function Home() {
         <Section
           name="hero"
           tone="light"
+          spacing="none"
           labelledBy="hero-title"
           className={heroStyles.section}
+          bodyClassName={heroStyles.body}
           bodyStyle={{ rowGap: 0 }}
         >
           <Hero />
@@ -78,6 +80,7 @@ export default function Home() {
         <Section
           name="respiration"
           tone="dark"
+          spacing="none"
           className={respirationStyles.section}
           bodyStyle={{ rowGap: 0 }}
         >

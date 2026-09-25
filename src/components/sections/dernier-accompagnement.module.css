@@ -11,8 +11,12 @@
  * des deux côtés.
  *
  * row-gap à 0 sur la grille externe (bodyStyle, page.tsx) : les écarts
- * entre label / titre / split / lien sont portés par les margin-top
- * ci-dessous, pas par le gap de la grille.
+ * entre label / titre / paragraphe / split / lien sont portés par les
+ * margin-top ci-dessous, pas par le gap de la grille — les LIGNES,
+ * elles (grid-row explicite dès 1024px), viennent de la mise en page B
+ * (« Règle des deux axes » du CLAUDE.md, voir le bloc @media plus bas) :
+ * le paragraphe (axe droit) occupe sa propre ligne, après celle du
+ * titre (axe gauche), jamais la même.
  *
  * overflow: hidden ne vit que sur .visual, dans la colonne de contenu —
  * cette section n'a de toute façon aucun carton de rail.
@@ -227,8 +231,34 @@
   flex: none;
 }
 
+/* Mise en page B (CLAUDE.md, « Règle des deux axes ») dès 1024px : le
+   paragraphe passe sur l'axe droit (colonnes 7-12), sur une ligne de
+   grille APRÈS celle du titre — jamais à côté (comme dans les Services :
+   .paragraph et .title/.heading n'occupent jamais la même grid-row).
+   Lignes explicites sur la grille externe (section.module.css .body,
+   row-gap:0 via bodyStyle) plutôt que comptées sur l'auto-placement :
+   1 label, 2 titre, 3 paragraphe, 4 split (photo+chiffres), 5 lien —
+   même technique que .heading/.phrase/.paragraphs dans services.module.css. */
 @media (min-width: 1024px) {
+  .label {
+    grid-row: 1;
+  }
+
+  .title {
+    grid-column: 1 / 8;
+    grid-row: 2;
+    margin-top: 48px;
+  }
+
+  .paragraph {
+    grid-column: 7 / 13;
+    grid-row: 3;
+    margin-top: 48px;
+    max-width: 42ch; /* identique aux paragraphes des Services */
+  }
+
   .split {
+    grid-row: 4;
     margin-top: 48px;
   }
 
@@ -241,18 +271,9 @@
     margin-top: 0;
   }
 
-  .title {
-    grid-column: 1 / 8;
-    margin-top: 48px;
-  }
-
-  .paragraph {
-    grid-column: 1 / 8;
-    margin-top: 48px;
-  }
-
   .link {
     grid-column: 7 / 13;
+    grid-row: 5;
   }
 }
 

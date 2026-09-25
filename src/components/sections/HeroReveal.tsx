@@ -92,37 +92,41 @@ export function HeroReveal() {
 
   return (
     <>
-      <h1 id="hero-title" ref={titleRef} className={styles.title}>
-        <span className={styles.accent}>{hero.titleAccent}</span>{" "}
-        {hero.titleLine1Rest}
-        <br />
-        {hero.titleLine2}
-      </h1>
+      <div className={styles.titleWrap}>
+        <h1 id="hero-title" ref={titleRef} className={styles.title}>
+          <span className={styles.accent}>{hero.titleAccent}</span>{" "}
+          {hero.titleLine1Rest}
+          <br />
+          {hero.titleLine2}
+        </h1>
+      </div>
 
-      <p ref={subtitleRef} className={styles.subtitle}>
-        {hero.subtitle}
-      </p>
+      <div className={styles.bottom}>
+        <p ref={subtitleRef} className={styles.subtitle}>
+          {hero.subtitle}
+        </p>
 
-      <div ref={actionsRef} className={styles.actions}>
-        <Link href={hero.ctaSecondary.href} className={styles.ctaSecondary}>
-          <svg
-            className={styles.ctaArrow}
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M8 2.5V13M3.5 9L8 13.5L12.5 9"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          {hero.ctaSecondary.label}
-        </Link>
+        <div ref={actionsRef} className={styles.actions}>
+          <Link href={hero.ctaSecondary.href} className={styles.ctaSecondary}>
+            <svg
+              className={styles.ctaArrow}
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M8 2.5V13M3.5 9L8 13.5L12.5 9"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {hero.ctaSecondary.label}
+          </Link>
+        </div>
       </div>
     </>
   );

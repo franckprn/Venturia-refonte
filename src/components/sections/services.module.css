@@ -1,10 +1,10 @@
 /* ------------------------------------------------------------------ *
  * Section « Services » (home) — quatre lignes, chacune sur les deux
  * axes de la grille partagée (CLAUDE.md, « Règle des deux axes ») :
- * numéro+nom / phrase courte sur l'axe gauche (colonne 1), paragraphe
- * sur l'axe droit (colonne 7), à partir de 1280px (voir plus bas pour
- * le choix de ce point de repli). Fond --ground, dans la zone de
- * contenu (jamais sous le rail).
+ * nom / phrase courte sur l'axe gauche (colonne 1), paragraphe sur
+ * l'axe droit (colonne 7), à partir de 1280px (voir plus bas pour le
+ * choix de ce point de repli). Fond --ground, dans la zone de contenu
+ * (jamais sous le rail).
  *
  * Aucune grille interne à padding : `.row` redéclare sa propre grille
  * 12 colonnes (comme `.split` dans dernier-accompagnement.module.css)
@@ -15,12 +15,18 @@
  * n'affecte pas les colonnes.
  *
  * Ligne entièrement cliquable (lien étiré) : seul `.link` est un vrai
- * <a> ; son ::after, positionné en absolute sur TOUTE la boîte de
- * `.row` (position:relative), étend sa zone cliquable à la ligne
- * entière sans imbriquer d'autre élément interactif. `.link:hover`
- * s'active donc aussi en survolant n'importe où dans la ligne (le
- * ::after fait partie du <a>) — voir CLAUDE.md, « Services (home) »
- * § « Ligne cliquable ».
+ * <a>, sans contenu visible — `position: absolute; inset: 0` sur
+ * l'ÉLÉMENT LUI-MÊME (plus un ::after, inutile sans texte à mettre en
+ * forme) l'étire à toute la boîte de `.row` (position: relative). Nom
+ * accessible porté par `aria-label` (le titre du service) : jamais un
+ * lien vide (CLAUDE.md, « Services (home) » § « Ligne cliquable »).
+ *
+ * Survol/focus (rétabli, retiré par erreur lors du passage en mise en
+ * page B — voir git 3507f4f pour la version d'origine) : `.row:has(.link:hover)`
+ * inverse fond + textes, la flèche de `.headingRow` apparaît. `:has()`
+ * plutôt qu'un `.link:hover ~ …` : le lien est en fin de DOM, un
+ * combinateur de frères suivants ne peut pas remonter vers les
+ * éléments qui le précèdent.
  *
  * Le deuxième carton du rail s'ancrera à cette section plus tard : pas
  * d'overflow ni de contain sur aucun ancêtre, pour ne pas casser son
@@ -53,7 +59,6 @@
 .list {
   grid-column: 1 / -1;
   margin-top: 32px;
-  border-top: 1px solid var(--line);
 }
 
 /* --- Ligne : mobile-first, une seule colonne (< 1280px) --- *
@@ -62,13 +67,21 @@
  * vérification) — repli explicitement décalé à 1280px, pas 1024px. */
 
 .row {
-  position: relative; /* containing block du ::after du lien étiré */
+  position: relative; /* containing block du lien étiré (.link) */
   display: flex;
   flex-direction: column;
   gap: 12px;
   padding-block: 32px;
-  border-bottom: 1px solid var(--line);
   cursor: pointer;
+}
+
+/* Titre + flèche décorative, sur toute la largeur de la bande — voir
+   « survol/focus » plus bas pour la flèche elle-même. */
+.headingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .heading {
@@ -108,60 +121,82 @@
   color: var(--ink);
 }
 
-/* Zone cliquable réelle : le seul <a> de la ligne. padding-block +
-   margin-block négatif égal (technique de zone tactile agrandie) :
-   agrandit la surface cliquable à >= 44px de haut SANS déplacer la
-   boîte de marge (celle qu'utilisent grid/align-self pour la
-   position) — nécessaire en desktop pour que l'alignement de
-   ligne de base avec le paragraphe (voir plus bas) reste exact. */
+/* Zone cliquable réelle : le seul <a> de la ligne, sans contenu visible
+   (nom accessible porté par aria-label — voir ServicesRowsReveal.tsx).
+   Étiré à toute la boîte de `.row` (position: relative) directement,
+   plus besoin d'un ::after : rien à mettre en forme séparément de
+   l'étirement lui-même maintenant que le lien n'a plus de texte propre. */
 .link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  width: fit-content;
-  padding-block: 12px;
-  margin-block: -12px;
-  font-family: var(--font-sans), system-ui, sans-serif;
-  font-size: var(--t-body);
-  line-height: var(--t-body-lh);
-  letter-spacing: var(--t-body-ls);
-  font-weight: 500;
-  color: var(--ink);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 4px;
-  text-decoration-color: transparent;
-  transition: text-decoration-color 150ms cubic-bezier(0, 0.55, 0.45, 1);
-}
-
-/* Lien étiré : couvre toute la ligne, sans imbriquer d'élément
-   interactif. `.link:hover` s'active donc dès que le pointeur survole
-   n'importe quel point de la ligne (le ::after fait partie du <a>). */
-.link::after {
-  content: "";
   position: absolute;
   inset: 0;
 }
 
-/* Pas besoin de `.row:hover .link` : le ::after du lien couvre toute
-   la ligne et fait partie du <a>, donc `.link:hover` s'active déjà en
-   survolant n'importe quel point de la ligne. */
-.link:hover,
-.link:focus-visible {
-  text-decoration-color: currentColor;
-}
-
 .link:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: -2px; /* vers l'intérieur : le lien touche déjà les 4 bords de la ligne */
 }
 
-.linkArrow {
+/* Flèche décorative de `.headingRow` — visible en permanence sous
+   1024px (pas de survol tactile, CLAUDE.md § 2e) : indique que la
+   ligne est cliquable, sans inversion de fond. */
+.rowArrow {
   flex: none;
+  color: var(--ink);
+}
+
+/* --- Survol/focus (>= 1024px uniquement) --- *
+ * Rétabli tel qu'avant le passage en mise en page B (voir git 3507f4f
+ * pour la version d'origine, qui utilisait --accent pour la flèche —
+ * --ground désormais, CLAUDE.md § 2d) : fond de la bande en --ink, tous
+ * ses textes en --ground, flèche --ground à l'extrémité droite.
+ * `.row:has(.link:hover)` plutôt qu'un `.link:hover ~ …` : `.link` est
+ * le DERNIER enfant du DOM, un combinateur de frères suivants ne
+ * pourrait pas viser les éléments qui le précèdent. */
+@media (min-width: 1024px) {
+  .row {
+    transition: background-color 200ms cubic-bezier(0, 0.55, 0.45, 1);
+  }
+
+  .heading,
+  .phrase,
+  .paragraph {
+    transition: color 200ms cubic-bezier(0, 0.55, 0.45, 1);
+  }
+
+  .rowArrow {
+    opacity: 0;
+    transition:
+      opacity 200ms cubic-bezier(0, 0.55, 0.45, 1),
+      color 200ms cubic-bezier(0, 0.55, 0.45, 1);
+  }
+
+  .row:has(.link:hover),
+  .row:has(.link:focus-visible) {
+    background: var(--ink);
+  }
+
+  .row:has(.link:hover) .heading,
+  .row:has(.link:hover) .phrase,
+  .row:has(.link:hover) .paragraph,
+  .row:has(.link:focus-visible) .heading,
+  .row:has(.link:focus-visible) .phrase,
+  .row:has(.link:focus-visible) .paragraph {
+    color: var(--ground);
+  }
+
+  .row:has(.link:hover) .rowArrow,
+  .row:has(.link:focus-visible) .rowArrow {
+    opacity: 1;
+    color: var(--ground);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .link {
+  .row,
+  .heading,
+  .phrase,
+  .paragraph,
+  .rowArrow {
     transition: none;
   }
 }
@@ -177,8 +212,14 @@
     align-items: start;
   }
 
-  .heading {
-    grid-column: 1 / 7;
+  /* Toute la largeur de la bande (pas juste la moitié gauche) : c'est
+     ce qui permet à la flèche (.rowArrow, poussée par
+     `justify-content: space-between`) de retomber à l'extrémité DROITE
+     de la ligne — colonne 12 — tout en gardant le titre lui-même sur
+     l'axe gauche (aucun autre contenu dans les colonnes 7-12 de cette
+     1ʳᵉ ligne de grille). */
+  .headingRow {
+    grid-column: 1 / -1;
     grid-row: 1;
   }
 
@@ -201,20 +242,7 @@
     max-width: 42ch; /* ~45-75 caractères/ligne visé, voir rapport de vérification */
   }
 
-  /* Calé contre le bord droit de la moitié gauche (fin de la colonne
-     6) : justify-self:end place le bord droit du lien sur la ligne de
-     grille 7 côté "fin de span", c-a-d la fin de la colonne 6, pas le
-     début de la colonne 7 (vérifié par sonde CSS Grid, voir l'audit
-     deux-colonnes — une différence de 20px selon le sens). align-self:
-     end aligne le bas de la boîte du lien sur le bas de la boîte de
-     .paragraphs (même grid-row), donc sur le bas du DERNIER <p> (le
-     flex column n'ajoute aucun padding) : comme .link et .paragraph
-     partagent exactement le même --t-body/--t-body-lh, aligner ces
-     boîtes aligne aussi leurs lignes de base — sans mesure JS. */
-  .link {
-    grid-column: 1 / 7;
-    grid-row: 3;
-    justify-self: end;
-    align-self: end;
-  }
+  /* .link reste `position: absolute` (voir plus haut) — un item
+     positionné en absolu sort du flux de la grille, aucun grid-column/
+     grid-row à lui donner ici. */
 }

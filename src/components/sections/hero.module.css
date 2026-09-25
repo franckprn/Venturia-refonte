@@ -3,24 +3,39 @@
  * typographie et l'espacement seuls.
  *
  * .section porte le padding vertical propre au hero (96/160, EN PLUS
- * des 64px de nav déjà posés par <main>) — le hero est la première
- * section du Shell, la règle générale d'espacement inter-sections
- * (section.module.css, padding-top sur :not(:first-child)) ne le
- * concerne pas.
+ * des 64px de nav déjà posés par <main>) — `<Section spacing="none">`
+ * (page.tsx) l'exempte du padding partagé (section.module.css .spaced)
+ * : le hero impose aussi une hauteur minimale d'écran (100svh, jamais
+ * 100vh, CLAUDE.md § 1) que la classe partagée ne gère pas, et cette
+ * valeur reste au moins celle du token (--section-space) par
+ * construction (elle EST le token). `.section` est un flex column
+ * simple (pas de grid) : à défaut de contenu qui remplit l'écran,
+ * l'espace en trop tombe sous `.body` (dernier enfant), jamais au-dessus
+ * — cohérent avec « le sous-titre + CTA vivent en bas du Hero » dès
+ * 1024px (voir .body/.bottom plus bas), sans rien de spécial à faire à
+ * ce sujet en dessous de 1024px (empilement normal, .body garde sa
+ * hauteur naturelle, `flex:1`/lignes de grille ne s'appliquent qu'à
+ * partir de 1024px).
  *
- * Mobile-first ici : la base est la pile verticale pleine largeur,
- * l'écran >= 1024px ajoute les colonnes (h1 1-9, sous-titre 1-6, CTA
- * 1-8) et remet la ligne de CTA sur une seule ligne.
+ * Mobile-first ici : la base est la pile verticale pleine largeur
+ * (titre, puis sous-titre + CTA empilés juste en dessous, écarts
+ * 32/48 en margin-top). >= 1024px : `.body` devient une grille à 3
+ * lignes (titre / 1fr / bas) qui pousse le sous-titre + CTA
+ * (`.bottom`, colonnes 7-12) au bas du Hero, pendant que le titre
+ * passe sur les 12 colonnes entières (voir § 1 du prompt : la ligne la
+ * plus longue du h1 doit occuper exactement leur largeur).
  *
- * row-gap à 0 sur la grille 12 colonnes (bodyStyle, page.tsx) : les
- * écarts 32/48 puis 48 entre les trois blocs (titre, sous-titre, CTA)
- * sont portés par les margin-top ci-dessous, pas par le gap de la
- * grille. Pas de badge : retiré (S9), la ligne de CTA est le dernier
- * élément — le padding-bottom de .section referme la section sans rien
- * d'orphelin derrière.
+ * row-gap à 0 sur la grille 12 colonnes (bodyStyle, page.tsx) : l'écart
+ * titre → sous-titre/CTA est porté par la ligne 1fr en desktop, par un
+ * margin-top en mobile — jamais par le gap de la grille. Pas de badge :
+ * retiré (S9), le bloc bas est le dernier élément — le padding-bottom
+ * de .section referme la section sans rien d'orphelin derrière.
  * ------------------------------------------------------------------ */
 
 .section {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
   padding-block: 96px;
 }
 
@@ -28,11 +43,42 @@
   .section {
     padding-block: 160px;
   }
+
+  .body {
+    flex: 1;
+    grid-template-rows: auto 1fr auto;
+  }
+}
+
+/* Wrapper DÉDIÉ du h1 (jamais le h1 lui-même) : seul élément de cet
+   arbre à porter `container-type` (CLAUDE.md, « Rail droit » —
+   « aucun ancêtre d'un élément sticky ne doit porter contain »). Sans
+   incidence ici : ce wrapper vit dans la colonne de contenu du Hero,
+   jamais un ancêtre des cartons du rail (colonne séparée du Shell, DOM
+   distinct — voir Shell.tsx/Rail.tsx). `container-type: inline-size`
+   n'est posé qu'à partir de 1024px : en dessous, le h1 garde
+   --t-hero (40px) fixe, aucune unité de conteneur. */
+.titleWrap {
+  grid-row: 1;
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .titleWrap {
+    container-type: inline-size;
+    /* Calibré par mesure (Playwright) : à ce poids/approche/police fixés,
+       la largeur du texte scale linéairement avec le font-size (le
+       letter-spacing est lui-même en em) — un seul multiplicateur reste
+       donc exact à toute largeur de conteneur. Rapport de vérification
+       du prompt « rythme de la home ». */
+    --hero-title-cqi: 11.7855;
+  }
 }
 
 .title {
-  grid-column: 1 / -1;
   margin: 0;
+  width: 100%;
   font-family: var(--font-display), system-ui, sans-serif;
   font-weight: 800;
   font-size: var(--t-hero);
@@ -45,6 +91,22 @@
      h1..h6 { text-wrap: balance }), qui reste en place pour les autres
      titres de la page. */
   text-wrap: wrap;
+}
+
+/* >= 1024px : la ligne la plus longue du h1 (« du référencement »)
+   occupe EXACTEMENT la largeur des 12 colonnes (CLAUDE.md § 1) — taille
+   calculée sur la largeur de la grille (1cqi = 1 % de la largeur de
+   .titleWrap, lui-même égal aux 12 colonnes du Hero puisqu'il n'y a pas
+   de rail sur cette section), jamais sur 100vw. Le multiplicateur
+   (--hero-title-cqi) est une CONSTANTE : comme la largeur d'un texte à
+   letter-spacing en em scale exactement comme le font-size, un seul
+   calibrage (texte/police/graisse/approche fixés) reste valable à
+   n'importe quelle largeur de conteneur — mesuré par Playwright, voir
+   le rapport de vérification (< 0,01 % d'écart mesuré à 1024-1920px). */
+@media (min-width: 1024px) {
+  .title {
+    font-size: calc(var(--hero-title-cqi) * 1cqi);
+  }
 }
 
 /* Couleur --accent retirée du h1 (le titre est entièrement --ink,
@@ -65,8 +127,27 @@
   display: inline-block;
 }
 
-.subtitle {
+/* Enveloppe le sous-titre + le CTA (HeroReveal.tsx) : un seul item de
+   grille pour les deux, ce qui permet de les poser ensemble sur l'axe
+   droit (colonnes 7-12) et en bas du Hero à partir de 1024px (voir
+   .body plus haut, ligne 3 de `grid-template-rows: auto 1fr auto`) —
+   sans lui, .subtitle et .actions seraient deux items séparés et
+   n'occuperaient pas forcément la même ligne de grille. En dessous de
+   1024px : bloc simple, pleine largeur, empilé sous le titre (pas de
+   grid-row/-column posés, auto-placement en ligne 2 par défaut). */
+.bottom {
   grid-column: 1 / -1;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .bottom {
+    grid-row: 3;
+    grid-column: 7 / -1;
+  }
+}
+
+.subtitle {
   margin: 32px 0 0;
   max-width: 68ch;
   font-size: var(--t-lead);
@@ -77,7 +158,6 @@
 }
 
 .actions {
-  grid-column: 1 / -1;
   margin-top: 48px;
   display: flex;
   flex-direction: column;
@@ -155,17 +235,17 @@
 }
 
 @media (min-width: 1024px) {
-  .title {
-    grid-column: 1 / 10;
-  }
-
+  /* Même largeur de texte max que les paragraphes des Services
+     (CLAUDE.md, « Services (home) » — services.module.css .paragraphs),
+     cible 45-75 caractères/ligne. Sous 1024px, pas de plafond dédié :
+     68ch ci-dessus ne contraint jamais la pleine largeur du contenu à
+     ces largeurs (colonne bien plus étroite). */
   .subtitle {
-    grid-column: 1 / 7;
-    margin-top: 48px;
+    margin-top: 0;
+    max-width: 42ch;
   }
 
   .actions {
-    grid-column: 1 / 9;
     flex-direction: row;
     align-items: baseline;
     gap: 32px;

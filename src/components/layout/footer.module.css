@@ -1,10 +1,13 @@
 /* ------------------------------------------------------------------ *
  * Bloc de fin de page (CTA + footer), un seul bloc sombre. Le fond
- * --ink pleine largeur et le padding vertical (96px haut / 32px bas)
- * vivent sur `.section`, portée par le <Section> qui englobe ce
- * composant dans page.tsx — même technique de débordement que
- * Respiration (voir respiration.module.css et CLAUDE.md, « Shell de
- * page », pour le détail du box-shadow/clip-path).
+ * --ink pleine largeur vit sur `.section`, portée par le <Section> qui
+ * englobe ce composant dans page.tsx — même technique de débordement
+ * que Respiration (voir respiration.module.css et CLAUDE.md, « Shell
+ * de page », pour le détail du box-shadow/clip-path). Padding vertical
+ * (haut ET bas) : plus de valeur propre à ce fichier — cette section
+ * n'est PAS une exception (seuls Hero et Respiration en sont, CLAUDE.md
+ * « Shell de page ») : `<Section spacing="default">` (page.tsx, valeur
+ * par défaut) pose déjà `--section-space` (96/160) des deux côtés.
  *
  * `.bands` et ses enfants directs sont l'unique item de la grille 12
  * colonnes externe (section.module.css .body) : comme .split
@@ -12,12 +15,6 @@
  * chaque bande redéclare sa propre grille 12 colonnes interne plutôt
  * que de dépendre de la grille partagée — ce composant a son propre
  * point de rupture, 768px, indépendant du 1024px du shell.
- *
- * padding-top est réécrit ici (96px !important) pour la même raison
- * que dans respiration.module.css : la règle générale d'espacement
- * inter-sections (section.module.css, 96/160 sur :not(:first-child))
- * s'appliquerait sinon en plus, et l'ordre de deux modules CSS
- * distincts ne garantit pas laquelle des deux règles l'emporte.
  * ------------------------------------------------------------------ */
 
 .section {
@@ -25,8 +22,6 @@
   isolation: isolate;
   color: var(--ground);
   -webkit-font-smoothing: antialiased;
-  padding-top: 96px !important;
-  padding-bottom: 32px;
   /* Fond plein écran sans 100vw (CLAUDE.md, « Shell de page ») : le
      box-shadow étend la même couleur unie bien au-delà des deux bords du
      conteneur, le clip-path retaille cette extension à la hauteur exacte
@@ -42,14 +37,18 @@
 /* Sous 1024px, la pile mobile du rail est fixée par-dessus le bas de
    l'écran (MobileRailStack.tsx, CLAUDE.md « Rail droit » § « Pile
    mobile ») : la barre légale ci-dessous (.legalBar) a besoin d'un
-   espace supplémentaire pour ne jamais se retrouver cachée derrière,
-   même tout en bas de page. --mobile-pile-space (globals.css) est
-   mesuré en JS (hauteur réelle de la pile REPLIÉE, trait compris — elle
-   varie avec le texte des cartons) ; le repli ci-dessous n'est qu'une
-   valeur plausible pour le rendu sans JS. */
+   espace supplémentaire, EN PLUS du padding-bottom déjà posé par
+   `.spaced` (section.module.css, même token --section-space), pour ne
+   jamais se retrouver cachée derrière, même tout en bas de page.
+   --mobile-pile-space (globals.css) est mesuré en JS (hauteur réelle de
+   la pile REPLIÉE, trait compris) ; le repli ci-dessous n'est qu'une
+   valeur plausible pour le rendu sans JS. `!important` : nécessaire pour
+   gagner sur `.spaced`, une classe de même spécificité posée par un
+   AUTRE module CSS — l'ordre d'import entre les deux n'est pas garanti
+   (même raisonnement que le padding-top de respiration.module.css). */
 @media (max-width: 1023px) {
   .section {
-    padding-bottom: calc(32px + var(--mobile-pile-space, 100px));
+    padding-bottom: calc(var(--section-space) + var(--mobile-pile-space, 100px)) !important;
   }
 }
 

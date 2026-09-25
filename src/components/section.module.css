@@ -13,8 +13,13 @@
  *   <section> retombe naturellement dans le flux.
  *   .body     6 colonnes, gap 20px
  *
- * Espacement inter-sections : 96px mobile / 160px desktop, porté par le
- * padding-top de chaque section sauf la première.
+ * Espacement inter-sections : `--section-space` (globals.css, 96px
+ * mobile / 160px desktop), posé en haut ET en bas par `.spaced` — classe
+ * ajoutée par Section.tsx quand `spacing="default"` (le cas normal).
+ * Centralisé ici plutôt qu'en padding par section : Hero et Respiration
+ * (spacing="none") gèrent seuls leur propre padding, au moins égal à ce
+ * même token, parce qu'ils imposent aussi une hauteur d'écran (100svh) —
+ * voir hero.module.css et respiration.module.css.
  *
  * Aucun overflow ni contain ici : le carton du rail en dépend.
  * ------------------------------------------------------------------ */
@@ -24,8 +29,8 @@
   min-width: 0;
 }
 
-.section:not(:first-child) {
-  padding-top: 96px;
+.spaced {
+  padding-block: var(--section-space);
 }
 
 .body {
@@ -33,12 +38,6 @@
   grid-template-columns: repeat(12, 1fr);
   gap: var(--shell-gutter);
   align-content: start;
-}
-
-@media (min-width: 1024px) {
-  .section:not(:first-child) {
-    padding-top: 160px;
-  }
 }
 
 @media (max-width: 1023px) {

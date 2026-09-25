@@ -122,6 +122,16 @@ délibéré : le conserver tel quel.
 Un titre de section peut descendre à --t-lead quand le contenu de la
 section porte déjà du --t-title, pour éviter deux niveaux concurrents.
 
+Emphase dans un bloc de texte (un ou plusieurs mots à distinguer du
+reste) : en gras SI l'écart entre la graisse du texte et la graisse
+maximale disponible de la police est d'au moins 200 ; sinon, un
+soulignement (`text-decoration`, couleur du texte, épaisseur et
+décalage en em — proportionnels à la taille du texte, jamais des px
+fixes). Bricolage Grotesque est une police variable, axe 200-800
+(`document.fonts`) : un texte déjà posé à 800 (--t-hero, --t-mass) n'a
+donc plus de graisse disponible au-dessus — jamais de gras dessus,
+toujours un soulignement (voir Respiration).
+
 ## Shell de page
 
 Desktop (>= 1024px) — construction springsummer.dk : fluide, sans marge à
@@ -156,8 +166,13 @@ Le contenu reste dans le conteneur. Seul le rail (desktop) et la pile
 mobile (son remplacement sous 1024px) vont jusqu'au bord, protégés par leur
 propre padding/marge de 20px.
 
-Espacement vertical des sections : 96px mobile / 160px desktop.
-Section dense 64/128. Section en négatif 128/200.
+Espacement vertical des sections : 96px mobile / 160px desktop
+(`--section-space`, globals.css), posé en haut ET en bas par
+`<Section>` (`spacing="default"`, la valeur par défaut — jamais de
+padding en dur section par section). Section dense 64/128. Section en
+négatif 128/200. Exceptions : Hero et Respiration (`spacing="none"`) —
+elles imposent une hauteur minimale d'écran (100svh, jamais 100vh) et
+gèrent leur propre padding, qui reste au moins égal à ce même token.
 Titre de section → contenu : 32px mobile / 48px desktop.
 Échelle : 4 · 8 · 12 · 16 · 20 · 24 · 32 · 48 · 64 · 96 · 128 · 160.
 Espacer au `gap` d'un flex ou d'une grille plutôt qu'aux marges individuelles.
@@ -184,79 +199,148 @@ référence : `.split` dans `dernier-accompagnement.module.css` (visuel
 colonnes 1-5, chiffres colonnes 7-12, aucun padding-inline, lignes
 alignées au pixel avec la grille partagée).
 
+## Hero (home)
+
+Hauteur minimale d'un écran : `min-height: 100svh` (jamais `100vh`, qui
+inclut la barre d'adresse mobile). `spacing="none"` (voir « Shell de
+page ») : le hero gère son propre padding-block (96/160, au moins le
+token), en `display: flex; flex-direction: column` — le contenu
+(`.body`) est le seul enfant, l'espace en trop tombe donc SOUS lui,
+jamais au-dessus (pas de centrage vertical).
+
+H1 (« Bien plus que / du référencement ») : dès 1024px, sur les 12
+colonnes entières (`grid-column: 1 / -1`), la ligne la plus longue («
+du référencement ») occupant EXACTEMENT cette largeur, du bord gauche
+de la colonne 1 au bord droit de la colonne 12, à toute largeur
+d'écran. Taille calculée sur la largeur de la grille, jamais sur
+100vw : un wrapper DÉDIÉ (`.titleWrap`, jamais le h1 lui-même, jamais
+un ancêtre des cartons du rail) porte `container-type: inline-size`,
+le h1 un `font-size: calc(<constante> * 1cqi)`. La constante est un
+calibrage géométrique (letter-spacing en em ⇒ la largeur du texte
+scale linéairement avec le font-size, donc un seul multiplicateur reste
+exact à toute largeur de conteneur) — à recalibrer seulement si le
+texte, la police, la graisse ou l'approche du h1 changent. Sous 1024px :
+pleine largeur du contenu, taille fixe (--t-hero).
+
+Sous-titre + CTA (`.bottom`) : dès 1024px, colonnes 7-12 (axe droit),
+en bas du Hero — `.body` passe en grille 3 lignes
+(`auto 1fr auto` + `flex: 1`), la ligne du milieu (1fr) pousse `.bottom`
+contre le padding-bottom de la section. Largeur de texte du sous-titre :
+`max-width: 42ch`, identique aux paragraphes des Services
+(services.module.css `.paragraphs`). Sous 1024px : pleine largeur, sous
+le h1, empilement normal (pas de poussée vers le bas).
+
+## Respiration (home)
+
+Section plein écran : `min-height: 100svh` (jamais 100vh),
+`spacing="none"` (voir « Shell de page ») — padding propre 128/200 («
+section en négatif »), au moins le token partagé. `<section>` reste un
+bloc simple (pas de flex/grid) : son unique enfant (le texte) s'empile
+depuis le haut par défaut, donc le texte n'est jamais centré
+verticalement — il démarre en haut de la section, sur les 12 colonnes,
+aligné à gauche, sans JS ni flex nécessaires pour ça.
+
+Tout le texte en --ground (plus de --accent dans cette section).
+Emphase sur les deux derniers mots avant le point (« passer commande ») :
+voir « Typographie » § emphase — le texte est déjà à 800 (graisse
+maximale de Bricolage Grotesque), donc soulignement, pas gras.
+
+## Dernier accompagnement — Inoko (home)
+
+Mise en page B (« Règle des deux axes ») : le titre reste sur l'axe
+gauche (colonne 1), le paragraphe passe sur l'axe droit (colonnes
+7-12) — mais sur sa PROPRE ligne de grille, après celle du titre,
+jamais à côté de lui (comme `.heading`/`.paragraphs` dans Services :
+un bloc de l'axe droit ne partage jamais la ligne d'un bloc de l'axe
+gauche). `max-width: 42ch`, identique aux paragraphes des Services.
+Lignes explicites sur la grille externe (`section.module.css .body`,
+row-gap:0) : 1 label, 2 titre, 3 paragraphe, 4 split (photo colonne
+1-5 / 3 chiffres colonnes 7-12, alignés en haut par construction —
+voir `.split` dans dernier-accompagnement.module.css), 5 lien. Label
+et lien : position inchangée (label pleine largeur au-dessus du titre,
+lien colonnes 7-12 sous les chiffres). Sous 1024px : une seule
+colonne, ordre label → titre → paragraphe → photo → chiffres → lien.
+
 ## Services (home)
 
-Quatre lignes, une par service (`content/services.ts` : `number`,
-`name`, `phrase`, `paragraph`, `href`), chacune sur les deux axes —
-voir « Règle des deux axes ». `.row` redéclare sa propre grille 12
-colonnes (comme `.split`), sans padding-inline (padding-block:32px
-entre les lignes, ça n'affecte pas les colonnes) :
+Quatre lignes, une par service (`content/services.ts` : `name`,
+`phrase`, `paragraph`, `href` — plus de `number`, retiré : l'affichage
+ne montre plus de numéro ni de tiret, et le champ n'était lu nulle part
+ailleurs, mega-menu et menu mobile compris, qui lisent `service.name`
+seul), chacune sur les deux axes — voir « Règle des deux axes ». `.row`
+redéclare sa propre grille 12 colonnes (comme `.split`), sans
+padding-inline (padding-block:32px entre les lignes, ça n'affecte pas
+les colonnes). Aucun trait séparateur : ni sous le titre de section, ni
+entre les 4 lignes (retirés — voir « Traits entre sections »).
 
   moitié gauche (colonnes 1-6)
-    numéro + nom (« 01 — Référencement »), --t-title, Bricolage
-    Grotesque 600, pas d'italique, axe gauche.
-    12px plus bas : la phrase courte, --t-body, axe gauche.
-    Le lien « En savoir plus → » : calé contre le bord droit de la
-    moitié gauche (fin de la colonne 6, avant la gouttière — pas le
-    début de la colonne 7), ligne de base alignée sur celle de la
-    DERNIÈRE ligne du paragraphe.
+    `.headingRow` (nom seul, plus de numéro/tiret, --t-title, Bricolage
+    Grotesque 600, axe gauche) + la flèche décorative (voir
+    « survol/focus » plus bas) sur la MÊME ligne, `justify-content:
+    space-between` — `.headingRow` s'étend sur TOUTE la largeur de la
+    bande (colonnes 1-12, pas seulement 1-6) pour que la flèche
+    retombe à l'extrémité droite, colonne 12. 12px plus bas : la
+    phrase courte, --t-body, axe gauche.
 
   moitié droite (colonnes 7-12)
     le paragraphe, --t-body, axe droit, `max-width: 42ch` (cible
     45-75 caractères/ligne ; mesuré 50,8 en régime deux axes, quelle
     que soit la largeur — le plafond en `ch` absorbe la croissance de
     l'écran). Commence sous le niveau de la phrase courte (effet
-    d'escalier), jamais au niveau du nom : techniquement, `.heading`
-    et `.phrase` occupent les lignes de grille 1 et 2, `.paragraph`
-    la ligne 3 — 12px de row-gap partout, +8px de margin-top propre au
-    paragraphe (20px au total entre le bas de la phrase et le
-    paragraphe, contre 12px entre le nom et la phrase).
-
-  ligne de base du lien = ligne de base du paragraphe
-    `.link` occupe la MÊME ligne de grille 3 que `.paragraph` (colonne
-    1-7, `justify-self: end`, `align-self: end`) — puisque `.link` et
-    `.paragraph` partagent exactement le même `--t-body`/`--t-body-lh`,
-    aligner le bas de leurs boîtes aligne aussi leurs lignes de base,
-    sans mesure JS (même principe que `.figures` dans dernier
-    accompagnement : `align-self` sur une grille commune, pas un calcul
-    de position). Le lien porte `padding-block: 12px` +
-    `margin-block: -12px` (zone cliquable élargie à 44px de haut sans
-    déplacer sa boîte de marge — donc sans casser l'alignement).
+    d'escalier), jamais au niveau du nom : techniquement, `.headingRow`
+    et `.phrase` occupent les lignes de grille 1 et 2, `.paragraphs`
+    la ligne 3.
 
   repli en une seule colonne : sous 1280px, pas 1024px
     Mesuré : à 1024px, forcer les deux moitiés donnerait 43,6
     caractères/ligne (paragraphe sur 350px de large) — sous le seuil de
     45. À 1280px : 50,8 caractères/ligne — dans la cible. Le repli est
     donc décalé à 1280px (au-delà de la bascule rail/shell à 1024px,
-    qui reste inchangée pour le reste du site). Sous 1280px : numéro +
-    nom, phrase courte, paragraphe, puis le lien sous le paragraphe —
-    tout empilé sur l'axe gauche, dans cet ordre.
+    qui reste inchangée pour le reste du site). Sous 1280px : nom,
+    phrase courte, paragraphe — empilés sur l'axe gauche, `.headingRow`
+    (nom + flèche) pleine largeur par défaut du flex (`align-items:
+    stretch`).
 
   ligne cliquable
     Toute la ligne est cliquable, mais un SEUL vrai `<a>` existe par
-    ligne (le lien « En savoir plus → ») — jamais d'autre élément
-    interactif imbriqué. Sa zone cliquable est étendue à toute la ligne
-    par un lien étiré : `.row { position: relative }`,
-    `.link::after { content:""; position:absolute; inset:0 }`. Le
-    survol de n'importe quel point de la ligne déclenche donc
-    `.link:hover` (le `::after` fait partie du `<a>`) : seul le texte
-    « En savoir plus → » se souligne — pas d'inversion de fond, pas
-    d'atténuation des lignes voisines. `cursor: pointer` sur `.row`.
-    Un clic n'importe où dans la ligne (y compris au milieu du
-    paragraphe) navigue vers `service.href`. Une seule tabulation
-    clavier par ligne (un seul `<a>`).
+    ligne — SANS contenu visible : plus de texte « En savoir plus → »
+    (retiré). Nom accessible porté par `aria-label={service.name}` —
+    jamais un lien vide. `.link { position: absolute; inset: 0 }`
+    directement sur l'élément (`.row { position: relative }` comme
+    containing block) : sans texte propre à mettre en forme, plus
+    besoin du `::after` intermédiaire de l'ancienne version. `cursor:
+    pointer` sur `.row`. Un clic n'importe où dans la ligne (y compris
+    au milieu du paragraphe) navigue vers `service.href`. Une seule
+    tabulation clavier par ligne (un seul `<a>`).
 
-  lien « En savoir plus → »
-    Soulignement au survol ET au focus clavier (`:focus-visible`),
-    `text-decoration-color: transparent → currentColor`, 150ms,
-    l'easing du site — repris tel quel du titre du carton 3 du rail
-    (`rail.module.css .cardAction .cardTitle`), pas un nouveau motif.
-    `prefers-reduced-motion` : pas de transition, le soulignement
-    apparaît directement. Couleur du texte : celle du reste de la
-    section (`var(--ink)`, cette section n'a jamais d'autre tonalité).
+  survol/focus (rétabli — retiré par erreur lors du passage en mise en
+  page B, retrouvé dans l'historique git, commit `3507f4f`)
+    Dès 1024px, au survol ET au focus clavier (`.row:has(.link:hover)`,
+    `.row:has(.link:focus-visible)` — `:has()` plutôt qu'un
+    `.link:hover ~ …` : le lien est le DERNIER enfant du DOM, un
+    combinateur de frères suivants ne peut pas remonter vers les
+    éléments qui le précèdent) :
+      fond de toute la bande → --ink
+      nom, phrase, paragraphe → --ground
+      une flèche « → » --ground apparaît (opacity 0→1) à l'extrémité
+        droite de la bande, alignée verticalement sur le nom du
+        service (`.headingRow`, `align-items: center`)
+    200ms, l'easing du site ; `prefers-reduced-motion` : changement
+    immédiat, sans transition. Couleur de la flèche différente de la
+    version d'origine (--accent avant, --ground maintenant — un rouge
+    sur fond charbon était moins net que sur le fond --ground d'avant).
     Exception assumée à la règle « lien vers une page inexistante =
-    `<span>` » (voir plus bas, « AVANT MISE EN LIGNE ») : les 4 pages
-    `/services/*` seront créées avant la mise en ligne.
+    `<span>` » (mega-menu, menu mobile) : ces lignes restent de vrais
+    `<a>` vers `/services/*` avant que ces pages n'existent — voir plus
+    bas, « AVANT MISE EN LIGNE ».
+    Sous 1024px (pas de survol) : la flèche reste visible en
+    permanence (`--ink`, opacity 1 par défaut), sans inversion de fond
+    — elle indique juste que la ligne est cliquable.
+    Tonalité de la SECTION inchangée (`data-tone="light"`, toujours
+    --ground) : l'inversion est un pur effet CSS local à la ligne
+    survolée/focus, la nav, le rail et la pile mobile continuent de
+    lire la tonalité déclarée de la section, jamais la couleur
+    réellement peinte à l'écran.
 
 AVANT MISE EN LIGNE : les 4 pages `/services/referencement`,
 `/services/publicite`, `/services/site-internet` et l'Automatisation
@@ -344,6 +428,33 @@ trait, alignés au pixel. Une fois figé, il RESTE visible jusqu'au bas de la
 page : il ne repart jamais vers le haut, quelle que soit la section à
 l'écran. Le carton suivant se fige à son tour, 20px sous le bas du
 précédent. En bas de page, les trois cartons sont visibles, empilés.
+
+Apparition du carton 1 : aucun carton visible pendant le Hero (rail
+desktop ET pile mobile). Le carton 1 reste ancré au hero (figement
+sticky inchangé, « au niveau du hero ») mais sa VISIBILITÉ suit la
+section suivante (Dernier accompagnement, le cas client Inoko) : il
+apparaît (opacity 0→1 + y 12px→0, 300ms, l'easing du site) quand cette
+section entre dans l'écran (seuil 50 % de la hauteur visible, la même
+hystérésis que les cartons 2/3 de la pile mobile — 60 % pour la sortie),
+disparaît (l'inverse) en remontant au-dessus de ce seuil. État initial
+posé en JS (gsap.set), jamais en CSS — sans JS, le repli est visible
+d'emblée (« Animations », aucun contenu parqué à opacity 0).
+prefers-reduced-motion : apparition/disparition instantanées. Sur le
+rail desktop, le carton reste monté en permanence (seule son opacité
+change) ; dans la pile mobile, il est démonté/remonté comme les cartons
+2/3 (voir « Pile mobile ») — son icône (l'horloge), elle, ne suit QUE le
+signal de fin du h1 (jamais l'entrée dans la pile) et ne rejoue jamais.
+
+Écarts harmonisés à une seule valeur, 20px (la gouttière) : l'écart
+horizontal rail↔colonne 12, l'écart rail↔bord de l'écran, l'écart
+vertical entre deux cartons figés, ET l'écart entre le haut d'un carton
+(avant figement) et le haut de sa section de rattachement — ce dernier
+porté par un `padding-top` sur `.slot`, sans quoi le carton suivant
+« touche » visuellement le bas de la section précédente jusqu'à son
+figement (mesuré avant correction : le carton du GEO touchait le bas de
+Respiration). N'affecte pas le carton 1 : son figement, lui, tombe
+délibérément PILE sur le trait de la nav (voir ci-dessus), ce n'est pas
+« le haut d'une section ».
 
 Le carton passe AU-DESSUS du bloc nav (z-index) : à cette hauteur, il
 partage sa position avec la bande floutée latérale du trait, côté rail — le
@@ -469,10 +580,13 @@ verticalement, aria-hidden (l'état est déjà porté par aria-expanded).
 Pointe vers le haut repliée, pivote de 180° à l'ouverture, 200ms, easing du
 site ; orientation instantanée en reduced-motion.
 
-Cartons 2 et 3 RÉVERSIBLES : ils entrent ET ressortent selon la position de
-scroll, le carton 1 seul reste toujours présent. La pile elle-même ne bouge
-jamais — fixed en permanence, aucune logique liée au scroll sur sa
-position.
+Les 3 cartons sont RÉVERSIBLES : ils entrent ET ressortent selon la
+position de scroll — le carton 1 aussi désormais (voir « Apparition du
+carton 1 » plus haut : jamais visible pendant le Hero, apparaît avec la
+section Inoko, sur le même seuil d'hystérésis que les cartons 2/3, mais
+son icône ne suit que le signal de fin du h1, jamais rejouée). La pile
+elle-même ne bouge jamais — fixed en permanence, aucune logique liée au
+scroll sur sa position.
   entrée     haut de la section de rattachement à 50 % de la hauteur
              visible EN DESCENDANT
   sortie     haut de cette même section à 60 % de la hauteur visible EN
@@ -824,6 +938,13 @@ Un seul `<h1>` par page. Si SplitText découpe le titre, il découpe des `<span>
 
 ## Détails faciles à oublier
 
+- Aucun trait séparateur horizontal entre les sections de la home, ni à
+  l'intérieur d'une section pour distinguer des blocs répétés (ex. les
+  4 lignes de Services, retirés — le rythme vient de l'espacement, pas
+  d'un filet). Seuls traits conservés : celui de la nav (« Barre de
+  navigation »), celui du footer (`.legalBar`, avant la barre légale) et
+  les traits internes du bloc de fin — ce sont des éléments de chrome
+  ou de structure interne, pas des séparateurs entre deux sections.
 - Les champs de formulaire font au minimum 16px sur mobile. En dessous,
   Safari iOS zoome la page à la mise au point du champ et ne la dézoome pas.
 - Toute cible tactile (lien, bouton, entrée de menu) fait au moins 44×44px

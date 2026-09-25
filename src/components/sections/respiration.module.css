@@ -10,12 +10,20 @@
  * section (empilement permanent) : le fond doit passer derrière eux,
  * pas le texte à côté.
  *
- * padding-top est réécrit ici (128/200) : la règle générale
- * d'espacement inter-sections (section.module.css, 96/160) ne
- * s'applique qu'à :not(:first-child), or Respiration n'est pas la
- * première section — sans cette réécriture les deux valeurs
- * coexisteraient plutôt que la seconde remplaçant la première selon
- * l'ordre d'import des modules CSS, ce qui n'est pas garanti.
+ * padding-top/bottom (128/200, le token « section en négatif » du
+ * CLAUDE.md) vivent ici, PAS via `.spaced` (section.module.css) :
+ * Respiration passe `spacing="none"` (page.tsx) — exception explicite
+ * (CLAUDE.md, « Shell de page »), comme Hero, parce qu'elle impose
+ * aussi une hauteur minimale d'écran (100svh) que la classe partagée ne
+ * gère pas. Plus de `!important` : sans `.spaced` posée sur ce même
+ * <section>, il n'y a plus de règle concurrente à battre.
+ *
+ * min-height: 100svh (jamais 100vh, CLAUDE.md) : le <section> reste un
+ * bloc simple (pas de flex/grid sur lui-même) — son unique enfant
+ * (.body, hauteur naturelle) s'empile donc depuis le HAUT par défaut,
+ * et l'espace en trop (quand le texte est plus court que l'écran) tombe
+ * SOUS le texte, jamais au-dessus : le texte n'est donc jamais centré
+ * verticalement, sans JS ni flex nécessaire (CLAUDE.md § 3).
  *
  * Une seule phrase, pleine largeur (mise en page A, CLAUDE.md § 3) :
  * .text occupe TOUTE la grille de contenu (grid-column: 1 / -1),
@@ -29,7 +37,8 @@
   isolation: isolate;
   color: var(--ground);
   -webkit-font-smoothing: antialiased;
-  padding-top: 128px !important;
+  min-height: 100svh;
+  padding-top: 128px;
   padding-bottom: 128px;
   /* Fond plein écran sans 100vw (CLAUDE.md, « Shell de page ») : le
      box-shadow étend la même couleur unie bien au-delà des deux bords du
@@ -45,7 +54,7 @@
 
 @media (min-width: 1024px) {
   .section {
-    padding-top: 200px !important;
+    padding-top: 200px;
     padding-bottom: 200px;
   }
 }
@@ -63,8 +72,21 @@
      texte de cette longueur (CLAUDE.md, « Détails faciles à oublier »). */
 }
 
+/* Emphase sur « passer commande » : PAS en gras. .text est déjà à
+   font-weight: 800, le poids maximal disponible de la variable
+   Bricolage Grotesque (200-800, voir document.fonts) — écart de graisse
+   nul avec le corps du texte (lui-même à 800), largement sous les 200
+   de seuil fixé par CLAUDE.md pour qu'un gras se voie. Soulignement à
+   la place, en --ground (plus de rouge dans cette section) : épaisseur
+   et décalage en em, proportionnels à --t-hero (donc à --font-display,
+   800), pas des px fixes — ils suivent la bascule mobile/desktop de
+   --t-hero sans règle séparée. */
 .accent {
-  color: var(--accent);
+  color: var(--ground);
+  text-decoration: underline;
+  text-decoration-color: var(--ground);
+  text-decoration-thickness: 0.05em;
+  text-underline-offset: 0.14em;
 }
 
 /* Cache immobile (overflow hidden) : la ligne, elle, translate de

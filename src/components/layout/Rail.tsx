@@ -1,13 +1,22 @@
 "use client";
 
-import { useEffect, useRef, type ComponentType, type RefAttributes, type RefObject } from "react";
+import { useCallback, useEffect, useRef, type ComponentType, type RefAttributes, type RefObject } from "react";
 import Link from "next/link";
+import { gsap } from "gsap";
 import { railCards, type RailCardContent } from "@/content/rail";
+import { VENTURIA_EASE } from "@/lib/ease";
 import { onHeroTitleDone } from "@/lib/heroTitleSignal";
 import { useSectionTone, type Tone } from "@/lib/tone";
+import { useSectionHysteresis, type CrossEvent } from "@/lib/useSectionHysteresis";
 import { useStickOnce } from "@/lib/useStickOnce";
 import { IconArrowRight, IconClock, IconSparkle, type RailIconHandle } from "./RailIcons";
 import styles from "./rail.module.css";
+
+/** Section qui déclenche l'apparition du carton 1 (CLAUDE.md, « Rail
+ *  droit ») — pas `anchor` ("hero", le point de figement sticky du
+ *  carton, inchangé) : le carton reste associé au hero, mais ne
+ *  devient visible que quand la section Inoko entre dans l'écran. */
+const CARD1_REVEAL_SECTION = "dernier-accompagnement";
 
 // Une icône par carton, dans l'ordre de content/rail.ts (CLAUDE.md,
 // « Rail droit ») : horloge, étoile à quatre branches, flèche.
@@ -61,8 +70,80 @@ type RailSlotProps = {
 export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
   const card = railCards[cardIndex];
   const measureRef = useRef<HTMLDivElement>(null);
+  const cardElRef = useRef<HTMLElement | null>(null);
+  const revealCtxRef = useRef<ReturnType<typeof gsap.context> | null>(null);
   const iconRef = useRef<RailIconHandle>(null);
   const tone = useSectionTone(measureRef);
+
+  // Carton 1 uniquement : aucun carton visible pendant le Hero
+  // (CLAUDE.md, « Rail droit ») — le carton reste figé « au niveau du
+  // hero » (anchor/sticky inchangés), seule sa VISIBILITÉ suit
+  // désormais la section Inoko, indépendamment du figement. État
+  // initial posé en JS (gsap.set, jamais en CSS) : sans JS, le repli
+  // est le CSS par défaut (visible) — CLAUDE.md, « Animations »,
+  // « aucun contenu parqué à opacity 0 si le JS ne charge pas ».
+  // gsap.context(() => {}) créé une seule fois au montage, puis
+  // `.add()` pour chaque tween déclenché après coup par le scroll
+  // (piège documenté : gsap.context() sans fonction ne crée pas de
+  // contexte utilisable).
+  useEffect(() => {
+    if (cardIndex !== 0) return;
+    const wrap = measureRef.current;
+    if (!wrap) return;
+    const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+    if (!isDesktop) return;
+    const cardEl = wrap.querySelector<HTMLElement>("[data-rail-card]");
+    if (!cardEl) return;
+    cardElRef.current = cardEl;
+
+    const ctx = gsap.context(() => {});
+    revealCtxRef.current = ctx;
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Masqué par défaut (avant toute mesure de scroll) : le hook de
+    // seuil ci-dessous (useSectionHysteresis) rétablit immédiatement la
+    // visibilité, sans animation, si la page est chargée alors que la
+    // section Inoko est déjà franchie (chargement en milieu de scroll).
+    ctx.add(() => {
+      gsap.set(cardEl, { opacity: 0, y: reduced ? 0 : 12 });
+    });
+
+    return () => {
+      ctx.revert();
+      revealCtxRef.current = null;
+    };
+  }, [cardIndex]);
+
+  const revealCard1 = useCallback((event: CrossEvent) => {
+    const cardEl = cardElRef.current;
+    const ctx = revealCtxRef.current;
+    if (!cardEl || !ctx) return;
+    if (!window.matchMedia("(min-width: 1024px)").matches) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (event.type === "enter") {
+      if (reduced || event.immediate) {
+        ctx.add(() => gsap.set(cardEl, { opacity: 1, y: 0 }));
+        return;
+      }
+      ctx.add(() =>
+        gsap.to(cardEl, { opacity: 1, y: 0, duration: 0.3, ease: VENTURIA_EASE, overwrite: true }),
+      );
+      return;
+    }
+
+    // event.type === "exit" — retour au Hero en remontant : le carton
+    // disparaît (CLAUDE.md, « Rail droit »).
+    if (reduced) {
+      ctx.add(() => gsap.set(cardEl, { opacity: 0, y: 0 }));
+      return;
+    }
+    ctx.add(() =>
+      gsap.to(cardEl, { opacity: 0, y: 12, duration: 0.3, ease: VENTURIA_EASE, overwrite: true }),
+    );
+  }, []);
+
+  useSectionHysteresis(CARD1_REVEAL_SECTION, revealCard1, cardIndex === 0, () => false);
 
   // Carton 1 : l'horloge démarre juste après la fin de l'animation du
   // h1 du Hero (jamais un délai estimé), en desktop et hors
