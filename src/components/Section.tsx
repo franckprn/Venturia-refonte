@@ -16,7 +16,7 @@ type SectionProps = {
    *  de tonalités interroge (`section[data-tone]`). */
   tone: Tone;
   /** Espacement vertical de la section (CLAUDE.md, « Shell de page ») :
-   *  "default" (padding-block: --section-space, 96/160, haut ET bas —
+   *  "default" (padding-block: --section-space, 72/120, haut ET bas —
    *  centralisé ici, plus de valeur en dur par section) ou "none" pour
    *  les deux exceptions qui gèrent leur propre padding (>= le même
    *  token) parce qu'elles imposent aussi une hauteur d'écran (100svh) :

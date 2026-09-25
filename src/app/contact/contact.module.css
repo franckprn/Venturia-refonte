@@ -1,20 +1,16 @@
 /* ------------------------------------------------------------------ *
  * Page /contact — une seule section de contenu (pas de rail), suivie
  * du bloc de fin de page (voir page.tsx, qui réutilise footer.module.css
- * tel quel). Padding-block 96px mobile / 160px desktop : cette section
- * est la première du Shell de la page, donc la règle générale
- * .section:not(:first-child) de section.module.css ne s'applique pas
- * ici — pas besoin de !important pour la remplacer, juste de la poser.
+ * tel quel). Padding-block : `--section-space` (globals.css, 72px
+ * mobile / 120px desktop), posé ici plutôt que de dépendre de `.spaced`
+ * (section.module.css) — cette section est la première du Shell de la
+ * page, donc pas besoin de `!important` pour la remplacer, juste de la
+ * poser. Même token que `<Section spacing="default">` ailleurs sur le
+ * site : jamais de valeur en dur.
  * ------------------------------------------------------------------ */
 
 .section {
-  padding-block: 96px;
-}
-
-@media (min-width: 1024px) {
-  .section {
-    padding-block: 160px;
-  }
+  padding-block: var(--section-space);
 }
 
 .content {

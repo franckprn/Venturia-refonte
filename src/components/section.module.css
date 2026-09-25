@@ -13,8 +13,8 @@
  *   <section> retombe naturellement dans le flux.
  *   .body     6 colonnes, gap 20px
  *
- * Espacement inter-sections : `--section-space` (globals.css, 96px
- * mobile / 160px desktop), posé en haut ET en bas par `.spaced` — classe
+ * Espacement inter-sections : `--section-space` (globals.css, 72px
+ * mobile / 120px desktop), posé en haut ET en bas par `.spaced` — classe
  * ajoutée par Section.tsx quand `spacing="default"` (le cas normal).
  * Centralisé ici plutôt qu'en padding par section : Hero et Respiration
  * (spacing="none") gèrent seuls leur propre padding, au moins égal à ce

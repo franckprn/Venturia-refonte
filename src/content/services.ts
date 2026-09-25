@@ -1,18 +1,20 @@
-// Contenu de la section Services (home). Chaque ligne pointe vers sa
-// page /services/* — voir CLAUDE.md « Services (home) » § « Lien "En
-// savoir plus →" » pour l'exception qui autorise ce lien avant que ces
-// pages existent réellement (elles doivent exister avant mise en
-// ligne, voir « AVANT MISE EN LIGNE »).
+// Contenu de la section Services (home). Chaque ligne se termine par un
+// lien explicite (ArrowLink, direction="right") vers sa page
+// /services/* — voir CLAUDE.md « Services (home) » § « Lien "Découvrir
+// …" » pour l'exception qui autorise ce lien avant que ces pages
+// existent réellement (elles doivent exister avant mise en ligne, voir
+// « AVANT MISE EN LIGNE »).
 //
 // L'adresse de l'Automatisation (04) est l'adresse RÉELLE de la page en
 // ligne aujourd'hui (trafic Google existant) — donnée par Franck,
-// jamais devinée : https://venturia.fr/services/automations/, barre
-// finale comprise. Les trois autres sont provisoires (pages à créer).
+// jamais devinée : /services/automations/, barre finale comprise.
+// Chemin relatif (pas https://venturia.fr/...) : ce site EST venturia.fr,
+// un lien absolu vers son propre domaine sortirait inutilement du
+// routeur Next.js (rechargement complet plutôt qu'une navigation
+// client). Les trois autres sont provisoires (pages à créer).
 
 export type Service = {
-  /** --t-title, Bricolage Grotesque 600. Sert aussi de nom accessible au
-   *  lien étiré de la ligne (aria-label) : le texte visible « En savoir
-   *  plus → » a été retiré, voir ServicesRowsReveal.tsx. */
+  /** --t-title, Bricolage Grotesque 600. */
   name: string;
   /** Phrase courte, --t-body, moitié gauche. */
   phrase: string;
@@ -20,6 +22,10 @@ export type Service = {
    *  par 16px (échelle CLAUDE.md, « Shell de page »), voir
    *  services.module.css .paragraphs. */
   paragraphs: string[];
+  /** Texte du lien explicite sous les paragraphes (ArrowLink,
+   *  direction="right") — jamais en dur dans le JSX. Verbatim, donné
+   *  par Franck. */
+  ctaLabel: string;
   href: string;
 };
 
@@ -39,6 +45,7 @@ export const services: [Service, Service, Service, Service] = [
         "puissent vous citer.",
       "Résultat : plus de visites utiles, et plus de commandes.",
     ],
+    ctaLabel: "Découvrir le référencement",
     href: "/services/referencement",
   },
   {
@@ -51,6 +58,7 @@ export const services: [Service, Service, Service, Service] = [
       "On ajuste vos annonces chaque jour et on concentre le budget sur " +
         "ce qui vend, pour que chaque euro investi rapporte le plus possible.",
     ],
+    ctaLabel: "Découvrir la publicité",
     href: "/services/publicite",
   },
   {
@@ -64,6 +72,7 @@ export const services: [Service, Service, Service, Service] = [
       "Résultat : une plus grande part de vos visiteurs passe commande, " +
         "sans dépenser un euro de plus pour les faire venir.",
     ],
+    ctaLabel: "Découvrir la création de site",
     href: "/services/site-internet",
   },
   {
@@ -78,6 +87,7 @@ export const services: [Service, Service, Service, Service] = [
         "méthodes que vous utilisez déjà : vous gardez vos habitudes, " +
         "et vous gagnez du temps.",
     ],
-    href: "https://venturia.fr/services/automations/",
+    ctaLabel: "Découvrir l'automatisation",
+    href: "/services/automations/",
   },
 ];

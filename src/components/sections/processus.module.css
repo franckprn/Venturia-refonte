@@ -1,7 +1,7 @@
 /* ------------------------------------------------------------------ *
  * Section « Processus » (home) — un schéma (axe unique, trois formes
  * tangentes de taille croissante), pas une liste. Fond --ground, dans
- * la zone de contenu. Espacement de section standard (96/160px) : pas
+ * la zone de contenu. Espacement de section standard (72/120px) : pas
  * d'override ici, section.module.css suffit.
  *
  * Point de rupture propre à ce composant : 768px, indépendant du

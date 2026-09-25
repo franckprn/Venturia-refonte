@@ -1,0 +1,55 @@
+/* ------------------------------------------------------------------ *
+ * ArrowLink — style unique, partagé par le CTA secondaire du Hero
+ * (`direction="down"`) et les liens « Découvrir… » de Services
+ * (`direction="right"`) : voir ArrowLink.tsx. Extrait de
+ * hero.module.css (`.ctaSecondary`/`.ctaArrow` d'origine), inchangé
+ * visuellement pour le Hero — seule la direction ajoute un comportement
+ * de survol distinct.
+ * ------------------------------------------------------------------ */
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px; /* zone tactile, CLAUDE.md */
+  width: fit-content;
+  padding-bottom: 0;
+  border-bottom: 1px solid var(--ink);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: var(--t-body);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.arrow {
+  flex: none;
+}
+
+/* direction="down" (Hero) : le filet s'écarte du texte au survol —
+   comportement d'origine, inchangé. */
+.link[data-direction="down"] {
+  transition: padding-bottom 200ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.link[data-direction="down"]:hover,
+.link[data-direction="down"]:focus-visible {
+  padding-bottom: 4px;
+}
+
+/* direction="right" (Services) : le filet reste fixe, la flèche glisse
+   de 4px vers la droite au survol/focus (CLAUDE.md, « Services
+   (home) »). */
+.link[data-direction="right"] .arrow {
+  transition: transform 200ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.link[data-direction="right"]:hover .arrow,
+.link[data-direction="right"]:focus-visible .arrow {
+  transform: translateX(4px);
+}

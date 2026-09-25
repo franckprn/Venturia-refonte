@@ -5,7 +5,7 @@ import styles from "./processus.module.css";
 // Section « Processus » (home) — un schéma (axe unique, trois formes
 // tangentes de taille croissante), pas une liste. Fond --ground, dans
 // la zone de contenu (jamais sous le rail). Espacement de section
-// standard (96/160px) : pas d'override ici, section.module.css suffit.
+// standard (72/120px) : pas d'override ici, section.module.css suffit.
 //
 // Le schéma lui-même (ProcessusSchemaReveal) pivote à son propre point
 // de rupture, 768px — indépendant du point de rupture 1024px du reste

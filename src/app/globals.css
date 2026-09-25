@@ -96,11 +96,11 @@
   --rail-card1-offset: 20px;
 
   /* Espacement vertical des sections (CLAUDE.md, « Shell de page ») :
-     96px mobile / 160px desktop, posé par <Section> (padding-block, haut
+     72px mobile / 120px desktop, posé par <Section> (padding-block, haut
      ET bas) — pas de valeur en dur par section. Hero et Respiration en
      sont exceptés (100svh minimum, leur propre padding reste >= ce
      token) : voir hero.module.css et respiration.module.css. */
-  --section-space: 96px;
+  --section-space: 72px;
 
   /* Hauteur réelle de la pile mobile du rail REPLIÉE, trait compris
      (CLAUDE.md, « Rail droit » § « Pile mobile ») : mesurée en JS
@@ -130,7 +130,7 @@
    celui de la typo (767px) : CLAUDE.md, « Shell de page ». */
 @media (min-width: 1024px) {
   :root {
-    --section-space: 160px;
+    --section-space: 120px;
   }
 }
 

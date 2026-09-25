@@ -7,7 +7,7 @@
  * (haut ET bas) : plus de valeur propre à ce fichier — cette section
  * n'est PAS une exception (seuls Hero et Respiration en sont, CLAUDE.md
  * « Shell de page ») : `<Section spacing="default">` (page.tsx, valeur
- * par défaut) pose déjà `--section-space` (96/160) des deux côtés.
+ * par défaut) pose déjà `--section-space` (72/120) des deux côtés.
  *
  * `.bands` et ses enfants directs sont l'unique item de la grille 12
  * colonnes externe (section.module.css .body) : comme .split
@@ -150,8 +150,8 @@
    bloc ancêtre le fait s'appliquer uniformément aux deux lignes. */
 /* Pas de margin-top : premier enfant de .bands désormais (l'ancienne
    bande CONTACT au-dessus a été retirée) — le padding-top de .section
-   (96px) suffit à lui seul, un margin-top ici recréerait le trou que la
-   suppression devait combler. */
+   (--section-space, 72px mobile) suffit à lui seul, un margin-top ici
+   recréerait le trou que la suppression devait combler. */
 .giant {
   margin-top: 0;
 }

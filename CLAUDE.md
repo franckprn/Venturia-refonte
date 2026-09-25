@@ -166,7 +166,7 @@ Le contenu reste dans le conteneur. Seul le rail (desktop) et la pile
 mobile (son remplacement sous 1024px) vont jusqu'au bord, protégés par leur
 propre padding/marge de 20px.
 
-Espacement vertical des sections : 96px mobile / 160px desktop
+Espacement vertical des sections : 72px mobile / 120px desktop
 (`--section-space`, globals.css), posé en haut ET en bas par
 `<Section>` (`spacing="default"`, la valeur par défaut — jamais de
 padding en dur section par section). Section dense 64/128. Section en
@@ -244,7 +244,12 @@ en bas du Hero — `.body` passe en grille 3 lignes
 contre le padding-bottom de la section. Largeur de texte du sous-titre :
 `max-width: 42ch`, identique aux paragraphes des Services
 (services.module.css `.paragraphs`). Sous 1024px : pleine largeur, sous
-le h1, empilement normal (pas de poussée vers le bas).
+le h1, empilement normal (pas de poussée vers le bas). Le CTA lui-même
+est `<ArrowLink>` (src/components/ArrowLink.tsx, `direction="down"`) :
+filet --ink sous le texte qui s'écarte de 4px au survol/focus, flèche
+« ↓ » avant le texte — composant partagé avec le lien « Découvrir… » de
+chaque service (`direction="right"`, voir « Services (home) »), seule
+la direction change le comportement de survol.
 
 ## Respiration (home)
 
@@ -347,32 +352,34 @@ colonne, ordre label → titre → paragraphe → photo → chiffres → lien.
 ## Services (home)
 
 Quatre lignes, une par service (`content/services.ts` : `name`,
-`phrase`, `paragraph`, `href` — plus de `number`, retiré : l'affichage
-ne montre plus de numéro ni de tiret, et le champ n'était lu nulle part
-ailleurs, mega-menu et menu mobile compris, qui lisent `service.name`
-seul), chacune sur les deux axes — voir « Règle des deux axes ». `.row`
-redéclare sa propre grille 12 colonnes (comme `.split`), sans
-padding-inline (padding-block:32px entre les lignes, ça n'affecte pas
-les colonnes). Aucun trait séparateur : ni sous le titre de section, ni
-entre les 4 lignes (retirés — voir « Traits entre sections »).
+`phrase`, `paragraphs`, `ctaLabel`, `href`), chacune sur les deux axes —
+voir « Règle des deux axes ». `.row` redéclare sa propre grille 12
+colonnes (comme `.split`), sans padding-inline (padding-block:32px,
+ça n'affecte pas les colonnes). Aucun trait séparateur sous le titre de
+section ; un trait 1px `--line` en haut de CHAQUE service en revanche
+(`border-top` sur `.row`, jamais `border-bottom` — c'est ce choix qui
+garantit qu'aucun trait ne tombe sous le dernier service, sans logique
+`:last-child` à écrire), sur toute la largeur des 12 colonnes. Interne à
+cette liste : la règle générale « plus de trait entre deux sections »
+(voir « Détails faciles à oublier ») ne concerne que les séparateurs
+ENTRE sections, pas ceux d'une liste répétée à l'intérieur d'une même
+section.
 
   moitié gauche (colonnes 1-6)
-    `.headingRow` (nom seul, plus de numéro/tiret, --t-title, Bricolage
-    Grotesque 600, axe gauche) + la flèche décorative (voir
-    « survol/focus » plus bas) sur la MÊME ligne, `justify-content:
-    space-between` — `.headingRow` s'étend sur TOUTE la largeur de la
-    bande (colonnes 1-12, pas seulement 1-6) pour que la flèche
-    retombe à l'extrémité droite, colonne 12. 12px plus bas : la
-    phrase courte, --t-body, axe gauche.
+    le nom (--t-title, Bricolage Grotesque 600, axe gauche), 12px plus
+    bas la phrase courte, --t-body, axe gauche. Plus de flèche
+    décorative sur cette ligne (retirée avec l'inversion charbon au
+    survol, voir « lien "Découvrir…" » plus bas).
 
   moitié droite (colonnes 7-12)
-    le paragraphe, --t-body, axe droit, `max-width: 42ch` (cible
-    45-75 caractères/ligne ; mesuré 50,8 en régime deux axes, quelle
-    que soit la largeur — le plafond en `ch` absorbe la croissance de
-    l'écran). Commence sous le niveau de la phrase courte (effet
-    d'escalier), jamais au niveau du nom : techniquement, `.headingRow`
-    et `.phrase` occupent les lignes de grille 1 et 2, `.paragraphs`
-    la ligne 3.
+    les paragraphes (`.paragraphs`, un `<p>` par entrée de
+    `paragraphs: string[]`, --t-body, axe droit, `max-width: 42ch` —
+    cible 45-75 caractères/ligne, mesuré 50,8 en régime deux axes quelle
+    que soit la largeur), puis le lien « Découvrir… » (voir plus bas),
+    empilés dans un même bloc `.right` (gap 24px). Commence sous le
+    niveau de la phrase courte (effet d'escalier), jamais au niveau du
+    nom : `.heading` et `.phrase` occupent les lignes de grille 1 et 2,
+    `.right` la ligne 3.
 
   repli en une seule colonne : sous 1280px, pas 1024px
     Mesuré : à 1024px, forcer les deux moitiés donnerait 43,6
@@ -380,58 +387,49 @@ entre les 4 lignes (retirés — voir « Traits entre sections »).
     45. À 1280px : 50,8 caractères/ligne — dans la cible. Le repli est
     donc décalé à 1280px (au-delà de la bascule rail/shell à 1024px,
     qui reste inchangée pour le reste du site). Sous 1280px : nom,
-    phrase courte, paragraphe — empilés sur l'axe gauche, `.headingRow`
-    (nom + flèche) pleine largeur par défaut du flex (`align-items:
-    stretch`).
+    phrase courte, paragraphes, lien — empilés sur l'axe gauche.
 
-  ligne cliquable
-    Toute la ligne est cliquable, mais un SEUL vrai `<a>` existe par
-    ligne — SANS contenu visible : plus de texte « En savoir plus → »
-    (retiré). Nom accessible porté par `aria-label={service.name}` —
-    jamais un lien vide. `.link { position: absolute; inset: 0 }`
-    directement sur l'élément (`.row { position: relative }` comme
-    containing block) : sans texte propre à mettre en forme, plus
-    besoin du `::after` intermédiaire de l'ancienne version. `cursor:
-    pointer` sur `.row`. Un clic n'importe où dans la ligne (y compris
-    au milieu du paragraphe) navigue vers `service.href`. Une seule
-    tabulation clavier par ligne (un seul `<a>`).
-
-  survol/focus (rétabli — retiré par erreur lors du passage en mise en
-  page B, retrouvé dans l'historique git, commit `3507f4f`)
-    Dès 1024px, au survol ET au focus clavier (`.row:has(.link:hover)`,
-    `.row:has(.link:focus-visible)` — `:has()` plutôt qu'un
-    `.link:hover ~ …` : le lien est le DERNIER enfant du DOM, un
-    combinateur de frères suivants ne peut pas remonter vers les
-    éléments qui le précèdent) :
-      fond de toute la bande → --ink
-      nom, phrase, paragraphe → --ground
-      une flèche « → » --ground apparaît (opacity 0→1) à l'extrémité
-        droite de la bande, alignée verticalement sur le nom du
-        service (`.headingRow`, `align-items: center`)
-    200ms, l'easing du site ; `prefers-reduced-motion` : changement
-    immédiat, sans transition. Couleur de la flèche différente de la
-    version d'origine (--accent avant, --ground maintenant — un rouge
-    sur fond charbon était moins net que sur le fond --ground d'avant).
-    Exception assumée à la règle « lien vers une page inexistante =
-    `<span>` » (mega-menu, menu mobile) : ces lignes restent de vrais
-    `<a>` vers `/services/*` avant que ces pages n'existent — voir plus
-    bas, « AVANT MISE EN LIGNE ».
-    Sous 1024px (pas de survol) : la flèche reste visible en
-    permanence (`--ink`, opacity 1 par défaut), sans inversion de fond
-    — elle indique juste que la ligne est cliquable.
-    Tonalité de la SECTION inchangée (`data-tone="light"`, toujours
-    --ground) : l'inversion est un pur effet CSS local à la ligne
-    survolée/focus, la nav, le rail et la pile mobile continuent de
-    lire la tonalité déclarée de la section, jamais la couleur
-    réellement peinte à l'écran.
+  lien « Découvrir… » — une seule cible cliquable par service
+    Plus de ligne entièrement cliquable (le lien étiré `.link { position:
+    absolute; inset: 0 }` et son `cursor: pointer` sur `.row` ont été
+    retirés) : un SEUL `<a>` existe par service, sous les paragraphes,
+    en colonne 7 — bord gauche du lien = bord gauche de `.right`, donc
+    de la colonne 7. C'est `<ArrowLink>` (src/components/ArrowLink.tsx),
+    le même composant que le CTA secondaire du Hero (voir « Hero
+    (home) »), avec `direction="right"` : même style (filet --ink sous
+    le texte, --t-body/500, zone tactile >= 44px), flèche « → » au lieu
+    de « ↓ », flèche placée APRÈS le texte (lecture naturelle d'un lien
+    qui pointe vers la droite — seul le composant du Hero garde la
+    flèche avant, puisqu'elle pointe vers le bas). Texte du lien
+    (`ctaLabel`, content/services.ts, jamais en dur dans le JSX) :
+    « Découvrir le référencement / la publicité / la création de site /
+    l'automatisation ». `href` inchangé (déjà les adresses `/services/*`
+    voulues, Automatisation comprise — voir « AVANT MISE EN LIGNE »).
+    Nom accessible porté par le texte visible du lien lui-même — plus
+    besoin d'`aria-label`.
+    Survol/focus : le filet reste fixe, SEULE la flèche glisse de 4px
+    vers la droite (`transform: translateX(4px)`, 200ms, l'easing du
+    site — `prefers-reduced-motion` couvert par la règle globale du
+    projet, rien de propre à ce lien). Remplace l'ancienne inversion
+    charbon de toute la bande (fond --ink, textes --ground, flèche
+    --ground à l'extrémité droite) — retirée : elle se déclenchait au
+    simple survol de n'importe quel point de la ligne (y compris en
+    défilant), sans équivalent tactile sur mobile (pas de survol) pour
+    inviter au clic. Tonalité de la SECTION inchangée
+    (`data-tone="light"`, --ground) : ni l'ancienne inversion ni ce
+    nouveau lien ne la modifient.
 
 AVANT MISE EN LIGNE : les 4 pages `/services/referencement`,
 `/services/publicite`, `/services/site-internet` et l'Automatisation
 doivent exister. L'adresse de l'Automatisation n'est PAS à choisir
-librement : elle doit rester identique à celle du site en ligne
-aujourd'hui (`https://venturia.fr/services/automations/`, barre finale
-comprise) — cette page a déjà du trafic Google, changer son adresse le
-perdrait. Les trois autres adresses sont provisoires.
+librement : son CHEMIN doit rester identique à celui du site en ligne
+aujourd'hui (`/services/automations/`, barre finale comprise — écrit en
+relatif dans content/services.ts, pas en `https://venturia.fr/...` : ce
+site EST venturia.fr) — cette page a déjà du trafic Google, changer son
+adresse le perdrait. Les trois autres adresses sont provisoires. Ce sont
+des vrais `<a>` (via `<ArrowLink>`) vers ces 4 pages avant qu'elles
+n'existent toutes — exception assumée, comme pour les mêmes adresses
+citées par le mega-menu et le menu mobile.
 
 ## Barre de navigation
 

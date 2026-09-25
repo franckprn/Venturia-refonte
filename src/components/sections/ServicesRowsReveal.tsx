@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { VENTURIA_EASE } from "@/lib/ease";
 import type { Service } from "@/content/services";
+import { ArrowLink } from "@/components/ArrowLink";
 import styles from "./services.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -25,32 +25,21 @@ type ServicesRowsRevealProps = {
  * `prefers-reduced-motion` : aucune animation d'entrée, la fonction
  * s'arrête avant de rien parquer.
  *
- * La cible de l'animation est le conteneur `.row` (plus le <a> comme
- * avant) : seul le lien « En savoir plus → » est cliquable désormais,
- * étiré à toute la ligne via son ::after (voir services.module.css et
- * CLAUDE.md, « Services (home) » § « Ligne cliquable ») — un seul <a>
- * par ligne, une seule tabulation clavier par service.
- *
  * `opacity` seule, jamais `autoAlpha` : `autoAlpha` bascule aussi
- * `visibility`, qui retirerait le lien du parcours clavier tant que le
- * ScrollTrigger n'a pas déclenché — un Tab ne peut pas donner le focus
- * à un élément `visibility:hidden`, donc il saute la ligne, et sans
- * focus dessus le navigateur ne la fait jamais défiler dans la vue
- * pour déclencher la révélation : boucle bloquée. En opacity seule, la
- * ligne reste focusable (juste transparente) : le focus clavier
- * l'amène dans la vue, ce qui déclenche le ScrollTrigger normalement.
+ * `visibility`, qui retirerait le lien « Découvrir… » du parcours
+ * clavier tant que le ScrollTrigger n'a pas déclenché — un Tab ne peut
+ * pas donner le focus à un élément `visibility:hidden`, donc il saute
+ * la ligne, et sans focus dessus le navigateur ne la fait jamais
+ * défiler dans la vue pour déclencher la révélation : boucle bloquée.
+ * En opacity seule, le lien reste focusable (juste transparent) : le
+ * focus clavier l'amène dans la vue, ce qui déclenche le ScrollTrigger
+ * normalement.
  *
- * Les états de survol/focus (inversion charbon/crème, flèche) sont
- * entièrement en CSS — voir services.module.css § « survol/focus » —
- * ce composant ne gère que l'entrée.
- *
- * Lien étiré (CLAUDE.md, « Services (home) » § « Ligne cliquable ») :
- * plus de texte visible « En savoir plus → » (retiré) — le `<Link>`
- * lui-même n'a plus de contenu, juste `aria-label={service.name}` pour
- * garder un nom accessible (jamais un lien vide). La flèche « → »
- * décorative vit désormais à côté du titre (`.headingRow`), pas dans le
- * lien : elle indique que toute la ligne est cliquable, pas seulement
- * elle-même.
+ * Une seule cible cliquable par ligne : le lien « Découvrir… »
+ * (ArrowLink, direction="right") sous les paragraphes — plus de lien
+ * étiré sur toute la ligne (CLAUDE.md, « Services (home) »). Son
+ * survol/focus fait glisser sa propre flèche, géré entièrement dans
+ * ArrowLink — ce composant ne gère que l'entrée.
  */
 export function ServicesRowsReveal({ services }: ServicesRowsRevealProps) {
   const listRef = useRef<HTMLDivElement>(null);
@@ -100,39 +89,18 @@ export function ServicesRowsReveal({ services }: ServicesRowsRevealProps) {
           }}
           className={styles.row}
         >
-          <div className={styles.headingRow}>
-            <p className={styles.heading}>{service.name}</p>
-            {/* Décorative (aria-hidden) : le nom accessible de la ligne
-                vit sur le <Link> ci-dessous (aria-label). Visible en
-                permanence sous 1024px (pas de survol tactile) ;
-                apparaît seulement au survol/focus dès 1024px — voir
-                services.module.css. */}
-            <svg
-              className={styles.rowArrow}
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M2.5 8H13M9 3.5L13.5 8L9 12.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
+          <p className={styles.heading}>{service.name}</p>
           <p className={styles.phrase}>{service.phrase}</p>
-          <div className={styles.paragraphs}>
-            {service.paragraphs.map((paragraph, i) => (
-              <p key={i} className={styles.paragraph}>
-                {paragraph}
-              </p>
-            ))}
+          <div className={styles.right}>
+            <div className={styles.paragraphs}>
+              {service.paragraphs.map((paragraph, i) => (
+                <p key={i} className={styles.paragraph}>
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+            <ArrowLink href={service.href} label={service.ctaLabel} direction="right" />
           </div>
-          <Link href={service.href} className={styles.link} aria-label={service.name} />
         </div>
       ))}
     </div>

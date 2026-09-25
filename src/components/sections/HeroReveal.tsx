@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Link from "next/link";
 import { gsap } from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { VENTURIA_EASE } from "@/lib/ease";
 import { markHeroTitleDone } from "@/lib/heroTitleSignal";
 import { hero } from "@/content/hero";
+import { ArrowLink } from "@/components/ArrowLink";
 import styles from "./hero.module.css";
 
 gsap.registerPlugin(SplitText);
@@ -107,25 +107,7 @@ export function HeroReveal() {
         </p>
 
         <div ref={actionsRef} className={styles.actions}>
-          <Link href={hero.ctaSecondary.href} className={styles.ctaSecondary}>
-            <svg
-              className={styles.ctaArrow}
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M8 2.5V13M3.5 9L8 13.5L12.5 9"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            {hero.ctaSecondary.label}
-          </Link>
+          <ArrowLink href={hero.ctaSecondary.href} label={hero.ctaSecondary.label} direction="down" />
         </div>
       </div>
     </>
