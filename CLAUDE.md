@@ -28,6 +28,18 @@ du charbon « pour la lisibilité » sans le lui demander.
 Toute couleur dérivée de la palette s'écrit en color-mix sur un token,
 jamais en rgba figé : une valeur en dur ne suit pas un changement de token.
 
+`--ink` et `--ground` sont déclarées avec `@property` (`syntax: '<color>'`,
+`inherits: true`) : elles échangent leurs valeurs au niveau racine pendant
+la Respiration (voir « Respiration (home) »), un changement qu'une
+custom property non enregistrée ne peut pas transitionner en douceur
+(elle saute d'une valeur à l'autre au lieu d'interpoler). `--color-charcoal`
+et `--color-cream` (globals.css) portent les deux valeurs LITTÉRALES de la
+palette, jamais inversées : `--ink`/`--ground` sont définies à partir
+d'elles, et les rares surfaces qui doivent rester d'une couleur fixe quelle
+que soit la tonalité de la page (la carte cas client Inoko, substitut de
+photo — Dernier accompagnement et méga-menu desktop) les utilisent
+directement à la place de `--ink`/`--ground`.
+
 Tous les fonds sont opaques, sauf six exceptions explicites : la barre de
 nav (desktop ET mobile — voir « Barre de navigation »), les cartons du rail en
 desktop, la pile mobile du rail (repliée et dépliée), le calque plein écran
@@ -151,9 +163,12 @@ DROIT de l'écran, pas d'un conteneur centré.
   Aucun 100vw dans les calculs de largeur : 100vw inclut la barre de
   défilement et déborde de sa largeur sur Windows et Firefox. Tout calcul se
   fait en % du conteneur (voir le filet de nav et le méga-menu). Pour un
-  fond plein écran de couleur unie (Respiration, footer) : box-shadow: 0 0 0
-  100vmax var(--token); clip-path: inset(0 -100vmax); sur l'élément — un
-  box-shadow ne compte pas dans le scroll overflow, contrairement à 100vw.
+  fond plein écran de couleur unie posé EN DUR sur une section (footer) :
+  box-shadow: 0 0 0 100vmax var(--token); clip-path: inset(0 -100vmax); sur
+  l'élément — un box-shadow ne compte pas dans le scroll overflow,
+  contrairement à 100vw. La Respiration n'en fait plus partie : son fond
+  n'est plus posé sur la section elle-même mais sur toute la page (voir
+  « Respiration (home) »).
 
 Mobile (< 1024px)
   6 colonnes, gap 20px, marges 20px
@@ -170,9 +185,11 @@ Espacement vertical des sections : 72px mobile / 120px desktop
 (`--section-space`, globals.css), posé en haut ET en bas par
 `<Section>` (`spacing="default"`, la valeur par défaut — jamais de
 padding en dur section par section). Section dense 64/128. Section en
-négatif 128/200. Exceptions : Hero et Respiration (`spacing="none"`) —
-elles imposent une hauteur minimale d'écran (100svh, jamais 100vh) et
-gèrent leur propre padding, qui reste au moins égal à ce même token.
+négatif 128/200. Seule exception : le Hero (`spacing="none"`) — il
+impose une hauteur minimale d'écran (100svh, jamais 100vh) et gère son
+propre padding, qui reste au moins égal à ce même token. La Respiration
+n'en fait plus partie depuis qu'elle est passée en `spacing="default"`
+comme les autres sections (voir « Respiration (home) »).
 Titre de section → contenu : 32px mobile / 48px desktop.
 Échelle : 4 · 8 · 12 · 16 · 20 · 24 · 32 · 48 · 64 · 96 · 128 · 160.
 Espacer au `gap` d'un flex ou d'une grille plutôt qu'aux marges individuelles.
@@ -320,85 +337,116 @@ l'élément qui porte ce rôle change selon la largeur d'écran.
 
 ## Respiration (home)
 
-Section plein écran : `min-height: 100svh` (jamais 100vh),
-`spacing="none"` (voir « Shell de page ») — padding propre 128/200 («
-section en négatif »), au moins le token partagé. `<section>` reste un
-bloc simple (pas de flex/grid) : son unique enfant (le texte) s'empile
-depuis le haut par défaut, donc le texte n'est jamais centré
-verticalement — il démarre en haut de la section, sur les 12 colonnes,
-aligné à gauche, sans JS ni flex nécessaires pour ça.
+Section normale : `<Section spacing="default">`, comme Services ou
+Processus — plus d'exception ici. Plus de `min-height: 100svh`, plus de
+padding en dur (128/200), plus de `box-sizing: content-box` : ces trois
+mécanismes n'existaient que pour garantir une fenêtre de scroll assez
+large autour de l'ancien seuil de bascule (posé sur la SECTION entière,
+« top top »/« bottom bottom ») — le nouveau seuil se mesure sur le bloc
+de texte lui-même (voir plus bas), indépendant de la hauteur de la
+section. `<section>` reste un bloc simple (pas de flex/grid) : son
+unique enfant (le texte) s'empile depuis le haut par défaut, donc le
+texte n'est jamais centré verticalement — il démarre en haut de la
+section, sur les 12 colonnes, aligné à gauche, sans JS ni flex
+nécessaires pour ça. Écart réel entre le bas du texte et le haut de
+Services, mesuré : 144px mobile / 240px desktop — le double de
+`--section-space` (padding-bottom de Respiration + padding-top de
+Services), comme entre deux sections normales n'importe où ailleurs sur
+le site.
 
 Emphase sur les deux derniers mots avant le point (« passer commande ») :
 voir « Typographie » § emphase — le texte est déjà à 800 (graisse
 maximale de Bricolage Grotesque), donc soulignement, pas gras. Jamais de
 --accent dans cette section.
 
-Bascule de couleur plein écran, réversible dans les deux sens — RIEN
-n'est un fond en dur (ni sur `.section`, ni sur le texte) :
-  fond    `.section` ne porte AUCUN fond propre. `<RespirationBackdrop>`
-          (src/components/sections/RespirationBackdrop.tsx, ne rend
-          AUCUN DOM) anime directement `background-color` de `<html>`
-          ET `<body>` ensemble — PAS un calque `position: fixed`
-          séparé : un tel calque crée toujours son propre contexte
-          d'empilement, qui peint soit derrière le fond de `<body>`
-          (z-index négatif) soit par-dessus le contenu normal non
-          positionné (z-index positif/auto) — jamais les deux à la
-          fois (bug réel mesuré : les labels/titres non animés
-          d'Inoko, Services et toute la section Processus devenaient
-          invisibles, alors même que leur opacity/visibility/couleur
-          restaient corrects dans le DOM/CSSOM — seul un rendu pixel le
-          révèle). Animer directement le fond de la boîte racine
-          contourne le problème à la racine : un `background-color` est
-          peint AVANT toute la hiérarchie d'empilement, jamais un
-          concurrent d'empilement.
-  texte   --ink par défaut (donc correct même sans JS — la section
-          arrive avec le fond crème du site), --ground UNIQUEMENT
-          pendant que le fond est charbon — RespirationReveal.tsx,
-          MÊME trigger et MÊMES seuils que le fond (voir plus bas), un
-          second ScrollTrigger indépendant mais calculé à l'identique
-          donc synchrone. Soulignement de « passer commande » compris
-          (text-decoration-color suit).
-Seuils : quand le haut de la section touche le haut de la fenêtre
-(« top top ») — elle COMMENCE à occuper tout l'écran, sa boîte totale
-dépasse toujours 100svh (voir `box-sizing: content-box` plus bas) donc
-son bas reste sous le bas de la fenêtre à cet instant précis → bascule
-vers charbon/--ground. Quand le bas de la section touche le bas de la
-fenêtre (« bottom bottom ») — dernier instant où elle occupe encore tout
-l'écran, juste avant que Services n'apparaisse par le bas → bascule
-vers crème/--ink. `onEnter`/`onLeave`/`onEnterBack`/`onLeaveBack` : le
-seul endroit du projet qui utilise ScrollTrigger pour une bascule
-réversible liée au scroll (partout ailleurs, révélations `once: true`),
-à la demande explicite du prompt qui l'a introduite. Couleurs lues sur
-les tokens (`getComputedStyle`, --ground/--ink), jamais un hex en dur.
+`data-tone="light"` (`<Section tone="light">`, page.tsx) : la section
+n'a plus de tonalité « dark » spéciale. Tout son texte (`.text`,
+`.accent`, y compris le soulignement de « passer commande ») pose
+`color: var(--ink)`/`text-decoration-color: var(--ink)` en CSS PUR,
+exactement comme n'importe quelle autre section claire du site — RIEN
+à animer ici. C'est l'inversion décrite ci-dessous qui rend ce texte
+crème sur fond charbon pendant qu'on la lit.
 
-`box-sizing: content-box` sur `.section` (override local du
-`border-box` global posé par Tailwind) : sans lui, `min-height: 100svh`
-absorbe le padding 128/200 dans son propre budget plutôt que de
-l'ajouter, et sur un écran où le texte tient sur peu de lignes, la
-boîte totale peut retomber pile à 100svh, sans aucune marge — les deux
-seuils de la bascule (« top top » / « bottom bottom ») coïncident alors
-exactement, rendant le charbon imperceptible (mesuré). `content-box`
-garantit une fenêtre de tenue réelle d'au moins 256/400px (128/200 de
-chaque côté), quel que soit le nombre de lignes du texte.
+### Inversion de toute la page
 
-La nav suit via le mécanisme `data-tone` existant (la section déclare
-toujours `tone="dark"`), mais avec un correctif : `src/lib/tone.ts`
-expose `setLiveTone(sectionId, tone)`, un registre de tonalités RÉELLES
-qui prend le pas sur la tonalité déclarée pour la section concernée —
-`<RespirationBackdrop>` l'appelle dans les MÊMES callbacks
-`onEnter`/`onLeave`/… qui animent le fond, donc synchronisé à la frame
-près. Sans ce correctif, la nav (et tout autre abonné — cartons, pile
-mobile) bascule au franchissement du HAUT de la section, sa propre
-mesure indépendante — mesuré ~32px de scroll AVANT la bascule réelle du
-fond (la moitié de la hauteur de la nav) : un texte clair sur un fond
-encore crème le temps de l'écart. Contraste mesuré (13,08:1, --ground
-sur --ink plein, la valeur de référence de globals.css) : nav/fond ET
-texte/fond, dans les deux tonalités (charbon comme crème).
+Pendant la Respiration, `--ink` et `--ground` ÉCHANGENT LEURS VALEURS au
+niveau racine (`<html>`) : tout ce qui est construit sur ces deux
+tokens s'inverse donc automatiquement — fonds, textes, traits (`--line`),
+nav, cartons du rail, pile mobile, fin de Dernier accompagnement, début
+de Services — sans qu'aucun de ces composants n'ait besoin de savoir que
+l'inversion existe. `--accent` ne change jamais. Les photos ne changent
+jamais (voir plus bas les deux exceptions qui doivent rester fixes).
 
-prefers-reduced-motion : bascule immédiate aux mêmes seuils (`gsap.set`,
-pas de tween), sans transition, pour le fond ET pour le texte. Aucune
-différence de mise en page mesurée entre les deux modes (mêmes rects
-h1/carton/nav/texte).
+Mécanique (globals.css) : `--ink`/`--ground` déclarées avec `@property`
+(`syntax: '<color>'`, animable) ; `html[data-inverted="true"]` les
+réécrit à partir de `--color-charcoal`/`--color-cream` (les deux valeurs
+littérales fixes, voir « Couleurs ») ; une transition CSS
+(`--ink 400ms cubic-bezier(0,.55,.45,1)`, idem `--ground`) interpole la
+couleur elle-même — chaque élément qui lit `var(--ink)`/`var(--ground)`
+recalcule sa propre couleur à chaque frame de cette transition, sans
+qu'aucun `transition` propre à cet élément ne soit nécessaire.
+
+Déclenchement (`RespirationReveal.tsx`) : sur le BLOC DE TEXTE lui-même
+(le `<p>`, le même élément que la révélation d'entrée), PAS sur la
+section — mesuré au pixel via un seul `ScrollTrigger` :
+  `start: "top 80%"`   le haut du texte passe au-dessus de 80 % de la
+                        hauteur de la fenêtre → `data-inverted="true"`
+  `end: "bottom 20%"`  le bas du texte passe au-dessus de 20 % de la
+                        hauteur de la fenêtre → `data-inverted="false"`
+`onEnter`/`onEnterBack` inversent, `onLeave`/`onLeaveBack` reviennent —
+comportement symétrique en remontant. Le seuil précoce (80 % plutôt que
+« top top » de l'ancienne mécanique) est voulu : la bascule doit être
+visible AVANT que le texte n'arrive en haut de l'écran, pas après qu'on
+l'a déjà lu sur fond crème.
+
+Chargement en milieu de scroll (lien direct, restauration de scroll du
+navigateur) : `trigger.isActive` fixe l'état initial SANS transition
+(comme `gsap.set` ailleurs dans le projet) — la transition n'est armée
+qu'un frame plus tard (`html[data-tone-transition="on"]`, posé via
+`requestAnimationFrame`), pour que cet état initial ne s'anime jamais
+depuis la valeur par défaut. `prefers-reduced-motion` : couvert par la
+règle globale existante (`transition-duration: 0.01ms`), aucune branche
+séparée — cet effet ne fait plus que poser un attribut, la CSS gère le
+reste. Aucune différence de mise en page entre les deux modes (l'ancien
+mécanisme à base de min-height/padding est parti avec la bascule
+locale).
+
+### Exceptions à l'inversion — surfaces qui doivent rester fixes
+
+L'inversion touche TOUT élément qui lit `var(--ink)`/`var(--ground)`,
+y compris hors de la Respiration elle-même : tout élément visible à
+l'écran EN MÊME TEMPS que l'inversion (pas seulement dans la section)
+est concerné. Deux surfaces, un seul motif dupliqué deux fois (carte
+« cas client » Inoko, substitut de photo tant qu'aucune photo n'est
+fournie) doivent rester d'une couleur FIXE — une vraie photo, elle, ne
+changerait pas non plus :
+  - Dernier accompagnement, section juste avant Respiration : son bas
+    (la carte, `.imageFallback`/`.imageGradient`/`.tags`/`.tag`,
+    dernier-accompagnement.module.css) peut rester à l'écran au moment
+    où l'inversion se déclenche (seuil précoce, voir plus haut).
+  - Le méga-menu desktop, carte cas client (`.caseImageFallback`/
+    `.caseGradient`/`.caseClient`/`.caseSubtitle`/`.caseTag`,
+    megamenu.module.css) : peut s'ouvrir à N'IMPORTE QUELLE position de
+    scroll, y compris pendant que la page est inversée — vérifié
+    (méga-menu ouvert en pleine Respiration inversée, carte case client
+    toujours lisible).
+Les deux utilisent `--color-charcoal`/`--color-cream` (globals.css) à la
+place de `--ink`/`--ground` — les décorations qui suivent le TEXTE de
+ces cartes (numéros de Dernier accompagnement, filets --ink des angles)
+restent, elles, sur `--ink`/`--ground` normaux : seule la carte photo
+elle-même doit rester fixe.
+
+Le bloc de fin de page (footer, fond `--ink`/texte `--ground` en dur,
+tone="dark" permanent) porte le même motif en théorie, mais n'a jamais
+pu être visible en même temps que l'inversion sur le contenu actuel de
+la page (bien après Processus, géométriquement hors d'atteinte) —
+laissé sur `--ink`/`--ground`, signalé plutôt que retouché hors
+périmètre.
+
+Le fond de `<html>` (zone de rebond du scroll iOS) suit l'inversion —
+vérifié (`background: var(--ground)`, globals.css, donc lui aussi
+construit sur le token qui s'inverse) : à traiter avec le footer, pas
+touché ici.
 
 ## Dernier accompagnement — Inoko (home)
 
@@ -853,13 +901,10 @@ pile mobile (53), méga-menu — mobile ET desktop, même valeur, jamais
 montés en même temps (55), fond flouté de nav (58), trait de nav (59),
 barre de nav (60), carton du rail desktop figé (65, >= 1024px
 uniquement — partage sa position avec la bande floutée latérale du trait,
-voir plus haut). La bascule de Respiration (`<RespirationBackdrop>`,
-« Respiration ») ne participe pas à cette échelle : elle anime
-directement le fond de `<html>`/`<body>`, sans calque ni z-index —
-voir ce composant pour le piège CSS que ce choix évite (un calque
-`position: fixed` séparé, à N'IMPORTE quel z-index, se fait soit
-recouvrir par le fond de `<body>` soit passer par-dessus le contenu
-normal non positionné, jamais les deux à la fois).
+voir plus haut). La bascule de Respiration (« Respiration ») ne
+participe pas à cette échelle : elle échange les VALEURS de deux custom
+properties (`--ink`/`--ground`) au niveau racine, sans aucun calque ni
+z-index — voir « Respiration (home) » § « Inversion de toute la page ».
 
 Animation des icônes du RAIL DESKTOP (>= 1024px) — la pile mobile a ses
 propres déclencheurs, décrits ci-dessus dans « Pile mobile ».

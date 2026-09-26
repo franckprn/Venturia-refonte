@@ -6,9 +6,21 @@
  * CLAUDE.md. Tailwind ne fait que leur donner un nom (voir la config).
  * ------------------------------------------------------------------ */
 :root {
-  /* Couleurs — palette fermée, trois valeurs + deux filets */
-  --ground: #dedcd3;
-  --ink: #1a1614;
+  /* Couleurs — palette fermée, trois valeurs + deux filets.
+     --ink et --ground sont déclarées avec @property (syntax '<color>',
+     plus bas) et ÉCHANGENT leurs valeurs pendant la Respiration (CLAUDE.md,
+     « Respiration » — voir html[data-inverted] en fin de fichier) : leur
+     valeur COURANTE dépend donc de la position de scroll, jamais fixe.
+     --color-charcoal/--color-cream portent les deux valeurs LITTÉRALES de
+     la palette, JAMAIS inversées : réservées aux rares surfaces qui
+     doivent rester d'une couleur fixe quelle que soit la tonalité de la
+     page (la carte cas client Inoko, substitut de photo tant qu'aucune
+     photo n'est fournie — Dernier accompagnement et méga-menu desktop,
+     CLAUDE.md « Respiration »). */
+  --color-charcoal: #1a1614;
+  --color-cream: #dedcd3;
+  --ground: var(--color-cream);
+  --ink: var(--color-charcoal);
   --accent: #fe3939;
   --line: color-mix(in srgb, var(--ink) 16%, transparent);
   --line-accent: color-mix(in srgb, var(--accent) 20%, transparent);
@@ -154,6 +166,53 @@
 [data-tone="accent"] {
   --fg: var(--ground);
   --tone-bg: var(--accent);
+}
+
+/* ------------------------------------------------------------------ *
+ * Inversion de toute la page (CLAUDE.md, « Respiration ») — pendant la
+ * Respiration, --ink et --ground échangent leurs valeurs au niveau
+ * racine : tout ce qui est construit sur ces deux tokens s'inverse donc
+ * automatiquement (fonds, textes, traits --line, nav, cartons du rail,
+ * pile mobile, fin de Dernier accompagnement, début de Services) — sans
+ * qu'aucun de ces composants n'ait besoin de savoir que l'inversion
+ * existe. @property les déclare typées ('<color>') : une transition CSS
+ * peut alors interpoler la couleur elle-même, image par image, au lieu
+ * de sauter d'une valeur à l'autre (un custom property non enregistré
+ * n'anime jamais, même avec `transition`).
+ * ------------------------------------------------------------------ */
+@property --ink {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #1a1614;
+}
+
+@property --ground {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #dedcd3;
+}
+
+/* Piloté par RespirationReveal.tsx : bascule data-inverted="true"/"false"
+   sur <html> quand le BLOC DE TEXTE de la Respiration (pas la section)
+   franchit ses seuils — voir ce composant. */
+html[data-inverted="true"] {
+  --ink: var(--color-cream);
+  --ground: var(--color-charcoal);
+}
+
+/* Transition posée sur une classe armée par JS APRÈS le premier rendu
+   (voir RespirationReveal.tsx), jamais inconditionnellement sur `html` :
+   sans ce garde-fou, un chargement en milieu de scroll qui démarre déjà
+   dans l'état inversé (lien direct, restauration de scroll du
+   navigateur) animerait la toute première bascule au lieu de l'afficher
+   directement dans le bon état — même raisonnement que `gsap.set` avant
+   `gsap.to` ailleurs dans le projet. prefers-reduced-motion : couvert par
+   la règle globale plus bas (transition-duration: 0.01ms), rien de propre
+   à ajouter ici. */
+html[data-tone-transition="on"] {
+  transition:
+    --ink 400ms cubic-bezier(0, 0.55, 0.45, 1),
+    --ground 400ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
 /* ------------------------------------------------------------------ *

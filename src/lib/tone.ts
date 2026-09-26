@@ -44,22 +44,6 @@ let rafId: number | null = null;
 let resizeObserver: ResizeObserver | null = null;
 let started = false;
 
-/**
- * Tonalité RÉELLE, en direct, d'une section dont le fond change en JS
- * SANS que sa tonalité déclarée (`<Section tone="...">`, donc
- * `bounds`/`data-tone`) ne bouge — un seul cas aujourd'hui : Respiration,
- * toujours `tone="dark"` dans le JSX (CLAUDE.md, « Rail droit » —
- * l'ancrage du carton 1, entre autres, en dépend), mais dont le fond
- * plein écran ne devient réellement charbon qu'entre deux seuils de
- * scroll précis (voir RespirationBackdrop.tsx). Sans ce correctif, la
- * nav (et tout autre abonné) bascule au franchissement du HAUT de la
- * section — plus tôt que la bascule réelle du fond, un texte clair sur
- * un fond encore crème le temps de l'écart. `setLiveTone` écrit ici,
- * `toneAt`/`getBottomTone` lisent en priorité sur la valeur déclarée —
- * keyée par `id` de section (stable), pas par référence DOM.
- */
-const liveOverrides = new Map<string, Tone>();
-
 function refreshBounds() {
   const sections = Array.from(document.querySelectorAll<HTMLElement>("section[data-tone]"));
   bounds = sections
@@ -77,22 +61,9 @@ function toneAt(documentY: number): Tone {
   let tone = DEFAULT_TONE;
   for (const bound of bounds) {
     if (documentY < bound.top) break;
-    tone = liveOverrides.get(bound.id) ?? bound.tone;
+    tone = bound.tone;
   }
   return bounds.length > 0 ? tone : DEFAULT_TONE;
-}
-
-/**
- * Enregistre la tonalité RÉELLEMENT peinte d'une section en ce moment
- * (voir `liveOverrides` ci-dessus) et fait immédiatement rejouer tous
- * les abonnés (nav, cartons) — appelé par RespirationBackdrop.tsx et
- * RespirationReveal.tsx, dans les MÊMES callbacks ScrollTrigger qui
- * animent le fond/le texte, pour une synchronisation au pixel/à la
- * frame près plutôt qu'une mesure indépendante.
- */
-export function setLiveTone(sectionId: string, tone: Tone): void {
-  liveOverrides.set(sectionId, tone);
-  scheduleRun();
 }
 
 function runProbes() {
@@ -186,10 +157,7 @@ export function getBottomTone(): Tone {
     const top = el.getBoundingClientRect().top;
     if (top <= y && top > bestTop) {
       bestTop = top;
-      // Tonalité RÉELLE si cette section en porte une en direct
-      // (Respiration — voir `liveOverrides` plus haut), sinon la
-      // tonalité déclarée.
-      tone = liveOverrides.get(el.id) ?? (el.dataset.tone as Tone) ?? DEFAULT_TONE;
+      tone = (el.dataset.tone as Tone) ?? DEFAULT_TONE;
     }
   }
   return tone;

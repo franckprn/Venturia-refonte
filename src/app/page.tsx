@@ -6,7 +6,6 @@ import { Hero } from "@/components/sections/Hero";
 import heroStyles from "@/components/sections/hero.module.css";
 import { DernierAccompagnement } from "@/components/sections/DernierAccompagnement";
 import { Respiration } from "@/components/sections/Respiration";
-import { RespirationBackdrop } from "@/components/sections/RespirationBackdrop";
 import respirationStyles from "@/components/sections/respiration.module.css";
 import { Services } from "@/components/sections/Services";
 import { Processus } from "@/components/sections/Processus";
@@ -33,13 +32,17 @@ import footerStyles from "@/components/layout/footer.module.css";
 // carton visible pendant le Hero est une pure conséquence de la
 // grille (sa ligne ne démarre qu'à « dernier-accompagnement-start »),
 // pas d'une opacité pilotée en JS — voir Rail.tsx et CLAUDE.md, « Rail
-// droit ». Respiration et le footer n'ont pas de carton. Respiration et
-// le footer restent dans la zone de contenu comme les autres sections
-// (pas sous le rail) ; seul le fond du footer (--ink) déborde jusqu'aux
-// bords de l'écran (voir footer.module.css) — celui de Respiration
-// passe désormais par <RespirationBackdrop> (anime directement le fond
-// de <html>/<body>, ne rend aucun DOM — voir ce composant pour le
-// pourquoi), pas par un fond en dur sur la section.
+// droit ». Respiration et le footer n'ont pas de carton. Les deux
+// restent dans la zone de contenu comme les autres sections (pas sous
+// le rail) ; seul le fond du footer (--ink) déborde jusqu'aux bords de
+// l'écran (voir footer.module.css). Respiration n'a plus AUCUN fond
+// propre, même pas un fond plein écran local : `tone="light"` (comme
+// les autres sections « claires »: l'inversion crème ↔ charbon pendant
+// qu'on la lit n'est plus une propriété de la section, mais un effet de
+// TOUTE LA PAGE, piloté par RespirationReveal.tsx — bascule
+// `data-inverted` sur <html>, voir globals.css et CLAUDE.md,
+// « Respiration ») et `spacing="default"` (plus d'exception 100svh/
+// padding en dur, comme n'importe quelle autre section).
 // Sections suivantes (avis, ressources) et méga-menu : sessions
 // ultérieures.
 //
@@ -60,7 +63,6 @@ export default function Home() {
   return (
     <>
       <MobileRailStack anchors={["hero", "services", "processus"]} />
-      <RespirationBackdrop />
 
       <Shell>
         <Section
@@ -88,8 +90,7 @@ export default function Home() {
 
         <Section
           name="respiration"
-          tone="dark"
-          spacing="none"
+          tone="light"
           className={respirationStyles.section}
           bodyStyle={{ rowGap: 0 }}
         >

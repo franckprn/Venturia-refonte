@@ -239,10 +239,16 @@
   object-fit: cover;
 }
 
+/* --color-charcoal/--color-cream (globals.css), PAS --ink/--ground :
+   substitut de photo, doit rester fixe quelle que soit l'inversion de
+   page pendant la Respiration (CLAUDE.md, « Respiration ») — le
+   méga-menu peut s'ouvrir à n'importe quelle position de scroll, y
+   compris pendant que la page est inversée. Même carte cas client que
+   dernier-accompagnement.module.css .imageFallback. */
 .caseImageFallback {
   position: absolute;
   inset: 0;
-  background: var(--ink);
+  background: var(--color-charcoal);
 }
 
 .caseGradient {
@@ -250,10 +256,10 @@
   inset: 0;
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--ink) 45%, transparent),
+    color-mix(in srgb, var(--color-charcoal) 45%, transparent),
     transparent 30%,
     transparent 70%,
-    color-mix(in srgb, var(--ink) 45%, transparent)
+    color-mix(in srgb, var(--color-charcoal) 45%, transparent)
   );
 }
 
@@ -271,7 +277,7 @@
   font-size: var(--t-mono);
   line-height: var(--t-mono-lh);
   letter-spacing: var(--t-mono-ls);
-  color: var(--ground);
+  color: var(--color-cream);
 }
 
 .caseTags {
@@ -283,18 +289,19 @@
 }
 
 .caseTag {
-  /* Contour à la couleur du texte (var(--ground), même valeur que
+  /* Contour à la couleur du texte (var(--color-cream), même valeur que
      `color` ci-dessous) : tout badge posé sur une photo suit son texte
      (voir le commentaire d'en-tête et dernier-accompagnement.module.css
-     .tag). */
-  border: 1px solid var(--ground);
+     .tag). --color-cream, pas --ground : fixe comme la carte, voir
+     .caseImageFallback plus haut. */
+  border: 1px solid var(--color-cream);
   border-radius: 3px;
   padding: 8px 13px;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: var(--t-mono);
   line-height: var(--t-mono-lh);
   letter-spacing: var(--t-mono-ls);
-  color: var(--ground);
+  color: var(--color-cream);
 }
 
 /* --------------------------- Mobile (< 1024px) ------------------------ */
