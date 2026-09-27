@@ -619,7 +619,9 @@ Trois cartons, chacun rattaché à une section de la page :
   2. au niveau de la section services
   3. juste avant le CTA final
 
-Comportement attendu : un empilement permanent, pas un relais.
+Comportement par défaut : un empilement permanent — voir « Mode relais »
+plus bas pour la bascule automatique vers un comportement différent
+quand les 3 cartons figés ne tiennent pas dans la hauteur de la fenêtre.
 Le carton vit dans la colonne du rail et n'en sort jamais latéralement.
 Il monte avec la page, puis se fige à 64px du haut de la fenêtre — la hauteur
 de la nav, EXACTEMENT la même valeur que le haut du trait sous la barre
@@ -648,63 +650,161 @@ son icône (l'horloge) ne suit QUE le signal de fin du h1 (jamais
 l'entrée dans la pile) et ne rejoue jamais.
 
 Écarts harmonisés à une seule valeur, 20px (la gouttière) : l'écart
-horizontal rail↔colonne 12, l'écart rail↔bord de l'écran, l'écart
-vertical entre deux cartons figés, ET l'écart entre le haut d'un carton
-(avant figement) et le haut de sa section de rattachement — porté par
-un `padding-top` sur `.slot`, sans quoi le carton suivant « touche »
-visuellement le bas de la section précédente jusqu'à son figement
-(mesuré avant correction : le carton du GEO touchait le bas de
-Respiration). Vrai pour les cartons 2 et 3 (`.slot`, rail.module.css) ;
-le carton 1 fait exception depuis cette session (voir juste en dessous).
+horizontal rail↔colonne 12, l'écart rail↔bord de l'écran, ET l'écart
+vertical entre deux cartons figés. L'écart entre le haut d'un carton
+(avant figement) et sa cible d'alignement n'est PLUS cette valeur fixe
+pour aucun des trois cartons — chacun s'aligne désormais sur un point
+précis de sa propre section, mesuré (voir juste en dessous).
 
-Carton 1, point de départ EXCEPTION à cette harmonisation : son haut
-(avant figement) est aligné au PIXEL sur le haut de la PHOTO Inoko
-(`[data-da-photo]`, dernier-accompagnement.module.css), pas sur le haut
-de la section ni sur la gouttière générique de 20px — le
-label/titre/paragraphe qui précèdent la photo n'ont pas de hauteur
-fixe (texte, variable selon la largeur d'écran et le point de rupture).
-Mesuré comme les hauteurs des cartons (--rail-h1/--rail-h2) : jamais
-codé en dur, l'écart réel entre le haut de la section et le haut de la
-photo est réécrit dans `--rail-card1-offset` (globals.css, repli 20px
-sans JS) et lu par `.slot1` (rail.module.css) EN PLACE de
-`padding-top: var(--shell-rail-pad)`. Mesuré via `offsetTop` (chaîne
-`offsetParent`), jamais `getBoundingClientRect()` : ce dernier inclut
-le `transform` GSAP de la révélation d'entrée de la photo
-(DernierAccompagnementReveal, y:24→0), donnant une position transitoire
-au lieu de la position de repos si mesuré avant que l'utilisateur
-n'ait scrollé jusque-là — `offsetTop` ignore toujours `transform`, quel
-que soit l'état de la révélation au moment de la mesure. Écart
-haut-carton/haut-photo mesuré : 0px (aux arrondis sub-pixel près) à
-1024/1440/1728px.
+Point de départ (avant figement) des 3 cartons — UNE seule mécanique,
+MESURÉE en JS, jamais une valeur fixe :
+  1. au niveau de Dernier accompagnement : haut du carton = haut du
+     TITRE de la section, « Inoko — Mobilier pour van à Toulouse »
+     (`#dernier-accompagnement-title`) — pas la photo (l'ancien
+     alignement) : le titre précède tout le reste du contenu variable
+     de la section.
+  2. au niveau des services : haut du carton = haut du trait
+     (border-top) du premier service, « Référencement »
+     (`[data-service-row-first]`, services.module.css `.row`).
+  3. juste avant le CTA final, mais ANCRÉ SUR SERVICES (la section qui
+     porte sa cible, retenue plutôt que Processus) : haut du carton =
+     BAS du bloc du dernier service, « Automatisation »
+     (`[data-service-row-last]`, le `.row` entier — paragraphes et lien
+     « Découvrir l'automatisation » compris, jusqu'au bas de son propre
+     padding). `<RailSlot anchor="services">` pour ce carton (page.tsx) :
+     `anchor` fixe le `grid-row` en style inline, indépendamment de
+     l'endroit où le `<RailSlot>` est rendu dans le JSX (après
+     Processus, comme avant — seul l'ancrage change).
+Chaque écart est réécrit dans sa propre variable CSS
+(`--rail-card1-offset`/`--rail-card2-offset`/`--rail-card3-offset`,
+globals.css, repli 20px sans JS chacune — pas pixel-parfait sans JS,
+jamais 0 ni une valeur absurde) et lu par `.slot1`/`.slot2`/`.slot3`
+(rail.module.css) EN PLACE de l'ancien `padding-top:
+var(--shell-rail-pad)` générique (retiré de `.slot` : plus aucun carton
+ne l'utilise).
 
-Le POINT DE FIGEMENT du carton 1, lui, ne change pas — toujours
-particulier, inchangé par cette session : `top: var(--rail-stick)`
-(64px, le trait de la nav, directement — pas un calc() dérivé des
-cartons précédents comme pour 2 et 3), pas dérivé du haut d'une section
-ni d'une photo. Seul le POINT DE DÉPART (avant figement) a bougé.
+Mesure (Rail.tsx, OFFSET_TARGETS), IDENTIQUE pour les 3 cartons :
+l'écart = position document du bord visé (haut de la cible, ou bas —
+`offsetTop` + `offsetHeight` pour le carton 3) moins position document
+du haut de la section de rattachement (celle de l'`anchor` du
+`<RailSlot>` — « services » pour les cartons 2 ET 3, « dernier-
+accompagnement » pour le 1er). Position document = `offsetTop` cumulé
+le long de la chaîne `offsetParent`, JAMAIS `getBoundingClientRect()` :
+ce dernier inclut le `transform` d'une révélation d'entrée GSAP encore
+en cours (photo Inoko, lignes de Services) si mesuré avant que
+l'utilisateur n'ait scrollé jusque-là, donnant une position transitoire
+au lieu de la position de repos — `offsetTop` ignore toujours
+`transform`, quel que soit l'état de la révélation au moment de la
+mesure. Recalculée au montage, au redimensionnement de la fenêtre,
+après `document.fonts.ready` (métriques de police de repli → police
+réelle), et via un `ResizeObserver` sur la section de rattachement (un
+reflow du texte au-dessus de la cible change la hauteur de la section,
+donc l'écart). Écart mesuré : 0px (aux arrondis sub-pixel près) pour
+les 3 cartons, à 1024/1440/1728px, y compris après un redimensionnement
+1440 → 1024 → 1728 sans recharger la page.
+
+Le POINT DE FIGEMENT des 3 cartons, lui, ne change pas : carton 1 —
+`top: var(--rail-stick)` (64px, le trait de la nav, directement) ;
+cartons 2 et 3 — `calc()` dérivé des hauteurs des cartons précédents et
+des 20px entre deux cartons figés (voir « Implémentation » plus bas).
+Seul le POINT DE DÉPART (avant figement) est mesuré, pour les 3.
 
 Le carton passe AU-DESSUS du bloc nav (z-index) : à cette hauteur, il
 partage sa position avec la bande floutée latérale du trait, côté rail — le
 carton doit rester net, jamais flouté par cette bande.
 
-Implémentation : CSS sticky, aucun JS d'animation.
+### Mode relais
+
+Le rail bascule automatiquement entre deux comportements, DÉCIDÉ EN JS
+(pas un point de rupture CSS fixe, ni la largeur d'écran seule — c'est
+la HAUTEUR de la fenêtre qui compte) :
+  empilement (défaut, décrit ci-dessus)  les 3 cartons figés (hauteurs
+    RÉELLES, mesurées) + `var(--rail-stick)` + 2 gouttières de 20px
+    (entre cartons figés) + 20px de marge basse tiennent dans la hauteur
+    de la fenêtre.
+  relais (sinon — mesuré : 1024×768, 1366×657, deux résolutions
+    courantes, pas des cas limites)  chaque carton qui a un « suivant »
+    (1 et 2) se fige à la MÊME valeur que le carton 1,
+    `var(--rail-stick)` — plus de décalage empilé pour 2 et 3 — puis
+    REPART vers le haut dès que le suivant arrive, sans jamais rester
+    figés tous les deux en même temps ni se chevaucher. Le carton 3
+    (aucun suivant) se fige lui aussi à `var(--rail-stick)` mais reste
+    ensuite visible jusqu'au bas de la page, comme en mode empilement.
+Condition de bascule posée en `data-rail-mode="stack"`/`"relay"` sur
+`<html>` (RailController, Rail.tsx). Repli sans JS = "stack" (aucune
+règle CSS de relais ne s'applique tant que cet attribut n'est pas posé).
+
+Mécanique retenue pour le relais (la plus simple des deux envisagées
+avec Franck — pas de ligne de grille nommée par « carton suivant » :
+les cartons 2 et 3 partagent déjà la MÊME section de rattachement,
+« services », donc la même ligne ; une ligne de plus n'aurait pas pu les
+distinguer). Chaque carton qui a un suivant (1 et 2) reçoit, en mode
+relais, une hauteur de CONTENEUR EXPLICITE sur son `.slot`
+(`align-self: start` remplace `stretch`, `height` fixe la taille au lieu
+de laisser le slot s'étirer sur toute la grille) qui s'arrête PILE à la
+position de repos (avant figement) du carton SUIVANT — mesurée en JS
+(`--rail-card1-relay-height`/`--rail-card2-relay-height`, globals.css,
+repli 100vh sans JS : jamais une valeur courte qui ferait relayer un
+carton immédiatement). `position: sticky` ne dépassant jamais son
+conteneur, cette coïncidence géométrique garantit PAR CONSTRUCTION :
+tant que le carton suivant n'a pas atteint sa propre position de repos,
+le carton courant reste figé (son conteneur a encore de la marge en
+dessous) ; dès que cette position est atteinte, le carton courant est
+repoussé vers le haut à la vitesse du défilement — il quitte l'écran par
+le haut PENDANT que le suivant, pas encore figé, continue de monter
+depuis plus bas. Le bas du premier coïncide exactement avec le haut du
+second à tout instant de cette phase (même position document, par
+construction) : jamais de chevauchement, jamais les deux figés ensemble.
+Le carton 3 n'a personne après lui : son `.slot` garde
+`align-self: stretch` jusqu'à la fin de la grille dans les DEUX modes —
+rien à limiter ; seul son `top` sticky change en mode relais.
+
+Recalculée aux MÊMES déclencheurs que les écarts de repos (voir plus
+haut) : montage, redimensionnement, `document.fonts.ready`,
+`ResizeObserver` — ici sur les 2 sections cibles ET les 3 cartons
+eux-mêmes (leurs hauteurs réelles entrent dans la condition de bascule,
+contrairement aux écarts de repos). Un seul composant, `RailController`
+(Rail.tsx), monté une seule fois pour toute la page (pas un par carton
+comme `RailSlot`, headless — `return null`) : la décision de bascule ET
+les hauteurs de relais ont besoin de connaître les 3 cartons à la fois,
+une mesure par `RailSlot` ne pourrait pas partager ce résultat.
+
+Les alignements de repos (0px, `--rail-card1/2/3-offset`) restent
+IDENTIQUES dans les deux modes — ce mécanisme ne touche qu'au point de
+FIGEMENT et au conteneur, jamais au point de départ. Vérifié
+(Playwright, balayage progressif du scroll par pas de 15px, sans
+reduced-motion) : 0 chevauchement, 0 carton coupé par le bas de la
+fenêtre à 1024×768, 1366×657 et 1440×900 ; mode "relay" détecté à
+1024×768 et 1366×657, "stack" à 1440×900 et 1728×1117 ; bascule
+correcte lors d'un redimensionnement 1440×900 → 1024×768 → 1440×900
+sans recharger la page ; écarts de repos toujours à 0px à 1024/1440/
+1728px.
+
+Implémentation : CSS sticky, aucun JS d'animation (hors la mesure et la
+bascule de mode ci-dessus).
   <aside data-rail>
     <article data-rail-card>   position: sticky; top: 64px
     <article data-rail-card>   position: sticky;
                                 top: calc(64px + hauteur du 1ᵉʳ + 20px)
+                                — ou 64px en mode relais
     <article data-rail-card>   position: sticky;
                                 top: calc(64px + hauteur du 1ᵉʳ + hauteur du 2ᵉ + 40px)
+                                — ou 64px en mode relais
 Le conteneur de chaque carton s'étend de son point d'apparition jusqu'au BAS
-de la zone rail — jamais jusqu'à la fin de sa seule section : c'est ce qui
-distingue l'empilement du relais. Un conteneur qui s'arrête avec sa section
-fait repartir le carton au lieu de le laisser figé.
+de la zone rail (mode empilement) ou jusqu'à la position de repos du carton
+suivant (mode relais, voir « Mode relais » ci-dessus) — jamais jusqu'à la
+fin de sa seule section : c'est ce qui distingue l'empilement du relais
+CSS-only utilisé en session 3 (retiré depuis). Un conteneur qui s'arrête
+avec sa section fait repartir le carton au lieu de le laisser figé.
 
 Les hauteurs des cartons varient avec leur contenu (nombre de lignes) : les
 mesurer au montage et au resize plutôt que les coder en dur, et les écrire
 dans des variables CSS pour que les `top` restent des calc().
 
-L'écart vertical entre deux cartons figés est fixe : 20px. Ce n'est plus
-celui des sections elles-mêmes.
+L'écart vertical entre deux cartons figés est fixe : 20px, en mode
+empilement uniquement (en mode relais, un seul carton est figé à la
+fois — aucun écart à maintenir entre deux cartons figés simultanément).
+Ce n'est plus celui des sections elles-mêmes.
 
 Aucun ancêtre d'un carton ne doit porter overflow: hidden, overflow: auto,
 overflow: clip ni contain. Un seul de ces ancêtres suffit à désactiver
@@ -1228,8 +1328,11 @@ Trois contrôles chiffrés, dans la console de la page :
 2. méga-menu OUVERT en 1440, sa hauteur reste sous 55 % de la fenêtre
    document.querySelector('[data-megamenu]').getBoundingClientRect().height
    / window.innerHeight   → < 0.55
-3. les trois cartons du rail se figent bien à 84px et restent visibles,
-   empilés, jusqu'au bas de la page
+3. les trois cartons du rail se figent bien à 64px (var(--rail-stick)) ;
+   en mode empilement (fenêtre assez haute), ils restent visibles,
+   empilés, jusqu'au bas de la page — en mode relais (fenêtre courte,
+   voir « Rail droit » § « Mode relais »), un seul à la fois est figé,
+   sans jamais se chevaucher ni être coupé par le bas de la fenêtre
 
 Puis navigation complète au clavier, du premier lien au dernier.
 Corriger avant de rendre la main.

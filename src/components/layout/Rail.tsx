@@ -13,6 +13,61 @@ import styles from "./rail.module.css";
 // « Rail droit ») : horloge, étoile à quatre branches, flèche.
 const RAIL_ICONS = [IconClock, IconSparkle, IconArrowRight] as const;
 
+// Classe de padding-top par carton (rail.module.css) : chacun lit sa
+// propre variable d'écart mesuré (--rail-card1/2/3-offset), voir
+// OFFSET_TARGETS et l'effet plus bas.
+const SLOT_OFFSET_CLASS = [styles.slot1, styles.slot2, styles.slot3] as const;
+
+/**
+ * Point de départ (avant figement) des 3 cartons — UNE seule mécanique,
+ * MESURÉE en JS, jamais une valeur fixe (CLAUDE.md, « Rail droit ») :
+ * l'écart entre le haut de la section de rattachement du carton
+ * (`sectionId`, celle visée par son `anchor`) et le bord de sa cible
+ * d'alignement (`selector` — haut par défaut, bas si `edge: "bottom"`)
+ * est réécrit dans `varName` (globals.css, repli 20px sans JS chacune).
+ *
+ *   1. Dernier accompagnement : haut du carton = haut du TITRE de la
+ *      section (`#dernier-accompagnement-title`) — pas la photo (le
+ *      titre précède tout le contenu variable de la section, la photo
+ *      n'est plus la cible).
+ *   2. Services : haut du carton = haut du trait (border-top) du 1ᵉʳ
+ *      service, « Référencement » (`[data-service-row-first]`,
+ *      services.module.css `.row`).
+ *   3. Services (même section que le carton 2, la cible visée y vit —
+ *      section d'ancrage retenue pour ce carton) : haut du carton = BAS
+ *      du bloc du dernier service, « Automatisation »
+ *      (`[data-service-row-last]`, le `.row` entier — paragraphes et
+ *      lien « Découvrir l'automatisation » compris, jusqu'au bas de son
+ *      propre padding).
+ */
+const OFFSET_TARGETS: readonly {
+  varName: string;
+  sectionId: string;
+  selector: string;
+  edge: "top" | "bottom";
+}[] = [
+  { varName: "--rail-card1-offset", sectionId: "dernier-accompagnement", selector: "#dernier-accompagnement-title", edge: "top" },
+  { varName: "--rail-card2-offset", sectionId: "services", selector: "[data-service-row-first]", edge: "top" },
+  { varName: "--rail-card3-offset", sectionId: "services", selector: "[data-service-row-last]", edge: "bottom" },
+];
+
+/** Position document (cumulée le long de la chaîne `offsetParent`),
+ *  JAMAIS `getBoundingClientRect()` : ce dernier inclut le `transform`
+ *  d'une révélation d'entrée GSAP encore en cours (photo, lignes de
+ *  service) si mesuré avant que l'utilisateur n'ait scrollé jusque-là,
+ *  donnant une position transitoire au lieu de la position de repos —
+ *  `offsetTop` ignore toujours `transform`, quel que soit l'état de la
+ *  révélation au moment de la mesure (CLAUDE.md, « Rail droit »). */
+function documentTop(el: HTMLElement | null): number {
+  let top = 0;
+  let node: HTMLElement | null = el;
+  while (node) {
+    top += node.offsetTop;
+    node = node.offsetParent as HTMLElement | null;
+  }
+  return top;
+}
+
 type RailSlotProps = {
   /** Index du carton dans content/rail.ts (0, 1 ou 2). */
   cardIndex: 0 | 1 | 2;
@@ -39,14 +94,17 @@ type RailSlotProps = {
  *   ne démarre qu'au haut de la section Inoko, donc rien n'est ni rendu
  *   ni peint dans les lignes du Hero qui précèdent — aucun carton
  *   visible pendant le Hero est une pure conséquence de la grille, plus
- *   une opacité pilotée en JS (CLAUDE.md, « Rail droit »). Deux
- *   différences avec 2/3, toutes deux volontaires : son `top` sticky
+ *   une opacité pilotée en JS (CLAUDE.md, « Rail droit »). Les cartons 2
+ *   et 3 partagent la MÊME section de rattachement (`anchor="services"`)
+ *   — la cible du carton 3 (bas du dernier service) y vit aussi, voir
+ *   OFFSET_TARGETS plus haut. Seule différence restante entre le carton
+ *   1 et les deux autres, volontaire : son `top` sticky
  *   (`var(--rail-stick)`, 64px, la hauteur de la nav, directement — pas
- *   un calc() dérivé des cartons précédents, stickyWrap1 plus bas) ; et
- *   son `padding-top` (`.slot1` plutôt que la gouttière générique de
- *   `.slot`) — voir plus bas, l'effet dédié qui l'écrit dans
- *   `--rail-card1-offset` : son POINT DE DÉPART (avant figement) est
- *   aligné sur le haut de la PHOTO Inoko, pas sur le haut de la section.
+ *   un calc() dérivé des cartons précédents, stickyWrap1 plus bas). Son
+ *   POINT DE DÉPART (avant figement), lui, suit désormais la MÊME
+ *   mécanique mesurée que les cartons 2 et 3 (`.slot1`/`.slot2`/`.slot3`
+ *   plutôt que la gouttière générique de `.slot` — voir OFFSET_TARGETS
+ *   et l'effet dédié plus bas).
  * - Mobile (< 1024px) : ce carton sort du flux (`.slot` passe à
  *   `display: none`, voir rail.module.css) — remplacé par la pile
  *   fixée en bas de l'écran (components/layout/MobileRailStack.tsx),
@@ -119,74 +177,63 @@ export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
     return () => observer.disconnect();
   }, [cardIndex]);
 
-  // Carton 1 uniquement : son point de départ (avant figement) est aligné
-  // au pixel sur le haut de la PHOTO Inoko (`[data-da-photo]`,
-  // dernier-accompagnement.module.css), pas sur le haut de la section —
-  // le label/titre/paragraphe qui précèdent la photo n'ont pas de hauteur
-  // fixe (texte, donc variable selon la largeur d'écran). Mesuré comme
-  // --rail-h1/--rail-h2 ci-dessus : jamais codé en dur, un écart entre le
-  // haut de la section et le haut de la photo, réécrit dans
-  // --rail-card1-offset (globals.css, repli 20px sans JS — la gouttière
-  // générique) et lu par `.slot1` (rail.module.css) EN PLACE de
-  // `padding-top: var(--shell-rail-pad)`. Le figement lui-même
-  // (`top: var(--rail-stick)`, stickyWrap1) reste inchangé — seul le
-  // POINT DE DÉPART bouge. Un ResizeObserver sur la SECTION (pas la photo
-  // elle-même) : la photo ne change jamais de position par elle-même,
-  // seul un reflow du texte au-dessus (largeur d'écran) la déplace, et ce
-  // reflow change la hauteur totale de la section par construction.
+  // Point de départ (avant figement) — UNE seule mécanique pour les 3
+  // cartons (voir OFFSET_TARGETS/documentTop plus haut, CLAUDE.md « Rail
+  // droit ») : l'écart entre le haut de la section de rattachement et le
+  // bord (haut, ou bas pour le carton 3) de la cible propre à ce carton,
+  // réécrit dans sa variable CSS et lu par `.slot1`/`.slot2`/`.slot3`
+  // (rail.module.css) EN PLACE de l'ancienne gouttière générique
+  // (`padding-top: var(--shell-rail-pad)`, retirée de `.slot`). Le
+  // figement lui-même (stickyWrap1/2/3, `top: var(--rail-stick…)`) reste
+  // inchangé — ce padding ne fait que retarder l'instant où le sticky
+  // s'accroche, pas la position une fois accroché.
   //
-  // Piège rencontré et corrigé : `getBoundingClientRect()` sur la photo
-  // ne donne pas sa position de repos tant que sa révélation d'entrée
-  // (DernierAccompagnementReveal, `.visualSlot` : gsap.set y:24 au
-  // montage, puis gsap.to y:0 au ScrollTrigger) n'a pas joué — mesurée
-  // trop tôt (avant que l'utilisateur n'ait scrollé jusque-là), la photo
-  // est encore visuellement décalée de 24px par ce transform GSAP,
-  // faussant l'écart mesuré de 24px jusqu'à ce que la page recharge.
-  // `offsetTop` (cumulé le long de la chaîne `offsetParent`), contrairement
-  // à `getBoundingClientRect()`, ignore TOUJOURS `transform` — quel que
-  // soit l'état de la révélation au moment de la mesure, cette valeur
-  // reste celle de la position de repos, sans dépendre d'un ordre de
-  // montage entre composants ni d'un signal de fin d'animation.
+  // Piège rencontré et corrigé (S16) : `getBoundingClientRect()` sur une
+  // cible ne donne pas sa position de repos tant que sa révélation
+  // d'entrée GSAP (photo Inoko, lignes de Services) n'a pas joué —
+  // mesurée trop tôt (avant que l'utilisateur n'ait scrollé jusque-là),
+  // la cible est encore visuellement décalée par ce transform, faussant
+  // l'écart mesuré jusqu'à ce que la page recharge. `offsetTop`,
+  // contrairement à `getBoundingClientRect()`, ignore TOUJOURS
+  // `transform` — quel que soit l'état de la révélation au moment de la
+  // mesure, cette valeur reste celle de la position de repos, sans
+  // dépendre d'un ordre de montage entre composants ni d'un signal de
+  // fin d'animation.
   //
-  // Recalcul garanti à deux autres moments, en plus du montage :
+  // Recalcul garanti à trois moments, en plus du montage :
   // - redimensionnement de la fenêtre : l'écart dépend de la hauteur du
-  //   label/titre/paragraphe au-dessus de la photo (texte, donc variable
-  //   avec la largeur de la colonne de contenu) — un ResizeObserver sur
-  //   la SECTION (pas la photo elle-même, qui ne bouge jamais toute
-  //   seule) suffirait déjà à le capter indirectement (le reflow du
-  //   texte change la hauteur totale de la section), mais un écouteur
-  //   `resize` direct est ajouté par prudence/clarté, au cas où un
-  //   redimensionnement change la largeur sans changer la hauteur totale
-  //   de la section (aucun reflow de ligne, donc aucun déclenchement du
-  //   ResizeObserver) — vérifié par mesure : écart < 1px après un
-  //   redimensionnement 1440 → 1024 → 1728 sans recharger la page.
+  //   contenu qui précède la cible (texte, donc variable avec la largeur
+  //   de la colonne de contenu) — un ResizeObserver sur la SECTION (pas
+  //   la cible elle-même, qui ne bouge jamais toute seule) suffirait déjà
+  //   à le capter indirectement (le reflow du texte change la hauteur
+  //   totale de la section), mais un écouteur `resize` direct est ajouté
+  //   par prudence/clarté, au cas où un redimensionnement change la
+  //   largeur sans changer la hauteur totale de la section (aucun reflow
+  //   de ligne, donc aucun déclenchement du ResizeObserver) — vérifié par
+  //   mesure : écart < 1px après un redimensionnement 1440 → 1024 → 1728
+  //   sans recharger la page.
   // - chargement des polices (`document.fonts.ready`) : next/font charge
   //   Bricolage Grotesque/Instrument Sans en `display: "swap"`
   //   (layout.tsx) — un premier rendu peut utiliser la police de repli
   //   avant que la vraie police ne s'échange, avec des métriques
   //   différentes (largeur de caractère, interligne) qui déplacent la
-  //   photo. Le ResizeObserver capterait aussi ce cas SI l'échange change
+  //   cible. Le ResizeObserver capterait aussi ce cas SI l'échange change
   //   la hauteur totale de la section, mais ne pas en dépendre : recalcul
   //   explicite une fois `document.fonts.ready` résolu.
+  // - ResizeObserver sur la section de rattachement elle-même (voir
+  //   ci-dessus) : un changement de hauteur d'un élément AU-DESSUS de la
+  //   cible (texte variable) change la hauteur de la section, donc
+  //   l'écart mesuré.
   useEffect(() => {
-    if (cardIndex !== 0) return;
-    const section = document.getElementById("dernier-accompagnement");
-    const photo = document.querySelector<HTMLElement>("[data-da-photo]");
-    if (!section || !photo) return;
-
-    const documentTop = (el: HTMLElement | null): number => {
-      let top = 0;
-      let node: HTMLElement | null = el;
-      while (node) {
-        top += node.offsetTop;
-        node = node.offsetParent as HTMLElement | null;
-      }
-      return top;
-    };
+    const target = OFFSET_TARGETS[cardIndex];
+    const section = document.getElementById(target.sectionId);
+    const el = document.querySelector<HTMLElement>(target.selector);
+    if (!section || !el) return;
 
     const update = () => {
-      const offset = documentTop(photo) - documentTop(section);
-      document.documentElement.style.setProperty("--rail-card1-offset", `${offset}px`);
+      const targetTop = documentTop(el) + (target.edge === "bottom" ? el.offsetHeight : 0);
+      const offset = targetTop - documentTop(section);
+      document.documentElement.style.setProperty(target.varName, `${offset}px`);
     };
     update();
 
@@ -206,7 +253,7 @@ export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
     };
   }, [cardIndex]);
 
-  const slotClassName = [styles.slot, cardIndex === 0 ? styles.slot1 : ""].filter(Boolean).join(" ");
+  const slotClassName = [styles.slot, SLOT_OFFSET_CLASS[cardIndex]].join(" ");
 
   const stickyClassName = [
     styles.stickyWrap,
@@ -230,6 +277,155 @@ export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
       </div>
     </div>
   );
+}
+
+/**
+ * Mode du rail desktop — « empilement » (défaut) ou « relais » — décidé
+ * en JS selon que les 3 cartons FIGÉS tiennent ou non dans la hauteur de
+ * la fenêtre (CLAUDE.md, « Rail droit » § « Mode relais ») :
+ *
+ *   empilement  var(--rail-stick) + hauteurs RÉELLES des 3 cartons + 2
+ *               gouttières de 20px (entre cartons figés) + 20px de marge
+ *               basse <= innerHeight → comportement actuel, inchangé :
+ *               les 3 cartons restent visibles, figés, empilés jusqu'au
+ *               bas de la page (aucun ne repart jamais).
+ *   relais      sinon (ex. 1024×768, 1366×657) : chaque carton qui a un
+ *               « suivant » (1 et 2) se fige à var(--rail-stick) — la
+ *               MÊME valeur pour les 3, plus de décalage empilé — puis
+ *               REPART vers le haut dès que le suivant arrive, sans
+ *               jamais rester figés tous les deux en même temps ni se
+ *               chevaucher (voir le raisonnement géométrique plus bas).
+ *
+ * Implémentation retenue, la plus simple des deux envisagées avec
+ * Franck : PAS de nouvelle ligne de grille nommée par carton suivant —
+ * les cartons 2 et 3 partagent déjà la même section de rattachement
+ * (« services »), donc la même ligne de grille : une ligne par
+ * « carton suivant » ne pourrait pas les distinguer. À la place, chaque
+ * carton qui a un suivant (1 et 2) reçoit, en mode relais, une hauteur
+ * EXPLICITE sur son `.slot` (`height`, `align-self: start` au lieu de
+ * `stretch` — rail.module.css) calculée pour que le BAS de son
+ * conteneur tombe pile sur la position de repos (avant figement, donc
+ * AU REPOS) du carton SUIVANT. Cette coïncidence géométrique garantit,
+ * PAR CONSTRUCTION (position: sticky ne dépasse jamais son conteneur) :
+ *   - tant que le carton suivant n'a pas atteint sa propre position de
+ *     repos, le carton courant reste figé à var(--rail-stick) (son
+ *     conteneur a encore de la marge en dessous) ;
+ *   - une fois cette position atteinte, le carton courant est repoussé
+ *     vers le haut par la contrainte de conteneur, à la même vitesse que
+ *     le défilement — il quitte l'écran par le haut PENDANT que le
+ *     carton suivant (pas encore figé) continue de monter depuis plus
+ *     bas ; le bas du premier coïncide exactement avec le haut du second
+ *     à tout instant de cette phase (les deux document-tops sont
+ *     égaux par construction) : jamais de chevauchement, jamais les deux
+ *     figés en même temps.
+ * Le carton 3 n'a personne après lui : son `.slot` garde
+ * `align-self: stretch` jusqu'à la fin de la grille dans les DEUX modes
+ * (rien à limiter — CLAUDE.md) ; seul son `top` sticky change en mode
+ * relais (var(--rail-stick), comme les 2 autres, au lieu du calc()
+ * empilé — voir rail.module.css) : une fois figé, il reste visible
+ * jusqu'au bas de la page, exactement comme en mode empilement.
+ *
+ * Un seul composant, monté une fois (pas un par carton, contrairement à
+ * <RailSlot>) : la décision de bascule ET les hauteurs de relais ont
+ * besoin de connaître les 3 cartons à la fois (leurs hauteurs réelles,
+ * et la position de repos du carton SUIVANT pour chacun) — une mesure
+ * par instance de <RailSlot> ne pourrait pas partager ce résultat.
+ * Les alignements de repos (0px, `--rail-card1/2/3-offset`) ne changent
+ * pas : ce composant ne touche à rien de ce que <RailSlot> calcule déjà.
+ */
+export function RailController() {
+  useEffect(() => {
+    const isDesktop = () => window.matchMedia("(min-width: 1024px)").matches;
+
+    // Position document (repos, avant figement) du carton `index` — le
+    // même calcul que OFFSET_TARGETS/l'effet de <RailSlot>, mais ici en
+    // position ABSOLUE (pas relative à la section) : c'est exactement le
+    // point où le carton SUIVANT doit être rejoint en mode relais.
+    const restDocTop = (index: number): number | null => {
+      const target = OFFSET_TARGETS[index];
+      const el = document.querySelector<HTMLElement>(target.selector);
+      if (!el) return null;
+      return documentTop(el) + (target.edge === "bottom" ? el.offsetHeight : 0);
+    };
+
+    const sectionTop = (index: number): number | null => {
+      const section = document.getElementById(OFFSET_TARGETS[index].sectionId);
+      return section ? documentTop(section) : null;
+    };
+
+    const update = () => {
+      // La pile mobile ne change pas : ce mécanisme est desktop
+      // uniquement (comme le rail lui-même, display:none sous 1024px).
+      if (!isDesktop()) return;
+
+      const slots = Array.from(document.querySelectorAll<HTMLElement>("[data-rail-slot]"));
+      if (slots.length !== 3) return;
+      const cards = slots.map((slot) => slot.firstElementChild as HTMLElement | null);
+      if (cards.some((c) => !c)) return;
+      const heights = cards.map((c) => c!.offsetHeight);
+
+      const rests = [0, 1, 2].map(restDocTop);
+      if (rests.some((r) => r === null)) return;
+      const restsPx = rests as number[];
+
+      const railStick =
+        parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--rail-stick")) || 64;
+
+      // Condition de bascule (donnée par Franck) : les 3 cartons figés
+      // (hauteurs réelles, pas --rail-h1/--rail-h2 qui n'existent que
+      // pour 1 et 2) + 2 gouttières de 20px entre eux + 20px de marge
+      // basse doivent tenir sous la hauteur de la fenêtre.
+      const neededHeight = railStick + heights[0] + heights[1] + heights[2] + 20 + 20 + 20;
+      const fits = neededHeight <= window.innerHeight;
+      document.documentElement.setAttribute("data-rail-mode", fits ? "stack" : "relay");
+
+      // Hauteurs de conteneur en mode relais (carton 1 → 2, carton 2 →
+      // 3 — voir le commentaire au-dessus du composant). Calculées dans
+      // tous les cas (mode empilement compris) : les règles CSS qui les
+      // lisent sont scopées à [data-rail-mode="relay"], donc sans effet
+      // hors de ce mode — mais jamais une variable non résolue au moment
+      // exact de la bascule.
+      for (const i of [0, 1] as const) {
+        const base = sectionTop(i);
+        if (base === null) continue;
+        const relayHeight = Math.max(0, restsPx[i + 1] - base);
+        document.documentElement.style.setProperty(`--rail-card${i + 1}-relay-height`, `${relayHeight}px`);
+      }
+    };
+
+    update();
+
+    // Mêmes déclencheurs que les décalages de repos (voir l'effet de
+    // <RailSlot>) : montage, redimensionnement, fonts.ready, et un
+    // ResizeObserver — ici sur les 2 sections cibles ET les 3 cartons
+    // eux-mêmes (leurs hauteurs réelles entrent dans la condition de
+    // bascule, contrairement aux décalages de repos).
+    const observedSections = new Set<Element>();
+    for (const target of OFFSET_TARGETS) {
+      const section = document.getElementById(target.sectionId);
+      if (section) observedSections.add(section);
+    }
+    for (const slot of document.querySelectorAll("[data-rail-slot]")) {
+      if (slot.firstElementChild) observedSections.add(slot.firstElementChild);
+    }
+    const observer = new ResizeObserver(update);
+    observedSections.forEach((el) => observer.observe(el));
+
+    window.addEventListener("resize", update, { passive: true });
+
+    let cancelled = false;
+    document.fonts.ready.then(() => {
+      if (!cancelled) update();
+    });
+
+    return () => {
+      cancelled = true;
+      observer.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
+  return null;
 }
 
 function RailCardArticle({

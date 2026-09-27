@@ -88,6 +88,14 @@ export function ServicesRowsReveal({ services }: ServicesRowsRevealProps) {
             rowRefs.current[i] = el;
           }}
           className={styles.row}
+          // Cibles du carton 2 (haut du trait du 1ᵉʳ service) et du
+          // carton 3 (bas du bloc du dernier service, paragraphes et
+          // lien compris) — voir components/layout/Rail.tsx et
+          // CLAUDE.md, « Rail droit ». Attributs, pas des refs : Rail.tsx
+          // les lit par `document.querySelector`, indépendant de ce
+          // composant.
+          data-service-row-first={i === 0 ? "" : undefined}
+          data-service-row-last={i === services.length - 1 ? "" : undefined}
         >
           <p className={styles.heading}>{service.name}</p>
           <p className={styles.phrase}>{service.phrase}</p>

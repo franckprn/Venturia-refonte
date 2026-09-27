@@ -18,18 +18,6 @@
      reste collé au bord GAUCHE de la colonne, laissant 40px de vide à
      droite au lieu des 20px voulus contre le bord de l'écran. */
   padding-inline: var(--shell-rail-pad);
-  /* Écart harmonisé avec les trois autres (CLAUDE.md, « Rail droit ») :
-     la même valeur que padding-inline ci-dessus, --shell-rail-pad
-     (20px, la gouttière). Sans lui, la position NATURELLE (avant
-     figement) d'un carton commence pile à la ligne de grille de sa
-     section (`${anchor}-start`, Shell.tsx) — donc pile au bas de la
-     section précédente, zéro écart entre les deux : mesuré, le carton
-     du GEO « touchait » ainsi le bas de Respiration jusqu'à son
-     figement. Sans incidence sur le point de figement lui-même
-     (`top: var(--rail-stick…)`, stickyWrap1/2/3 plus bas) : un padding
-     sur le conteneur ne fait que retarder l'instant où le sticky
-     s'accroche, pas la position une fois accroché. */
-  padding-top: var(--shell-rail-pad);
   /* .shell pose align-items: start (shell.module.css) : sans stretch
      ici, ce slot ne ferait que la hauteur de son propre contenu au
      lieu de remplir toute sa plage de lignes — et son carton, sticky
@@ -51,17 +39,47 @@
   z-index: 65;
 }
 
-/* Carton 1 uniquement : remplace la gouttière générique (padding-top
-   de .slot ci-dessus) par l'écart MESURÉ jusqu'au haut de la photo
-   Inoko (--rail-card1-offset, Rail.tsx + repli 20px sans JS,
-   globals.css) — son point de départ (avant figement) est aligné au
-   pixel sur le haut de la photo, pas sur le haut de la section. Le
-   figement lui-même (stickyWrap1, top: var(--rail-stick)) est
-   inchangé : ce padding ne fait que retarder l'instant où le sticky
-   s'accroche, pas la position une fois accroché (même logique que la
-   gouttière qu'il remplace, voir le commentaire de .slot ci-dessus). */
+/* Point de départ (avant figement) des 3 cartons : l'écart MESURÉ
+   jusqu'à la cible d'alignement propre à chacun (Rail.tsx —
+   CLAUDE.md, « Rail droit »), pas la gouttière générique de 20px ni le
+   haut de la section — carton 1 → haut du TITRE Dernier accompagnement,
+   carton 2 → haut du trait du 1ᵉʳ service, carton 3 → bas du bloc du
+   dernier service. Sans incidence sur le point de figement lui-même
+   (stickyWrap1/2/3 plus bas, top: var(--rail-stick…)) : ce padding ne
+   fait que retarder l'instant où le sticky s'accroche, pas la position
+   une fois accroché. */
 .slot1 {
   padding-top: var(--rail-card1-offset);
+}
+
+.slot2 {
+  padding-top: var(--rail-card2-offset);
+}
+
+.slot3 {
+  padding-top: var(--rail-card3-offset);
+}
+
+/* Mode relais (RailController, Rail.tsx — CLAUDE.md, « Rail droit »
+   § « Mode relais ») : posé sur <html> quand les 3 cartons figés ne
+   tiennent pas dans la hauteur de la fenêtre. Seuls les cartons qui ONT
+   un suivant (1 et 2) sont concernés — le 3ᵉ n'a rien à limiter, voir le
+   commentaire de RailController. `align-self: start` remplace `stretch`
+   (.slot ci-dessus) : sans lui, `height` n'aurait aucun effet, le slot
+   continuerait à s'étirer sur toute sa plage de lignes. `height` (pas
+   `max-height`) : c'est la hauteur EXACTE du conteneur qui doit
+   coïncider avec la position de repos du carton suivant, calculée en JS
+   (--rail-card1/2-relay-height) — box-sizing: border-box (Tailwind
+   preflight) : cette hauteur inclut déjà le padding-top posé par
+   .slot1/.slot2 ci-dessus, pas la peine de l'y ajouter. */
+[data-rail-mode="relay"] .slot1 {
+  align-self: start;
+  height: var(--rail-card1-relay-height);
+}
+
+[data-rail-mode="relay"] .slot2 {
+  align-self: start;
+  height: var(--rail-card2-relay-height);
 }
 
 .stickyWrap {
@@ -76,8 +94,23 @@
   top: calc(var(--rail-stick) + var(--rail-h1) + 20px);
 }
 
+/* Mode relais : les 3 cartons se figent tous à la MÊME valeur (comme le
+   carton 1, jamais figés en même temps — un seul visible à la fois, voir
+   RailController) — plus de décalage empilé. */
+[data-rail-mode="relay"] .stickyWrap2 {
+  top: var(--rail-stick);
+}
+
 .stickyWrap3 {
   top: calc(var(--rail-stick) + var(--rail-h1) + var(--rail-h2) + 40px);
+}
+
+/* Mode relais : le 3ᵉ carton (aucun suivant) se fige aussi à
+   var(--rail-stick), comme les 2 autres — il reste ensuite figé jusqu'au
+   bas de la page, `.slot3` gardant `align-self: stretch` dans les deux
+   modes (rien à limiter, voir RailController). */
+[data-rail-mode="relay"] .stickyWrap3 {
+  top: var(--rail-stick);
 }
 
 .card {

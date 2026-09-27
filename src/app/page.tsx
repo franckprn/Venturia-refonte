@@ -1,6 +1,6 @@
 import { Shell } from "@/components/Shell";
 import { Section } from "@/components/Section";
-import { RailSlot } from "@/components/layout/Rail";
+import { RailController, RailSlot } from "@/components/layout/Rail";
 import { MobileRailStack } from "@/components/layout/MobileRailStack";
 import { Hero } from "@/components/sections/Hero";
 import heroStyles from "@/components/sections/hero.module.css";
@@ -23,16 +23,19 @@ import footerStyles from "@/components/layout/footer.module.css";
 // dans layout.tsx, à côté de Nav), la zone de figement des cartons
 // s'arrêterait à la fin de Processus au lieu du vrai bas de page.
 //
-// Chaque <RailSlot> est placé juste après sa section déclencheuse
-// (CLAUDE.md, « Rail droit ») :
-//   1. dernier accompagnement (Inoko)   2. services   3. processus
-//   (« juste avant le bloc de fin de page » — Processus la précède
-//   directement)
-// Le carton 1 s'ancre à Dernier accompagnement, pas au Hero : aucun
-// carton visible pendant le Hero est une pure conséquence de la
-// grille (sa ligne ne démarre qu'à « dernier-accompagnement-start »),
-// pas d'une opacité pilotée en JS — voir Rail.tsx et CLAUDE.md, « Rail
-// droit ». Respiration et le footer n'ont pas de carton. Les deux
+// Chaque <RailSlot> ancre son `grid-row` à la section qui porte sa
+// CIBLE d'alignement (CLAUDE.md, « Rail droit »), pas forcément la
+// section la plus proche dans le DOM ci-dessous : carton 1 → « dernier-
+// accompagnement » (haut du titre Inoko), cartons 2 ET 3 → « services »
+// (haut du 1ᵉʳ service pour le 2, bas du dernier pour le 3 — la cible du
+// 3 vit dans Services, pas dans Processus, malgré son <RailSlot> rendu
+// après elle ci-dessous : `anchor` fixe le `grid-row` en style inline,
+// indépendamment de la position DOM). Le carton 1 s'ancre à Dernier
+// accompagnement, pas au Hero : aucun carton visible pendant le Hero
+// est une pure conséquence de la grille (sa ligne ne démarre qu'à
+// « dernier-accompagnement-start »), pas d'une opacité pilotée en JS —
+// voir Rail.tsx et CLAUDE.md, « Rail droit ». Respiration et le footer
+// n'ont pas de carton. Les deux
 // restent dans la zone de contenu comme les autres sections (pas sous
 // le rail) ; seul le fond du footer (--ink) déborde jusqu'aux bords de
 // l'écran (voir footer.module.css). Respiration n'a plus AUCUN fond
@@ -59,10 +62,19 @@ import footerStyles from "@/components/layout/footer.module.css";
 // avant d'atteindre un élément fixe pourtant visible depuis le début —
 // avant, il arrive juste après la nav, comme un élément de chrome
 // permanent.
+//
+// <RailController /> : de même, rendu une seule fois (pas un par
+// carton comme <RailSlot>) — décide le mode du rail DESKTOP,
+// « empilement » ou « relais » selon que les 3 cartons figés tiennent
+// dans la hauteur de la fenêtre (CLAUDE.md, « Rail droit » § « Mode
+// relais »). Ne rend rien (composant headless, `return null`) : sa
+// position dans le DOM n'a donc aucune incidence, ni visuelle ni sur le
+// clavier.
 export default function Home() {
   return (
     <>
       <MobileRailStack anchors={["hero", "services", "processus"]} />
+      <RailController />
 
       <Shell>
         <Section
@@ -107,7 +119,7 @@ export default function Home() {
           <Processus />
         </Section>
 
-        <RailSlot cardIndex={2} anchor="processus" />
+        <RailSlot cardIndex={2} anchor="services" />
 
         <Section name="footer" tone="dark" className={footerStyles.section} bodyStyle={{ rowGap: 0 }}>
           <Footer />
