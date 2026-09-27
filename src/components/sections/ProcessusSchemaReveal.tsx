@@ -37,9 +37,31 @@ type ProcessusSchemaRevealProps = {
  * `prefers-reduced-motion` : la fonction s'arrête avant de rien
  * parquer, le schéma reste dans son état final tel que rendu par défaut.
  *
- * Le point de rupture desktop/mobile (768px) est vérifié une seule
- * fois au montage, comme `prefers-reduced-motion` ailleurs dans le
- * projet : pas d'écouteur de resize, cohérent avec le reste du code.
+ * Le point de rupture desktop/mobile (768px) est vérifié une seule fois
+ * au montage, comme `prefers-reduced-motion` ailleurs dans le projet :
+ * pas d'écouteur de resize pour CE choix-là (lequel des deux <svg>
+ * animer). Le tiret de la révélation (voir plus bas), lui, EN a un —
+ * portée différente, pas une contradiction.
+ *
+ * Tiret du tracé (stroke-dasharray/dashoffset) : `vector-effect=
+ * "non-scaling-stroke"` sur ce <path> fait que le moteur de rendu
+ * interprète ces deux propriétés en PIXELS ÉCRAN, alors que
+ * `getTotalLength()` s'exprime en unités du viewBox — sans conversion,
+ * le segment « on » du tiret ne couvre le tracé réel qu'au prorata de
+ * 1/échelle dès que le schéma s'affiche plus large que son viewBox
+ * natif (échelle > 1 : > 1440px de fenêtre desktop, où la colonne de
+ * contenu atteint pile 1136px) : la ligne s'arrête avant d'atteindre le
+ * chevron, isolé au bout de l'ellipse C — invisible en dessous (le
+ * tiret y est au contraire trop long, sans effet visible), ce qui
+ * explique que mobile et iPad n'y soient jamais exposés (leur échelle y
+ * reste <= 1). Corrigé en convertissant la longueur dans le MÊME espace
+ * que le rendu via `getScreenCTM()` de l'élément (le facteur d'échelle
+ * RÉEL utilisateur → écran, jamais un ratio déduit de
+ * `getBoundingClientRect()`/viewBox, qui ne capterait pas un éventuel
+ * skew) — recalculée au redimensionnement tant que la révélation n'est
+ * pas terminée, puis `clearProps` retire les deux propriétés une fois
+ * la timeline achevée : la ligne au repos ne dépend plus d'aucun calcul,
+ * à aucune largeur.
  */
 export function ProcessusSchemaReveal({ steps }: ProcessusSchemaRevealProps) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -66,8 +88,38 @@ export function ProcessusSchemaReveal({ steps }: ProcessusSchemaRevealProps) {
     const c = isDesktop ? cDesktopRef.current : cMobileRef.current;
     if (!axis || !a || !b || !c) return;
 
+    // Longueur du tracé en unités du viewBox (`getTotalLength()`, jamais
+    // affectée par la taille d'affichage). `vector-effect="non-scaling-
+    // stroke"` (sur ce <path>) fait que le moteur de rendu interprète
+    // `stroke-dasharray`/`stroke-dashoffset` en PIXELS ÉCRAN, pas dans cet
+    // espace — sans conversion, le segment « on » du tiret ne couvre le
+    // tracé réel qu'au prorata de 1/échelle dès que le schéma s'affiche
+    // plus large que son viewBox natif (échelle > 1, soit une fenêtre de
+    // plus de 1440px desktop, où content = 1136px pile) : la ligne
+    // s'arrête avant d'atteindre le chevron, isolé au bout de l'ellipse C
+    // (mesuré : point d'arrêt = 40 + longueur/échelle, confirmé au pixel
+    // près à 1600/1728/1920/2560px). En dessous de cette largeur (échelle
+    // < 1), le tiret est au contraire plus long que nécessaire — le bug
+    // est invisible, ce qui explique qu'il ne touche ni mobile ni iPad
+    // (leur échelle y reste <= 1). Correction : convertir la longueur
+    // dans le MÊME espace que le rendu via `getScreenCTM()` (le facteur
+    // d'échelle RÉEL utilisateur → écran de CET élément, jamais un ratio
+    // déduit de `getBoundingClientRect()/viewBox`, qui ne capterait pas
+    // un éventuel skew) — recalculée au redimensionnement tant que la
+    // révélation n'est pas terminée. Une fois terminée, `clearProps`
+    // retire ces deux propriétés : la ligne au repos ne dépend plus
+    // d'aucun calcul, à aucune largeur.
+    const pathLength = axis.getTotalLength();
+    const screenLength = () => {
+      const ctm = axis.getScreenCTM();
+      const scale = ctm ? Math.hypot(ctm.a, ctm.b) : 1;
+      return pathLength * scale;
+    };
+
+    let onResize: (() => void) | null = null;
+
     const ctx = gsap.context(() => {
-      const length = axis.getTotalLength();
+      let length = screenLength();
       gsap.set(axis, { strokeDasharray: length, strokeDashoffset: length });
       gsap.set([a, b], { opacity: 0 });
 
@@ -79,7 +131,16 @@ export function ProcessusSchemaReveal({ steps }: ProcessusSchemaRevealProps) {
         gsap.set(c, { attr: { ry: 0, cy: 232 } });
       }
 
-      const tl = gsap.timeline({ paused: true });
+      const tl = gsap.timeline({
+        paused: true,
+        onComplete: () => {
+          if (onResize) {
+            window.removeEventListener("resize", onResize);
+            onResize = null;
+          }
+          gsap.set(axis, { clearProps: "strokeDasharray,strokeDashoffset" });
+        },
+      });
       tl.to(axis, { strokeDashoffset: 0, duration: 0.4, ease: VENTURIA_EASE })
         .to(a, { opacity: 1, duration: 0.4, ease: VENTURIA_EASE }, ">")
         .to(b, { opacity: 1, duration: 0.4, ease: VENTURIA_EASE }, "<0.12");
@@ -90,6 +151,24 @@ export function ProcessusSchemaReveal({ steps }: ProcessusSchemaRevealProps) {
         tl.to(c, { attr: { ry: 90, cy: 322 }, duration: 0.4, ease: VENTURIA_EASE }, "<0.12");
       }
 
+      // Tant que la révélation n'a pas démarré, un redimensionnement
+      // (largeur de la colonne de contenu, donc échelle) doit recalculer
+      // le tiret AU REPOS (dasharray = dashoffset, toujours masqué quelle
+      // que soit la valeur exacte tant que les deux sont égales). Si elle
+      // est déjà en cours, seul `strokeDasharray` est réajusté — le
+      // `dashoffset` continue vers 0 sans à-coup, porté par le tween en
+      // cours, qui reste correct puisque 0 signifie « entièrement révélé »
+      // quelle que soit la valeur du tiret au moment où il l'atteint.
+      onResize = () => {
+        if (tl.progress() > 0) {
+          gsap.set(axis, { strokeDasharray: screenLength() });
+          return;
+        }
+        length = screenLength();
+        gsap.set(axis, { strokeDasharray: length, strokeDashoffset: length });
+      };
+      window.addEventListener("resize", onResize, { passive: true });
+
       ScrollTrigger.create({
         trigger: root,
         start: "top 70%",
@@ -98,7 +177,10 @@ export function ProcessusSchemaReveal({ steps }: ProcessusSchemaRevealProps) {
       });
     }, root);
 
-    return () => ctx.revert();
+    return () => {
+      if (onResize) window.removeEventListener("resize", onResize);
+      ctx.revert();
+    };
   }, []);
 
   return (
