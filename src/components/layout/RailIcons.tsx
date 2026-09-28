@@ -12,7 +12,14 @@
 // révoqué au démontage — jamais d'état initial en CSS, jamais
 // autoAlpha (CLAUDE.md, « Animations »).
 
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  type ComponentType,
+  type RefAttributes,
+} from "react";
 import { gsap } from "gsap";
 import { VENTURIA_EASE } from "@/lib/ease";
 
@@ -23,6 +30,11 @@ export type RailIconHandle = {
 type IconProps = {
   className?: string;
 };
+
+/** Type d'une icône de carton du rail (forme commune aux 5 exports de ce
+ *  fichier) — partagé par components/layout/Rail.tsx et MobileRailStack.tsx
+ *  pour typer un `RailConfig.icons` propre à chaque page. */
+export type RailIconComponent = ComponentType<IconProps & RefAttributes<RailIconHandle>>;
 
 const SHARED_PROPS = {
   width: 20,
@@ -181,6 +193,112 @@ export const IconArrowRight = forwardRef<RailIconHandle, IconProps>(function Ico
   return (
     <svg {...SHARED_PROPS} className={className}>
       <path ref={pathRef} d="M4 10H16M10.5 5L16 10L10.5 15" />
+    </svg>
+  );
+});
+
+/**
+ * Carton « l'outil qui relie vos applications » (page /services/automations) :
+ * un nœud central et deux nœuds reliés par un trait chacun — une idée de
+ * connexion/hub, pas de délai ni d'IA (aucune des 3 icônes de la home ne
+ * correspondait). Rond des nœuds à fill: none (comme le cadran de l'horloge) :
+ * les traits, dessinés en premier, passent visuellement par leur centre.
+ *
+ * Au déclenchement : les deux traits se dessinent (stroke-dasharray/
+ * dashoffset, longueur lue via `getTotalLength()` au moment du `play()` —
+ * jamais codée en dur, ce composant est réutilisable à toute échelle),
+ * légèrement décalés (stagger 100ms), pour une lecture « ça se connecte ».
+ * Les nœuds eux-mêmes restent fixes.
+ */
+export const IconConnect = forwardRef<RailIconHandle, IconProps>(function IconConnect(
+  { className },
+  ref,
+) {
+  const lineARef = useRef<SVGLineElement>(null);
+  const lineBRef = useRef<SVGLineElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+
+  useEffect(() => {
+    ctxRef.current = gsap.context(() => {});
+    return () => ctxRef.current?.revert();
+  }, []);
+
+  useImperativeHandle(ref, () => ({
+    play: () => {
+      const lineA = lineARef.current;
+      const lineB = lineBRef.current;
+      if (!lineA || !lineB) return;
+      ctxRef.current?.add(() => {
+        [lineA, lineB].forEach((line) => {
+          const length = line.getTotalLength();
+          gsap.set(line, { strokeDasharray: length, strokeDashoffset: length });
+        });
+        gsap.to([lineA, lineB], {
+          strokeDashoffset: 0,
+          duration: 0.3,
+          stagger: 0.1,
+          ease: VENTURIA_EASE,
+        });
+      });
+    },
+  }));
+
+  return (
+    <svg {...SHARED_PROPS} className={className}>
+      <line ref={lineARef} x1="10" y1="10" x2="4.5" y2="5.5" />
+      <line ref={lineBRef} x1="10" y1="10" x2="15.5" y2="14.5" />
+      <circle cx="10" cy="10" r="1.75" />
+      <circle cx="4.5" cy="5.5" r="1.75" />
+      <circle cx="15.5" cy="14.5" r="1.75" />
+    </svg>
+  );
+});
+
+/**
+ * Carton « une tâche qui s'enchaîne seule » (page /services/automations) :
+ * trois blocs alignés, reliés par deux petites flèches — une idée de suite
+ * d'étapes. Un seul <path> par flèche (ligne + chevron), même motif que
+ * IconArrowRight à plus petite échelle.
+ *
+ * Au déclenchement : les deux flèches avancent d'un cran puis reviennent,
+ * légèrement décalées (stagger 100ms) — la première rejouée d'abord, la
+ * seconde juste après, comme la tâche qui « passe » d'un bloc au suivant.
+ * 400ms au total (2 × 150ms + 100ms de décalage), dans le budget du
+ * CLAUDE.md (« Rail droit », animations ≤ 400ms).
+ */
+export const IconFlow = forwardRef<RailIconHandle, IconProps>(function IconFlow({ className }, ref) {
+  const arrowARef = useRef<SVGPathElement>(null);
+  const arrowBRef = useRef<SVGPathElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+
+  useEffect(() => {
+    ctxRef.current = gsap.context(() => {});
+    return () => ctxRef.current?.revert();
+  }, []);
+
+  useImperativeHandle(ref, () => ({
+    play: () => {
+      const arrowA = arrowARef.current;
+      const arrowB = arrowBRef.current;
+      if (!arrowA || !arrowB) return;
+      ctxRef.current?.add(() => {
+        gsap
+          .timeline()
+          .to(arrowA, { x: 1.2, duration: 0.15, ease: VENTURIA_EASE }, 0)
+          .to(arrowA, { x: 0, duration: 0.15, ease: VENTURIA_EASE }, 0.15)
+          .to(arrowB, { x: 1.2, duration: 0.15, ease: VENTURIA_EASE }, 0.1)
+          .to(arrowB, { x: 0, duration: 0.15, ease: VENTURIA_EASE }, 0.25);
+      });
+    },
+  }));
+
+  return (
+    <svg {...SHARED_PROPS} className={className}>
+      <rect x="1.5" y="8" width="4" height="4" rx="0.6" />
+      <rect x="8" y="8" width="4" height="4" rx="0.6" />
+      <rect x="14.5" y="8" width="4" height="4" rx="0.6" />
+      <path ref={arrowARef} d="M5.8 10H7.1M6.5 9.4L7.2 10L6.5 10.6" />
+      <path ref={arrowBRef} d="M12.3 10H13.6M13 9.4L13.7 10L13 10.6" />
     </svg>
   );
 });

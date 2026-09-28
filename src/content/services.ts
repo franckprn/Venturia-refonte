@@ -7,7 +7,9 @@
 //
 // L'adresse de l'Automatisation (04) est l'adresse RÉELLE de la page en
 // ligne aujourd'hui (trafic Google existant) — donnée par Franck,
-// jamais devinée : /services/automations/, barre finale comprise.
+// jamais devinée : /services/automations, SANS barre finale (Google
+// l'indexe ainsi ; trailingSlash reste au défaut de Next.js, non
+// configuré — CLAUDE.md, « Pages services — gabarit »).
 // Chemin relatif (pas https://venturia.fr/...) : ce site EST venturia.fr,
 // un lien absolu vers son propre domaine sortirait inutilement du
 // routeur Next.js (rechargement complet plutôt qu'une navigation
@@ -27,6 +29,14 @@ export type Service = {
    *  par Franck. */
   ctaLabel: string;
   href: string;
+  /** Page réellement publiée aujourd'hui ou non — lu par l'accordéon
+   *  Services du menu mobile (MegaMenu.tsx, CLAUDE.md « Menu mobile ») :
+   *  true → <Link>, false → <span>, même convention que NavEntry
+   *  (content/nav.ts) et FooterLinkEntry (content/footer.ts). Sans
+   *  incidence sur la section Services de la home (ServicesRowsReveal.tsx,
+   *  « Services (home) ») : son lien « Découvrir… » reste un vrai <a>
+   *  pour les 4, exception déjà assumée et documentée. */
+  isLink: boolean;
 };
 
 export const servicesLabel = "EXPERTISES";
@@ -47,6 +57,7 @@ export const services: [Service, Service, Service, Service] = [
     ],
     ctaLabel: "Découvrir le référencement",
     href: "/services/referencement",
+    isLink: false,
   },
   {
     name: "Publicité",
@@ -60,6 +71,7 @@ export const services: [Service, Service, Service, Service] = [
     ],
     ctaLabel: "Découvrir la publicité",
     href: "/services/publicite",
+    isLink: false,
   },
   {
     name: "Site internet",
@@ -74,6 +86,7 @@ export const services: [Service, Service, Service, Service] = [
     ],
     ctaLabel: "Découvrir la création de site",
     href: "/services/site-internet",
+    isLink: false,
   },
   {
     name: "Automatisation",
@@ -88,6 +101,7 @@ export const services: [Service, Service, Service, Service] = [
         "et vous gagnez du temps.",
     ],
     ctaLabel: "Découvrir l'automatisation",
-    href: "/services/automations/",
+    href: "/services/automations",
+    isLink: true,
   },
 ];

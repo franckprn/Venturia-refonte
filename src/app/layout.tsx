@@ -27,7 +27,15 @@ const mono = JetBrains_Mono({
 // Métadonnées de la home (content/meta.ts) : la seule page du Shell
 // sans son propre export `metadata` (contrairement à /contact) — celles
 // du layout racine lui servent donc de valeurs par défaut.
+//
+// metadataBase : absent avant les pages /services/* — ajouté ici pour
+// que leur `alternates.canonical` (chemin relatif) se résolve en URL
+// absolue. Ce site EST venturia.fr (CLAUDE.md, « Services (home) » §
+// « AVANT MISE EN LIGNE ») : jamais une autre valeur. N'affecte aucune
+// page existante (home/contact ne déclarent ni canonical ni image
+// og/twitter en relatif aujourd'hui).
 export const metadata: Metadata = {
+  metadataBase: new URL("https://venturia.fr"),
   title: homeMeta.title,
   description: homeMeta.description,
 };

@@ -24,9 +24,9 @@ export const footer = {
       title: "SERVICES",
       entries: [
         { label: "Référencement", href: "/services/referencement", isLink: false },
-        { label: "Publicité", href: "/services/google-ads", isLink: false },
+        { label: "Publicité", href: "/services/publicite", isLink: false },
         { label: "Site internet", href: "/services/site-internet", isLink: false },
-        { label: "Automatisation", href: "/services/automatisation-n8n", isLink: false },
+        { label: "Automatisation", href: "/services/automations", isLink: true },
       ],
     },
     {

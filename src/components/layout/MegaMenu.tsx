@@ -394,13 +394,25 @@ export function MegaMenu({
             </button>
             <div className={styles.mobileSubWrap} data-open={servicesOpen}>
               <ul id={`${id}-services`} className={styles.mobileSubList}>
-                {services.map((service) => (
-                  <li key={service.name}>
-                    {/* <span>, jamais un lien : /services/* n'existe pas
-                        encore (CLAUDE.md, « Menu mobile » § 4). */}
-                    <span className={styles.mobileSubEntry}>{service.name}</span>
-                  </li>
-                ))}
+                {services.map((service) =>
+                  service.isLink ? (
+                    // <Link>, page réellement publiée aujourd'hui — même
+                    // style que la <span> ci-dessous, juste cliquable
+                    // (CLAUDE.md, « Menu mobile » § 4). Le tap ferme le
+                    // panneau puis laisse la navigation suivre, comme
+                    // Contact plus bas.
+                    <li key={service.name}>
+                      <Link href={service.href} className={styles.mobileSubEntry} onClick={onNavigate}>
+                        {service.name}
+                      </Link>
+                    </li>
+                  ) : (
+                    <li key={service.name}>
+                      {/* <span> : cette page n'existe pas encore. */}
+                      <span className={styles.mobileSubEntry}>{service.name}</span>
+                    </li>
+                  ),
+                )}
               </ul>
             </div>
           </li>

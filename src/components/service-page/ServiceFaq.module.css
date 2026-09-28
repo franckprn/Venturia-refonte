@@ -1,0 +1,33 @@
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  padding-block: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.item:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.question {
+  margin: 0;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-body);
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.answer {
+  margin: 0;
+  margin-top: 12px;
+  max-width: 60ch;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}

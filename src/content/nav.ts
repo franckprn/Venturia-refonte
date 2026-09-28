@@ -28,12 +28,16 @@ export type NavCaseStudy = {
 
 // Méga-menu desktop, colonne SERVICES : les 4 services, dans le même
 // ordre que la section Services de la home (Référencement, Publicité,
-// Site internet, Automatisation).
+// Site internet, Automatisation). Automatisation seule a une page
+// réelle aujourd'hui (/services/automations, sans barre finale — Google
+// l'indexe ainsi) : seule entrée en isLink: true, les 3 autres restent
+// en <span> tant que leurs pages n'existent pas (CLAUDE.md, « AVANT MISE
+// EN LIGNE »).
 const SERVICES_ENTRIES: NavEntry[] = [
   { label: "Référencement", href: "/services/referencement", isLink: false },
   { label: "Publicité", href: "/services/publicite", isLink: false },
   { label: "Site internet", href: "/services/site-internet", isLink: false },
-  { label: "Automatisation", href: "/services/automatisation-n8n", isLink: false },
+  { label: "Automatisation", href: "/services/automations", isLink: true },
 ];
 
 export const nav = {

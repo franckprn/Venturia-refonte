@@ -1,17 +1,39 @@
 "use client";
 
-import { useEffect, useRef, type ComponentType, type RefAttributes, type RefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import Link from "next/link";
 import { railCards, type RailCardContent } from "@/content/rail";
 import { onHeroTitleDone } from "@/lib/heroTitleSignal";
 import { useSectionTone, type Tone } from "@/lib/tone";
 import { useStickOnce } from "@/lib/useStickOnce";
-import { IconArrowRight, IconClock, IconSparkle, type RailIconHandle } from "./RailIcons";
+import { IconArrowRight, IconClock, IconSparkle, type RailIconComponent, type RailIconHandle } from "./RailIcons";
 import styles from "./rail.module.css";
 
 // Une icône par carton, dans l'ordre de content/rail.ts (CLAUDE.md,
 // « Rail droit ») : horloge, étoile à quatre branches, flèche.
 const RAIL_ICONS = [IconClock, IconSparkle, IconArrowRight] as const;
+
+/**
+ * Ce que le rail (desktop ET pile mobile) a besoin de connaître pour
+ * s'ancrer à une page — tout le reste (sticky, mode relais, hystérésis,
+ * timing des icônes) est un moteur partagé, indépendant du contenu, qui
+ * ne change jamais d'une page à l'autre. Un `RailConfig` par page ; la
+ * home garde `HOME_RAIL_CONFIG` (construit à partir des mêmes constantes
+ * qu'avant cette extraction — aucune valeur ne change), passé comme
+ * défaut de `config` sur <RailSlot>/<RailController>/<MobileRailStack>
+ * pour que page.tsx (home) n'ait rien à changer.
+ */
+export type RailConfig = {
+  cards: readonly [RailCardContent, RailCardContent, RailCardContent];
+  icons: readonly [RailIconComponent, RailIconComponent, RailIconComponent];
+  offsetTargets: readonly [OffsetTarget, OffsetTarget, OffsetTarget];
+  /** ids de section pour l'hystérésis de la pile MOBILE (un par carton,
+   *  MobileRailStack.tsx) — distincts de `offsetTargets[i].sectionId` :
+   *  sur la home, le carton 3 s'ancre (desktop) à « services » mais ne
+   *  révèle (mobile) qu'à l'entrée de « processus », une section plus
+   *  loin (CLAUDE.md, « Rail droit » § « Pile mobile »). */
+  mobileReveal: readonly [string, string, string];
+};
 
 // Classe de padding-top par carton (rail.module.css) : chacun lit sa
 // propre variable d'écart mesuré (--rail-card1/2/3-offset), voir
@@ -40,16 +62,30 @@ const SLOT_OFFSET_CLASS = [styles.slot1, styles.slot2, styles.slot3] as const;
  *      lien « Découvrir l'automatisation » compris, jusqu'au bas de son
  *      propre padding).
  */
-const OFFSET_TARGETS: readonly {
+export type OffsetTarget = {
   varName: string;
   sectionId: string;
   selector: string;
   edge: "top" | "bottom";
-}[] = [
+};
+
+const OFFSET_TARGETS: readonly [OffsetTarget, OffsetTarget, OffsetTarget] = [
   { varName: "--rail-card1-offset", sectionId: "dernier-accompagnement", selector: "#dernier-accompagnement-title", edge: "top" },
   { varName: "--rail-card2-offset", sectionId: "services", selector: "[data-service-row-first]", edge: "top" },
   { varName: "--rail-card3-offset", sectionId: "services", selector: "[data-service-row-last]", edge: "bottom" },
 ];
+
+/** Config par défaut = comportement exact d'avant cette extraction :
+ *  mêmes cartons (content/rail.ts), mêmes icônes, mêmes cibles de
+ *  repos, mêmes sections de révélation mobile (voir RailConfig
+ *  ci-dessus) — page.tsx (home) ne passe aucun `config` et retombe donc
+ *  ici. */
+export const HOME_RAIL_CONFIG: RailConfig = {
+  cards: railCards,
+  icons: RAIL_ICONS,
+  offsetTargets: OFFSET_TARGETS,
+  mobileReveal: ["dernier-accompagnement", "services", "processus"],
+};
 
 /** Position document (cumulée le long de la chaîne `offsetParent`),
  *  JAMAIS `getBoundingClientRect()` : ce dernier inclut le `transform`
@@ -69,11 +105,15 @@ function documentTop(el: HTMLElement | null): number {
 }
 
 type RailSlotProps = {
-  /** Index du carton dans content/rail.ts (0, 1 ou 2). */
+  /** Index du carton dans `config.cards` (0, 1 ou 2). */
   cardIndex: 0 | 1 | 2;
   /** `name` de la <Section> déclencheuse (voir Section.tsx) : le
    *  carton s'ancre à sa ligne de grille, `${anchor}-start / -1`. */
   anchor: string;
+  /** Cartons/icônes/cibles de repos propres à la page — défaut =
+   *  HOME_RAIL_CONFIG (comportement de la home, inchangé). Voir
+   *  `RailConfig` plus haut. */
+  config?: RailConfig;
 };
 
 /**
@@ -129,8 +169,8 @@ type RailSlotProps = {
  * `onHeroTitleDone`, le signal de fin d'animation du h1 du Hero. Les
  * trois se rejoignent sur `iconRef.current?.play()` (RailIcons.tsx).
  */
-export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
-  const card = railCards[cardIndex];
+export function RailSlot({ cardIndex, anchor, config = HOME_RAIL_CONFIG }: RailSlotProps) {
+  const card = config.cards[cardIndex];
   const measureRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<RailIconHandle>(null);
   const tone = useSectionTone(measureRef);
@@ -225,7 +265,7 @@ export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
   //   cible (texte variable) change la hauteur de la section, donc
   //   l'écart mesuré.
   useEffect(() => {
-    const target = OFFSET_TARGETS[cardIndex];
+    const target = config.offsetTargets[cardIndex];
     const section = document.getElementById(target.sectionId);
     const el = document.querySelector<HTMLElement>(target.selector);
     if (!section || !el) return;
@@ -251,7 +291,7 @@ export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
       observer.disconnect();
       window.removeEventListener("resize", update);
     };
-  }, [cardIndex]);
+  }, [cardIndex, config]);
 
   const slotClassName = [styles.slot, SLOT_OFFSET_CLASS[cardIndex]].join(" ");
 
@@ -270,7 +310,7 @@ export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
         <RailCardArticle
           card={card}
           action={cardIndex === 2}
-          Icon={RAIL_ICONS[cardIndex]}
+          Icon={config.icons[cardIndex]}
           iconRef={iconRef}
           tone={tone}
         />
@@ -333,23 +373,24 @@ export function RailSlot({ cardIndex, anchor }: RailSlotProps) {
  * Les alignements de repos (0px, `--rail-card1/2/3-offset`) ne changent
  * pas : ce composant ne touche à rien de ce que <RailSlot> calcule déjà.
  */
-export function RailController() {
+export function RailController({ config = HOME_RAIL_CONFIG }: { config?: RailConfig } = {}) {
   useEffect(() => {
     const isDesktop = () => window.matchMedia("(min-width: 1024px)").matches;
 
     // Position document (repos, avant figement) du carton `index` — le
-    // même calcul que OFFSET_TARGETS/l'effet de <RailSlot>, mais ici en
-    // position ABSOLUE (pas relative à la section) : c'est exactement le
-    // point où le carton SUIVANT doit être rejoint en mode relais.
+    // même calcul que config.offsetTargets/l'effet de <RailSlot>, mais
+    // ici en position ABSOLUE (pas relative à la section) : c'est
+    // exactement le point où le carton SUIVANT doit être rejoint en mode
+    // relais.
     const restDocTop = (index: number): number | null => {
-      const target = OFFSET_TARGETS[index];
+      const target = config.offsetTargets[index];
       const el = document.querySelector<HTMLElement>(target.selector);
       if (!el) return null;
       return documentTop(el) + (target.edge === "bottom" ? el.offsetHeight : 0);
     };
 
     const sectionTop = (index: number): number | null => {
-      const section = document.getElementById(OFFSET_TARGETS[index].sectionId);
+      const section = document.getElementById(config.offsetTargets[index].sectionId);
       return section ? documentTop(section) : null;
     };
 
@@ -401,7 +442,7 @@ export function RailController() {
     // eux-mêmes (leurs hauteurs réelles entrent dans la condition de
     // bascule, contrairement aux décalages de repos).
     const observedSections = new Set<Element>();
-    for (const target of OFFSET_TARGETS) {
+    for (const target of config.offsetTargets) {
       const section = document.getElementById(target.sectionId);
       if (section) observedSections.add(section);
     }
@@ -423,7 +464,7 @@ export function RailController() {
       observer.disconnect();
       window.removeEventListener("resize", update);
     };
-  }, []);
+  }, [config]);
 
   return null;
 }
@@ -437,7 +478,7 @@ function RailCardArticle({
 }: {
   card: RailCardContent;
   action: boolean;
-  Icon: ComponentType<{ className?: string } & RefAttributes<RailIconHandle>>;
+  Icon: RailIconComponent;
   iconRef: RefObject<RailIconHandle | null>;
   tone: Tone;
 }) {

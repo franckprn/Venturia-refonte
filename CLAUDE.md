@@ -555,15 +555,116 @@ section.
 
 AVANT MISE EN LIGNE : les 4 pages `/services/referencement`,
 `/services/publicite`, `/services/site-internet` et l'Automatisation
-doivent exister. L'adresse de l'Automatisation n'est PAS à choisir
-librement : son CHEMIN doit rester identique à celui du site en ligne
-aujourd'hui (`/services/automations/`, barre finale comprise — écrit en
-relatif dans content/services.ts, pas en `https://venturia.fr/...` : ce
-site EST venturia.fr) — cette page a déjà du trafic Google, changer son
-adresse le perdrait. Les trois autres adresses sont provisoires. Ce sont
-des vrais `<a>` (via `<ArrowLink>`) vers ces 4 pages avant qu'elles
-n'existent toutes — exception assumée, comme pour les mêmes adresses
-citées par le mega-menu et le menu mobile.
+doivent exister — l'Automatisation existe déjà (« Pages services —
+gabarit »), les trois autres restent à créer. L'adresse de
+l'Automatisation n'est PAS à choisir librement : son CHEMIN doit rester
+identique à celui que Google indexe aujourd'hui (`/services/automations`,
+SANS barre finale — écrit en relatif dans content/services.ts, pas en
+`https://venturia.fr/...` : ce site EST venturia.fr) — cette page a déjà
+du trafic Google, changer son adresse le perdrait. Les trois autres
+adresses sont provisoires. Ce sont des vrais `<a>` (via `<ArrowLink>`)
+vers ces 4 pages avant qu'elles n'existent toutes — exception assumée,
+comme pour les mêmes adresses citées par le mega-menu et le menu mobile.
+
+## Pages services — gabarit
+
+Posé par `/services/automations` (Automatisation), première des 4 pages
+`/services/*` citées plus haut — sert de gabarit aux 3 autres. Même
+construction Shell/Section que la home : une seule grille de page, le
+rail se fige puis reste visible jusqu'au bas — voir « Rail droit » pour
+le mécanisme, inchangé.
+
+Structure de fichiers, pour une nouvelle page service :
+  contenu     `content/services/<slug>.ts`, typé `ServicePageContent`
+              (`content/services/types.ts`, partagé par les 4 pages) —
+              même règle que le reste du site : texte dans content/*.ts,
+              jamais en dur dans le JSX.
+  composants  `components/service-page/*` (Service Hero/QuadCards/
+              SplitIntro/StepsThirds/Process/ToolCompare/Rollout/Faq/
+              OtherExpertises) — réutilisables tels quels par une
+              nouvelle page service, alimentés par son propre fichier de
+              contenu. `ServiceSplitIntro` porte la mise en page B
+              (label + titre colonnes 1-6, contenu colonnes 7-12 sur sa
+              PROPRE ligne — « Règle des deux axes ») : label/titre/axe
+              droit occupent les lignes 1/2/3 de la grille partagée de
+              la section (bodyStyle `rowGap:0`, comme
+              dernier-accompagnement.module.css) ; un bloc qui ajoute du
+              contenu après (encadré, tableau, schéma, note) continue
+              cette numérotation à partir de la ligne 4 dans SON PROPRE
+              module CSS — jamais dans celui de SplitIntro.
+              `ServiceStepsThirds` est le schéma en tiers (colonnes 1, 5,
+              9) réutilisé par le bloc « exemple de parcours »
+              (accentFrom, 6 étapes/2 lignes) ET le bloc « déroulé » (3
+              étapes/1 ligne, sans accent) — jamais le schéma animé du
+              Processus (home), une simple liste.
+  révélation  `components/ScrollReveal.tsx` (`useScrollReveal`), même
+              mécanique que ServicesRowsReveal.tsx (home : montée 16px +
+              fondu, stagger 60ms, 400ms, `ScrollTrigger` `top 75%` une
+              fois, reduced-motion respecté) mais générique — extraite
+              plutôt que réutilisée depuis ServicesRowsReveal.tsx (propre
+              à `Service[]`, home) pour ne jamais toucher ce fichier.
+              Jamais de wrapper autour des éléments révélés : le hook
+              expose `containerRef` (trigger) et `setItemRef(i)`, posés
+              directement sur les vrais éléments de la grille/liste — un
+              `<div>` ajouté casserait un `grid-column`/`grid-row` posé
+              sur l'élément lui-même. Hero exclu (voir plus bas).
+
+H1 de page (--t-title-lg, globals.css) : 56px desktop / 32px mobile,
+intermédiaire entre --t-title (40/28) et --t-hero (72/40) — ce H1 porte
+le titre de la page, mais reste un titre de page secondaire, pas le hero
+de la home. Pas de calibrage cqi comme le hero (CLAUDE.md, « Hero
+(home) ») : colonnes 1-9 ici veut seulement dire que le texte peut
+occuper jusqu'à cette largeur avant de retourner à la ligne, pas qu'il
+doit l'occuper EXACTEMENT à toute largeur — un `grid-column: 1 / 10`
+simple suffit.
+
+Aucune animation d'entrée sur le bloc 1 (hero) de ces pages, contrairement
+à tous les autres blocs : sans photo, le H1 est très probablement
+l'élément LCP de la page — CLAUDE.md, « Animations » : « rien d'animé sur
+l'élément LCP ». Peint à 100 % d'opacité dès le premier rendu, comme le
+h1 de la home.
+
+Rail (desktop + pile mobile) rendu réutilisable pour ce gabarit —
+`RailConfig` (components/layout/Rail.tsx) : cartons, icônes, cibles de
+repos desktop (`offsetTargets`) et sections de révélation mobile
+(`mobileReveal`) propres à CHAQUE page, passés en prop optionnelle
+`config` à `<RailSlot>`, `<RailController>` et `<MobileRailStack>` — leur
+moteur (sticky, mode relais, hystérésis, timing des icônes) reste un
+SEUL code partagé, inchangé, entre la home et les pages services.
+Défaut = `HOME_RAIL_CONFIG` (construit à partir des mêmes constantes
+qu'avant cette extraction) : la home ne passe aucun `config` et garde
+donc, à l'identique, son comportement d'avant — vérifié (captures +
+alignements de repos + mode relais, avant/après cette extraction, 0
+différence hors l'horloge du footer). Icônes : `RailIcons.tsx` reste un
+fichier UNIQUE et partagé, chaque page y ajoute les siennes en pur ajout
+(jamais retoucher un export existant) — `IconConnect` et `IconFlow`
+posées pour l'Automatisation, même construction que les 3 de la home
+(viewBox 20×20, trait 1.5px, `currentColor`, aucun remplissage, `play()`
+via GSAP context, ≤ 400ms).
+
+Canonical (`alternates.canonical`) via `metadataBase` (`src/app/
+layout.tsx` — absent avant ces pages, ajouté : `new URL("https://
+venturia.fr")`, pur ajout, sans incidence sur les pages existantes qui
+ne déclarent ni canonical ni image relative). `trailingSlash` : décision
+prise (Franck) — Google indexe `/services/automations` SANS barre
+finale, `next.config.ts` reste donc inchangé (défaut Next.js : une URL
+avec barre finale redirige en 308 vers la même URL sans barre — vérifié
+sur `/contact/` → `/contact`). Tous les liens internes vers les 4 pages
+`/services/*` (content/services.ts, content/nav.ts, content/footer.ts,
+content/services/automatisation.ts) utilisent donc la forme SANS barre
+finale, alignée sur le canonical.
+
+FAQ (`ServiceFaq.tsx`) : données structurées `FAQPage` (JSON-LD)
+générées DANS ce composant, à partir des mêmes questions-réponses que le
+rendu visuel — les deux ne peuvent pas diverger. Toutes les réponses
+visibles, jamais d'accordéon (contrairement à l'accordéon Services du
+menu mobile).
+
+Tableau de comparaison d'outils (bloc « L'outil », `ServiceToolCompare.
+tsx`) : un vrai `<table>` dès 1024px (traits --line, colonne mise en
+avant par la graisse SEULE — aucun gris, aucun fond de couleur, CLAUDE.md
+« Couleurs »), remplacé sous 1024px par des blocs empilés (un par
+colonne/outil) pour ne jamais imposer de défilement horizontal.
 
 ## Bloc de fin (footer)
 
@@ -1362,8 +1463,16 @@ entrées      4 entrées de premier niveau, dans cet ordre, tailles et
 
 accordéon    Services contient les 4 services de content/services.ts
              (Référencement, Publicité, Site internet, Automatisation),
-             jamais dupliqués depuis un autre fichier. Chaque service est
-             un <span>, --t-lead : /services/* n'existe pas encore.
+             jamais dupliqués depuis un autre fichier. Chaque service
+             suit son propre `isLink` (content/services.ts, même
+             convention que NavEntry/content/nav.ts et
+             FooterLinkEntry/content/footer.ts) : `<Link href={service.
+             href}>` si true (page réellement publiée — Automatisation
+             aujourd'hui, /services/automations), sinon <span> (page pas
+             encore publiée) — même style dans les deux cas, --t-lead,
+             aucun soulignement ajouté : un lien qui ne se distingue pas
+             à l'œil d'une <span>. Le tap sur un lien ferme le panneau
+             puis laisse la navigation suivre, comme Contact plus bas.
              Ouverture/fermeture en hauteur, 300ms, easing du site.
              Chevron : SVG dessiné à la main, trait 1.5px, currentColor,
              aligné à droite du mot « Services », centré verticalement

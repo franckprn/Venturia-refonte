@@ -1,0 +1,178 @@
+/* Bloc 4 — continue la numérotation de lignes posée par
+   ServiceSplitIntro.module.css (1 label, 2 titre, 3 axe droit) : 4
+   l'encadré, 5 le tableau. */
+
+.paragraph {
+  margin: 0;
+  max-width: 42ch;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+.sections {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sectionHeading {
+  margin: 0;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-body);
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.sectionText {
+  margin: 0;
+  margin-top: 8px;
+  max-width: 42ch;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+.calloutRow {
+  grid-column: 1 / -1;
+  grid-row: 4;
+  margin-top: 48px;
+}
+
+.callout {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.calloutTitle {
+  margin: 0;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-body);
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.calloutText {
+  margin: 0;
+  margin-top: 8px;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+.tableRow {
+  grid-column: 1 / -1;
+  grid-row: 5;
+  margin-top: 48px;
+}
+
+/* Desktop : vrai <table>, traits --line, colonne n8n mise en valeur par
+   la graisse (aucun gris, aucun fond de couleur — CLAUDE.md). */
+.table {
+  display: none;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 16px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+.table th {
+  padding-top: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  font-weight: 400;
+  border-bottom: 1px solid var(--ink);
+}
+
+.table .rowLabel {
+  font-weight: 500;
+}
+
+.table .n8nCol {
+  font-weight: 600;
+}
+
+/* Mobile/tablette (< 1024px) : 3 blocs empilés, un par outil — jamais
+   de défilement horizontal (CLAUDE.md, vérification). */
+.mobileStack {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.mobileTool {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.mobileToolName {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ink);
+}
+
+.mobileToolName[data-n8n] {
+  font-weight: 700;
+}
+
+.mobileRow {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobileRowLabel {
+  margin: 0;
+  font-size: var(--t-small);
+  line-height: var(--t-small-lh);
+  letter-spacing: var(--t-small-ls);
+  color: var(--ink);
+}
+
+.mobileRowValue {
+  margin: 0;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+.mobileRowValue[data-n8n] {
+  font-weight: 600;
+}
+
+@media (min-width: 1024px) {
+  .calloutRow {
+    grid-column: 7 / 13;
+  }
+
+  .table {
+    display: table;
+  }
+
+  .mobileStack {
+    display: none;
+  }
+}

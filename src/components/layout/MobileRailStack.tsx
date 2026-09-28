@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useId, useRef, useState, type RefObject } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
-import { railCards, railStackLabels } from "@/content/rail";
+import { railCards, railStackLabels, type RailCardContent } from "@/content/rail";
 import { VENTURIA_EASE } from "@/lib/ease";
 import { onHeroTitleDone } from "@/lib/heroTitleSignal";
 import { pauseLenis, resumeLenis } from "@/lib/lenis";
 import { getBottomTone, toVeilTone, useSectionTone, type Tone } from "@/lib/tone";
 import { useSectionHysteresis, type CrossEvent } from "@/lib/useSectionHysteresis";
-import { IconArrowRight, IconClock, IconSparkle, type RailIconHandle } from "./RailIcons";
+import type { RailConfig } from "./Rail";
+import { IconArrowRight, IconClock, IconSparkle, type RailIconComponent, type RailIconHandle } from "./RailIcons";
 import styles from "./mobileRailStack.module.css";
 
 const RAIL_ICONS = [IconClock, IconSparkle, IconArrowRight] as const;
@@ -45,9 +46,17 @@ function withAt<T>(arr: readonly T[], index: number, value: T): T[] {
 }
 
 type MobileRailStackProps = {
-  /** ids des trois sections de rattachement (mêmes ancres que les
-   *  <RailSlot> desktop, dans l'ordre 1, 2, 3 — voir page.tsx). */
-  anchors: [string, string, string];
+  /** ids des trois sections de rattachement, dans l'ordre 1, 2, 3 —
+   *  legacy (home) : sert de repli pour les cartons 2 et 3 quand `config`
+   *  n'est pas fourni (le carton 1 reste sur CARD1_REVEAL_SECTION, voir
+   *  plus bas). Optionnel : une page qui passe `config` n'a pas besoin de
+   *  fournir `anchors`, sa révélation mobile vit dans
+   *  `config.mobileReveal`. */
+  anchors?: [string, string, string];
+  /** Cartons/icônes/sections de révélation propres à la page — défaut =
+   *  HOME_RAIL_CONFIG (comportement de la home, inchangé). Voir
+   *  `RailConfig`, components/layout/Rail.tsx. */
+  config?: RailConfig;
 };
 
 /**
@@ -72,7 +81,19 @@ type MobileRailStackProps = {
  * enfant DOM — `:last-child` ne peut pas exprimer cette distinction
  * (voir mobileRailStack.module.css).
  */
-export function MobileRailStack({ anchors }: MobileRailStackProps) {
+export function MobileRailStack({ anchors, config }: MobileRailStackProps) {
+  // Résolution config-ou-legacy : quand `config` est fourni (nouvelle
+  // page), il remplace entièrement cartons/icônes/sections de révélation
+  // — `anchors` est alors ignoré. Sinon (home, page.tsx inchangé), on
+  // retombe EXACTEMENT sur le calcul d'avant cette extraction : cartons
+  // et icônes de content/rail.ts, carton 1 sur CARD1_REVEAL_SECTION,
+  // cartons 2/3 sur `anchors[1]`/`anchors[2]` — `anchors` reste donc
+  // requis dans ce cas précis (home le fournit toujours).
+  const cards = config?.cards ?? railCards;
+  const icons = config?.icons ?? RAIL_ICONS;
+  const mobileReveal: readonly [string, string, string] =
+    config?.mobileReveal ?? [CARD1_REVEAL_SECTION, anchors![1], anchors![2]];
+
   const [isMobile, setIsMobile] = useState(false);
   const [status, setStatus] = useState<CardStatus[]>(["out", "out", "out"]);
   const [open, setOpen] = useState(false);
@@ -205,9 +226,9 @@ export function MobileRailStack({ anchors }: MobileRailStackProps) {
   // CLAUDE.md : « aucun carton ne peut entrer ni sortir pendant ce
   // temps ».
   const isPaused = useCallback(() => openRef.current, []);
-  useSectionHysteresis(CARD1_REVEAL_SECTION, (e) => crossCard(0, e), isMobile, isPaused);
-  useSectionHysteresis(anchors[1], (e) => crossCard(1, e), isMobile, isPaused);
-  useSectionHysteresis(anchors[2], (e) => crossCard(2, e), isMobile, isPaused);
+  useSectionHysteresis(mobileReveal[0], (e) => crossCard(0, e), isMobile, isPaused);
+  useSectionHysteresis(mobileReveal[1], (e) => crossCard(1, e), isMobile, isPaused);
+  useSectionHysteresis(mobileReveal[2], (e) => crossCard(2, e), isMobile, isPaused);
 
   // Carton 1 : l'horloge démarre juste après la fin de l'animation du
   // h1 du Hero, comme sur desktop (src/lib/heroTitleSignal.ts) — jamais
@@ -456,7 +477,7 @@ export function MobileRailStack({ anchors }: MobileRailStackProps) {
   const mountedIndexes = [0, 1, 2].filter((i) => status[i] !== "out");
   const flowIndexes = mountedIndexes.filter((i) => status[i] !== "exiting");
   const frontIndex = flowIndexes.length > 0 ? flowIndexes[flowIndexes.length - 1] : null;
-  const frontTitle = frontIndex !== null ? railCards[frontIndex].title : railCards[0].title;
+  const frontTitle = frontIndex !== null ? cards[frontIndex].title : cards[0].title;
 
   // Pile REPLIÉE : `tone`, mesure continue (inchangée). Pile DÉPLIÉE :
   // `deployTone`, gelé au dépliage (voir le bouton `.toggle` plus bas)
@@ -509,7 +530,8 @@ export function MobileRailStack({ anchors }: MobileRailStackProps) {
               return (
                 <MobileCard
                   key={index}
-                  cardIndex={index}
+                  card={cards[index]}
+                  Icon={icons[index]}
                   role={role}
                   open={open}
                   iconRef={iconRefs[index]}
@@ -557,22 +579,22 @@ export function MobileRailStack({ anchors }: MobileRailStackProps) {
 type CardRole = "front" | "peek" | "exiting";
 
 function MobileCard({
-  cardIndex,
+  card,
+  Icon,
   role,
   open,
   iconRef,
   onClose,
   setRef,
 }: {
-  cardIndex: number;
+  card: RailCardContent;
+  Icon: RailIconComponent;
   role: CardRole;
   open: boolean;
   iconRef: RefObject<RailIconHandle | null>;
   onClose: () => void;
   setRef: (el: HTMLAnchorElement | HTMLDivElement | null) => void;
 }) {
-  const card = railCards[cardIndex];
-  const Icon = RAIL_ICONS[cardIndex];
   const className = [styles.card, card.href ? styles.cardAction : ""].filter(Boolean).join(" ");
 
   const content = (

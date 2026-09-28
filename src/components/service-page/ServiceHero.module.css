@@ -1,0 +1,59 @@
+/* ------------------------------------------------------------------ *
+ * Bloc 1 (hero) — pages /services/*. Lignes explicites sur la grille
+ * externe (bodyStyle rowGap:0, page.tsx) : 1 label, 2 h1, 3 sous-titre
+ * + bouton — même technique que .heading/.phrase/.paragraphs dans
+ * services.module.css (home) ou .label/.title/.paragraph dans
+ * dernier-accompagnement.module.css.
+ * ------------------------------------------------------------------ */
+
+.label {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ink);
+}
+
+.title {
+  grid-column: 1 / -1;
+  margin: 0;
+  margin-top: 16px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-title-lg);
+  line-height: var(--t-title-lg-lh);
+  letter-spacing: var(--t-title-lg-ls);
+  color: var(--ink);
+}
+
+.bottom {
+  grid-column: 1 / -1;
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.subtitle {
+  margin: 0;
+  max-width: 42ch; /* identique aux paragraphes des Services (home) */
+  font-size: var(--t-lead);
+  line-height: var(--t-lead-lh);
+  letter-spacing: var(--t-lead-ls);
+  font-weight: var(--t-lead-weight);
+  color: var(--ink);
+}
+
+@media (min-width: 1024px) {
+  .title {
+    grid-column: 1 / 10; /* colonnes 1 à 9 */
+    margin-top: 24px;
+  }
+
+  .bottom {
+    grid-column: 7 / 13; /* colonnes 7 à 12, sous le h1 */
+    margin-top: 48px;
+  }
+}
