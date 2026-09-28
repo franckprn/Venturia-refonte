@@ -63,6 +63,19 @@ Dans une section en négatif, un paragraphe long passe à 80 % d'opacité :
 sur fond sombre, un texte clair paraît optiquement plus gras et vibre sur
 plusieurs lignes. Les titres restent à 100 %.
 
+`<html>` et `<body>` portent chacun leur propre fond, jamais la même
+couleur : `<html>` (zone de rebond du scroll, Mac ET iPhone) reste sur
+`--color-charcoal`, un token FIXE — jamais `--ink`, qui s'inverse
+pendant la Respiration — tirer la page au-delà du haut ou du bas montre
+donc toujours du charbon, y compris en haut (voulu). `<body>`, lui, lit
+`var(--ground)` normalement : c'est LUI qui couvre la fenêtre visible en
+usage courant (jamais `<html>`, sauf pendant le rebond) et qui doit donc
+continuer à s'inverser avec le reste de la page — `min-height: 100svh`
+dessus (jamais `100vh`) pour qu'une page plus courte qu'un écran ne
+laisse jamais apparaître de charbon SOUS `body` avant même un rebond.
+Voir « Respiration » § « Exceptions à l'inversion » pour la vérification
+que ce découplage ne change rien au reste du mécanisme d'inversion.
+
 ## Tonalités
 
 Chaque section de page déclare sa tonalité réelle avec `data-tone="light"`
@@ -443,10 +456,16 @@ la page (bien après Processus, géométriquement hors d'atteinte) —
 laissé sur `--ink`/`--ground`, signalé plutôt que retouché hors
 périmètre.
 
-Le fond de `<html>` (zone de rebond du scroll iOS) suit l'inversion —
-vérifié (`background: var(--ground)`, globals.css, donc lui aussi
-construit sur le token qui s'inverse) : à traiter avec le footer, pas
-touché ici.
+Le fond de `<html>` (zone de rebond du scroll, Mac ET iPhone) ne suit
+PLUS l'inversion depuis la session « finitions du footer » : il est fixé
+à `--color-charcoal` (jamais `--ink`, qui s'inverse), voir « Couleurs ».
+Tirer la page au-delà du haut ou du bas montre donc toujours du charbon,
+y compris en haut — accepté, pas un défaut. `<body>`, lui, continue de
+lire `var(--ground)` et s'inverse normalement avec le reste de la page
+(c'est LUI qui couvre la fenêtre visible en usage normal, jamais
+`<html>` sauf pendant le rebond) — vérifié à chaque étape de la
+Respiration (avant/pendant/après) : fond, textes, nav et cartons du
+rail inchangés par ce découplage.
 
 ## Dernier accompagnement — Inoko (home)
 
@@ -545,6 +564,127 @@ adresse le perdrait. Les trois autres adresses sont provisoires. Ce sont
 des vrais `<a>` (via `<ArrowLink>`) vers ces 4 pages avant qu'elles
 n'existent toutes — exception assumée, comme pour les mêmes adresses
 citées par le mega-menu et le menu mobile.
+
+## Bloc de fin (footer)
+
+Titre géant (« ON PEUT VOUS AIDER ? », lien entier vers /contact) aligné
+sur l'AXE GAUCHE comme le reste du site (« Règle des deux axes ») —
+plus aucun élément du site ne sort de la grille. Une ancienne marge
+négative (-40px) qui l'en faisait sortir a été retirée (mesurée : 40px
+pile, une valeur fixe identique à 1024/1440/1728px, jamais documentée
+ici comme un choix voulu).
+
+Exactement 2 lignes dès 768px (le point de rupture PROPRE à ce
+composant — celui de `.linksGrid` plus bas, indépendant des 1024px du
+Shell), à toute largeur — « ON PEUT VOUS » / « AIDER ? » — un retour à
+la ligne EXPLICITE (`<br/>` entre `line1` et `line2`, `content/footer.ts`
+— jamais laissé au navigateur, comme le h1 du Hero) combiné à une taille
+FLUIDE en cqi, sur le modèle de `--hero-title-cqi` (hero.module.css)
+mais SANS sa correction affine : `.giant` (le bloc, jamais `.giantTitle`
+le lien lui-même — même principe que `.titleWrap`/`.title` au Hero) fait
+TOUJOURS 100 % de la largeur de la colonne de contenu (12 colonnes
+entières, jamais un sous-ensemble à gouttières fixes comme les colonnes
+1-9 du Hero, puisqu'aucun rail ne réduit cette ligne du Shell) — la
+relation entre la largeur du texte et celle du conteneur est donc
+PUREMENT proportionnelle (une droite PAR L'ORIGINE) à toute largeur, un
+seul calibrage suffit et reste EXACT partout (pas une valeur qui
+minimise un écart résiduel aux bornes comme au Hero) — y COMPRIS entre
+768 et 1023px, où `.giant` doit sa largeur au Shell MOBILE (100 % moins
+les 40px de marges, pas la formule desktop) : une relation proportionnelle
+tient quelle que soit la formule qui a produit la largeur, seule la
+largeur RÉSULTANTE compte. `container-type: inline-size` posé sur
+`.giant` : ce bloc vit dans la colonne de contenu du footer, jamais un
+ancêtre des cartons du rail (colonne séparée du Shell, DOM distinct) —
+vérifié, aucun élément sticky n'en descend.
+`--mass-title-cqi: 13.46` (footer.module.css, mesuré Playwright, build
+de prod) fait tenir `line1` (« ON PEUT VOUS », la ligne la plus longue)
+sur 97 % de la largeur de `.giant` — vérifié EXACT (aucune dérive, aucun
+débordement à droite de la colonne 12) de 768 à 2560px, 3 % de marge
+choisie pour absorber l'arrondi sous-pixel entre navigateurs, jamais un
+ajustement à l'œil.
+
+Discontinuité observée, PAS corrigée (inhérente au Shell, pas à ce
+calibrage) : à 1024px pile, la taille du titre RÉTRÉCIT visiblement par
+rapport à 1023px (mesuré : 132px à 1023px → 97px à 1024px) — la colonne
+de contenu elle-même se rétrécit à cet instant précis (le rail, 250px,
+apparaît et prend la place que les marges mobiles laissaient au
+contenu), donc la taille proportionnelle du titre suit. Ce n'est pas un
+défaut de calibrage (la relation reste exacte des deux côtés de ce
+seuil, prise séparément) mais une conséquence visible, à ce seul point
+de la bascule, de rendre le titre fluide plutôt que fixe.
+
+Sous 768px (point de rupture TYPOGRAPHIQUE, 767px, où `--t-mass`
+lui-même passe à 60px) : `--mass-title-cqi` ne s'applique pas
+(`.giantTitle` garde `--t-mass` fixe) — le `<br/>` explicite reste posé,
+mais rien n'absorbe la largeur qui manque : « ON PEUT VOUS » (line1) ne
+tient pas sur une seule ligne à cette taille fixe, et s'enroule tout
+seul en « ON PEUT » / « VOUS » avant le `<br/>` — « VOUS » se retrouve
+orphelin, seul sur sa ligne (3 lignes au total). ACCEPTÉ à cette largeur
+(décision explicite) : ce motif existait déjà, à l'identique, avant
+cette session (l'ancien texte continu, sans `<br/>`, s'enroulait déjà de
+la même façon) — ce n'est pas une régression, juste un état choisi tel
+quel sous 768px.
+
+Repères sur le trait au-dessus de la barre légale (`.legalBar`,
+border-top existant — jamais déplacé ni doublé) : deux angles qui
+montent à ses extrémités + un petit trait droit par colonne de liens
+intermédiaire (SECTEURS, VENTURIA, ADRESSE) — jamais SERVICES, qui
+démarre pile sur l'extrémité gauche du trait (grid-column 1, comme
+`.linkColumn:nth-child(1)`) : l'angle gauche lui sert déjà de repère,
+un trait dédié en plus doublerait ce même repère au même endroit
+(vérifié : écart 0px entre les deux, à toute largeur).
+
+Même technique de dessin que les angles de la nav (`nav.module.css
+.rule` — voir « Barre de navigation »), en miroir vertical : la nav
+descend SOUS son trait (border-top + border-left/right, radius sur les
+coins HAUTS), ici les repères montent AU-DESSUS du trait existant
+(border-bottom + un seul border latéral par angle, radius sur le seul
+coin BAS concerné) — impossible de reprendre tel quel le bloc unique de
+la nav (un seul `<div>` bordé du bord gauche au bord droit) sans que
+son propre border-bottom ne redessine une seconde fois tout le trait
+déjà existant : chaque repère est donc un petit élément séparé
+(`.legalBarMarks`, un overlay `position:absolute` recalquant la grille
+12 colonnes de `.linksGrid` — mêmes colonnes, même gap — pour que
+chaque repère tombe exactement sur le bord gauche de sa colonne, sans
+calc() à la main), pas un unique bloc pleine largeur. Même longueur
+(12px), épaisseur (1px) et couleur que les angles de la nav — vérifié
+identique au pixel — mais `color-mix(in srgb, var(--ground) 16%,
+transparent)`, pas `--fg` comme la nav : ce bloc est `tone="dark"`
+PERMANENT (jamais dynamique, voir « Respiration » § « Exceptions à
+l'inversion »), `--ground` y est déjà l'équivalent fixe de ce que `--fg`
+vaudrait — c'est d'ailleurs la même valeur littérale que le trait
+existant juste en dessous. Masqués sous 768px pour les 3 traits
+intermédiaires (bascule propre à ce composant, indépendante du shell) :
+les colonnes de liens y sont toutes empilées sur le même axe, ces
+repères n'auraient plus rien à marquer. Les deux angles, eux, restent
+visibles à toute largeur (le trait existant, lui, ne change pas).
+
+Vérifié à 900px (dans la plage 768-1023 : la grille 12 colonnes DE CE
+COMPOSANT est déjà active — son point de rupture propre est 768px —
+alors que le Shell est encore en configuration mobile, sans rail) : les
+3 traits intermédiaires tombent EXACTEMENT sur le bord gauche de
+SECTEURS/VENTURIA/ADRESSE (écart 0px), pile comme au-dessus de 1024px —
+cohérent, aucune bascule à déplacer. Vérifié aussi à 1920 et 2560px,
+angles ET traits compris (écart 0px partout, y compris à 2560px où le
+Shell se centre au-delà du plafond de 1920px — CLAUDE.md, « Shell de
+page » — la grille de `.legalBarMarks` suit ce recentrage puisqu'elle
+recalque LA MÊME grille que `.linksGrid`, pas un calcul indépendant).
+
+Jonction angle/trait et trait/repère, vérifiée en deviceScaleFactor 2
+au niveau du pixel : aucun décalage (x identique au pixel), aucun
+épaississement VISIBLE à l'œil (captures zoomées). Une variation de
+luminosité D'UN SEUL pixel écran existe exactement AU POINT où un trait
+vertical rencontre le trait horizontal — attendue : c'est l'anti-
+crénelage normal de deux traits fins qui se croisent à angle droit
+(chaque trait est un color-mix semi-transparent à 16 % ; deux
+superpositions à ce même pixel composent un ton légèrement plus clair
+que chacun pris seul), pas un défaut propre à cette implémentation —
+INHÉRENT à toute jonction de deux traits fins bordés, y compris celles
+déjà en place ailleurs sur le site (ex. les angles de la nav
+elle-même). Aucune correction appliquée : la seule parade possible (un
+retrait sous-pixel entre le repère et le trait) échangerait cet artefact
+invisible contre un espace tout aussi sous-pixel mais visuellement
+disjoint — pas un progrès.
 
 ## Barre de navigation
 
@@ -1284,8 +1424,13 @@ Un seul `<h1>` par page. Si SplitText découpe le titre, il découpe des `<span>
   fixe. Valeur distincte de `--rail-stick` (64px, la hauteur de la seule
   barre) qui positionne le figement des cartons du rail — les deux ne se
   confondent plus depuis que les cartons s'alignent sur le trait.
-- Le fond crème est posé sur `html`, pas seulement sur `body` : sinon le
-  rebond de scroll d'iOS laisse apparaître du blanc en haut et en bas.
+- Un fond est posé sur `html` ET sur `body` séparément (jamais `body`
+  seul) : sinon le rebond de scroll (Mac ET iOS) laisse apparaître du
+  blanc en haut et en bas. Depuis la session « finitions du footer »,
+  les deux ne portent plus la MÊME couleur : voir « Couleurs » et
+  « Respiration » § « Exceptions à l'inversion » (`html` = charbon fixe,
+  `body` = `var(--ground)`, toujours actif pendant le rebond du haut ET
+  du bas).
 - `text-wrap: balance` sur les titres : évite le mot orphelin sur la
   dernière ligne. À réserver aux titres, c'est coûteux sur un long texte.
 - `-webkit-font-smoothing: antialiased` sur les sections en négatif, en

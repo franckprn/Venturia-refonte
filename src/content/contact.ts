@@ -23,7 +23,7 @@ export const contact = {
 
   info: [
     "Toulouse, France",
-    "Interventions partout en France et en Belgique",
+    "France et Belgique",
     "Du lundi au vendredi",
   ] as [string, string, string],
 

@@ -53,13 +53,20 @@ export const footer = {
   address: {
     title: "ADRESSE",
     city: "Toulouse, France",
-    coverage: "Interventions partout en France et en Belgique",
+    coverage: "France et Belgique",
   },
 
   giantTitle: {
-    /** Déjà en capitales : convention du projet, jamais de text-transform CSS. */
-    text: "ON PEUT VOUS AIDER",
-    /** Rendu séparément, en --accent — voir Footer.tsx. */
+    /** Déjà en capitales : convention du projet, jamais de text-transform
+     *  CSS. Coupé en 2 lignes, un <br/> EXPLICITE entre les deux (Footer.tsx)
+     *  — jamais laissé au navigateur (comme le h1 du Hero, CLAUDE.md « Bloc
+     *  de fin ») : à toute largeur dès 1024px, `line1` doit tenir sur une
+     *  seule ligne (c'est elle qui calibre --mass-title-cqi,
+     *  footer.module.css) et `line2` (plus courte) tient alors forcément
+     *  aussi sur la sienne. */
+    line1: "ON PEUT VOUS",
+    line2: "AIDER",
+    /** Rendu séparément, en fin de line2 — voir Footer.tsx. */
     mark: "?",
   },
 

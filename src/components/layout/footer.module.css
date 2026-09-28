@@ -140,20 +140,58 @@
 
 /* ---------------------------- BANDE 2 — TITRE GÉANT ------------------ */
 
-/* Seul élément du site autorisé à sortir de la grille — 40px de marge
-   négative à gauche sur desktop, pour presque toucher le bord de
-   l'écran sans jamais déborder à droite (pas de largeur forcée, le
-   texte casse sur deux lignes si besoin). Portée par .giant (le bloc),
-   pas par .giantTitle (le lien) : un lien inline qui s'enroule sur
-   plusieurs lignes ne décale que sa toute première ligne avec sa
-   propre margin-left, pas les suivantes — porter le décalage sur le
-   bloc ancêtre le fait s'appliquer uniformément aux deux lignes. */
-/* Pas de margin-top : premier enfant de .bands désormais (l'ancienne
+/* Aligné sur l'axe gauche (colonne 1), comme tout le reste du site
+   (CLAUDE.md, « Règle des deux axes ») : la marge négative de -40px
+   qui vivait ici avant cette session (héritée d'une version antérieure,
+   jamais documentée dans CLAUDE.md comme un choix voulu) sortait le
+   titre de la grille — mesuré : 40px pile au bord de la boîte du lien,
+   à 1024/1440/1728px indifféremment (une valeur fixe, pas un calcul
+   fluide). Retirée : plus aucun élément du site ne sort de la grille.
+   Pas de margin-top : premier enfant de .bands désormais (l'ancienne
    bande CONTACT au-dessus a été retirée) — le padding-top de .section
    (--section-space, 72px mobile) suffit à lui seul, un margin-top ici
    recréerait le trou que la suppression devait combler. */
 .giant {
   margin-top: 0;
+}
+
+/* >= 768px (le point de rupture PROPRE à ce composant — celui de
+   .linksGrid plus bas, indépendant des 1024px du Shell) : taille FLUIDE
+   en cqi, calée sur la largeur de .giant — sur le modèle de
+   --hero-title-cqi (hero.module.css), avec une différence qui simplifie
+   le calibrage : .giant fait TOUJOURS 100 % de la largeur de la colonne
+   de contenu (12 colonnes, jamais de rail sous cette ligne du Shell —
+   CLAUDE.md, « Bloc de fin »), donc AUCUNE gouttière fixe à soustraire
+   comme pour le h1 du Hero (colonnes 1-9 SUR 12, un sous-ensemble à
+   gouttières fixes). La relation entre la largeur du texte et celle du
+   conteneur est donc PUREMENT proportionnelle (une droite PAR
+   L'ORIGINE) à toute largeur — un seul calibrage suffit, exact PARTOUT
+   (pas une valeur qui minimise un écart résiduel aux bornes comme
+   --hero-title-cqi), y COMPRIS entre 768 et 1023px où .giant doit sa
+   largeur au Shell MOBILE (100 % moins les 40px de marges, pas la
+   formule desktop) : la proportion tient quelle que soit la formule qui
+   a produit cette largeur, seule la largeur RÉSULTANTE compte pour un
+   calibrage proportionnel. container-type posé ICI (jamais sur
+   .giantTitle, le lien lui-même, ni un ancêtre plus haut) : .giant vit
+   dans la colonne de contenu du footer, jamais un ancêtre des cartons
+   du rail (colonne séparée du Shell, DOM distinct — voir
+   Shell.tsx/Rail.tsx) — aucun élément sticky n'en descend.
+   --mass-title-cqi = 13.46 (mesuré Playwright, build de prod) fait tenir
+   `line1` (« ON PEUT VOUS », la ligne la plus longue — voir Footer.tsx/
+   content/footer.ts, jamais `line2` qui est plus courte) sur 97 % de la
+   largeur de .giant à CHAQUE largeur testée (768 à 2560px) — 3 % de
+   marge choisie pour absorber l'arrondi sous-pixel entre navigateurs,
+   jamais un ajustement à l'œil. En dessous de 768px (point de rupture
+   TYPOGRAPHIQUE, 767px, où --t-mass lui-même passe à 60px) :
+   --mass-title-cqi ne s'applique pas, `.giantTitle` garde --t-mass fixe
+   — le <br/> entre line1/line2 (Footer.tsx) reste posé, mais rien
+   n'absorbe la largeur qui manque : 3 lignes, « VOUS » orpheline,
+   ACCEPTÉ à cette largeur (voir CLAUDE.md, « Bloc de fin »). */
+@media (min-width: 768px) {
+  .giant {
+    container-type: inline-size;
+    --mass-title-cqi: 13.46;
+  }
 }
 
 /* display: inline (celui d'un <a> par défaut, redit ici pour ne rien
@@ -169,6 +207,12 @@
   line-height: var(--t-mass-lh);
   letter-spacing: var(--t-mass-ls);
   color: var(--ground);
+}
+
+@media (min-width: 768px) {
+  .giantTitle {
+    font-size: calc(var(--mass-title-cqi) * 1cqi);
+  }
 }
 
 /* Titre entièrement --ground, « ? » compris : plus de --accent ici. */
@@ -190,6 +234,9 @@
 /* ---------------------------- BANDE 4 — BARRE LÉGALE ------------------ */
 
 .legalBar {
+  /* position: relative — reçoit .legalBarMarks (repères décoratifs
+     au-dessus du trait ci-dessous), voir plus bas. */
+  position: relative;
   margin-top: 48px;
   padding-top: 24px;
   border-top: 1px solid color-mix(in srgb, var(--ground) 16%, transparent);
@@ -198,6 +245,102 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
+}
+
+/* Repères sur le trait existant (border-top ci-dessus, JAMAIS déplacé
+   ni doublé) : deux angles qui montent à ses extrémités + un petit
+   trait droit par colonne de liens intermédiaire — même longueur
+   (12px), épaisseur (1px) et couleur que les angles de la nav
+   (nav.module.css .rule), en miroir vertical (ici la couche monte
+   AU-DESSUS du trait, la nav descend en dessous du sien). Couleur :
+   color-mix(in srgb, var(--ground) 16%, transparent), pas --fg comme la
+   nav — ce bloc est tone="dark" PERMANENT (jamais dynamique), --ground
+   y est déjà l'équivalent fixe de ce que --fg vaudrait ; c'est d'ailleurs
+   la même valeur littérale que le trait existant juste en dessous
+   (.legalBar, border-top ci-dessus).
+   Grille recalquée sur celle de .linksGrid (repeat(12,1fr), même gap)
+   plutôt qu'un calc() à la main : chaque repère tombe alors EXACTEMENT
+   sur le bord gauche de sa colonne, par construction, à toute largeur —
+   .legalBar a la même largeur que .linksGrid (tous deux enfants directs
+   de .bands, un simple bloc, pas une grille : chacun hérite donc de sa
+   pleine largeur). bottom: 100% (relatif à .legalBar, position:relative
+   ci-dessus) place ces 12px juste AU-DESSUS du trait, jamais un nouveau
+   border sur toute la largeur qui le doublerait. */
+.legalBarMarks {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 12px;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--shell-gutter);
+  pointer-events: none;
+}
+
+/* Angles : miroir vertical de nav.module.css .rule — border-BAS (pas
+   haut) + un seul border latéral, radius sur le seul coin BAS
+   concerné (0 0 0 4px à gauche, 0 0 4px 0 à droite — pas 4px 4px 0 0
+   comme la nav, dont le trait EST le border-top de la même boîte).
+   Largeur = le rayon (4px) : la courbe consomme toute la largeur de la
+   boîte, aucun segment horizontal en trop qui doublerait le trait
+   au-delà de son propre congé — SERVICES (grid-column 1, comme
+   .linkColumn:nth-child(1) plus bas) démarre pile sur ce même bord,
+   l'angle gauche lui sert donc déjà de repère : pas de .legalBarTick
+   dédié pour elle (ça doublerait ce même repère au même endroit). */
+.legalBarCornerLeft,
+.legalBarCornerRight {
+  width: 4px;
+  height: 100%;
+  border-bottom: 1px solid color-mix(in srgb, var(--ground) 16%, transparent);
+}
+
+.legalBarCornerLeft {
+  grid-column: 1;
+  justify-self: start;
+  border-left: 1px solid color-mix(in srgb, var(--ground) 16%, transparent);
+  border-radius: 0 0 0 4px;
+}
+
+.legalBarCornerRight {
+  grid-column: 12;
+  justify-self: end;
+  border-right: 1px solid color-mix(in srgb, var(--ground) 16%, transparent);
+  border-radius: 0 0 4px 0;
+}
+
+/* Petits traits verticaux droits (sans congé) : un par colonne de
+   liens intermédiaire — SECTEURS (2ᵉ enfant de .legalBarMarks),
+   VENTURIA (3ᵉ), ADRESSE (4ᵉ), dans cet ordre (voir Footer.tsx). Jamais
+   SERVICES (voir commentaire de .legalBarCornerLeft ci-dessus). Repli
+   sous 1024px géré par la classe partagée `.linkColumn` de .linksGrid
+   plus bas (grid-column: 1/-1, une seule colonne empilée) : sous 768px
+   (bascule propre à CE composant, indépendante du shell), ces 3
+   colonnes ne démarrent plus à des positions horizontales distinctes —
+   les traits n'auraient donc plus rien à repérer, masqués ci-dessous. */
+.legalBarTick {
+  justify-self: start;
+  width: 0;
+  height: 100%;
+  border-left: 1px solid color-mix(in srgb, var(--ground) 16%, transparent);
+}
+
+.legalBarTick:nth-child(2) {
+  grid-column: 4; /* SECTEURS */
+}
+
+.legalBarTick:nth-child(3) {
+  grid-column: 7; /* VENTURIA */
+}
+
+.legalBarTick:nth-child(4) {
+  grid-column: 10; /* ADRESSE */
+}
+
+@media (max-width: 767px) {
+  .legalBarTick {
+    display: none;
+  }
 }
 
 .legalLeft {
@@ -269,9 +412,5 @@
 
   .linkColumn:nth-child(4) {
     grid-column: 10 / 13;
-  }
-
-  .giant {
-    margin-left: -40px;
   }
 }

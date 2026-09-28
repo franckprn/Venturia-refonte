@@ -32,13 +32,17 @@ export function Footer() {
           bande du footer désormais, voir commentaire d'en-tête) */}
       <div className={styles.giant}>
         <Link href="/contact" className={styles.giantTitle}>
-          {giantTitle.text}
+          {giantTitle.line1}
+          {/* Retour à la ligne CONTRÔLÉ, jamais laissé au navigateur —
+              comme le h1 du Hero (CLAUDE.md, « Hero (home) ») : dès
+              1024px, une taille fluide (footer.module.css
+              --mass-title-cqi) garantit que `line1` tient sur cette
+              seule ligne à toute largeur, donc que ce <br/> tombe
+              exactement ici, jamais ailleurs. */}
+          <br />
+          {giantTitle.line2}
           {/* Espace fine insécable (U+202F), pas une espace normale :
-              c'est la ponctuation française correcte avant un « ? »,
-              et elle est juste assez plus étroite pour que « VOUS
-              AIDER ? » tienne sur la 2ᵉ ligne à --t-mass — avec une
-              espace normale, le « ? » débordait seul sur une 3ᵉ ligne
-              (mesuré : 1181px pour 1176px de large disponible). */}
+              c'est la ponctuation française correcte avant un « ? ». */}
           {" "}
           <span className={styles.giantMark}>{giantTitle.mark}</span>
         </Link>
@@ -74,6 +78,23 @@ export function Footer() {
 
       {/* BANDE 4 — BARRE LÉGALE */}
       <div className={styles.legalBar}>
+        {/* Repères décoratifs au-dessus du trait existant (border-top de
+            .legalBar, INCHANGÉ) — jamais un nouveau trait : deux angles
+            qui montent à ses extrémités (miroir vertical des angles de
+            la nav, même technique — voir footer.module.css
+            .legalBarMarks) + un petit trait droit par colonne de liens
+            intermédiaire (SECTEURS, VENTURIA, ADRESSE). SERVICES
+            n'en a pas : elle démarre exactement sur l'extrémité gauche
+            du trait, déjà marquée par l'angle gauche (CLAUDE.md, « Bloc
+            de fin »). Décoratif : aria-hidden. */}
+        <div className={styles.legalBarMarks} aria-hidden="true">
+          <div className={styles.legalBarCornerLeft} />
+          <div className={styles.legalBarTick} />
+          <div className={styles.legalBarTick} />
+          <div className={styles.legalBarTick} />
+          <div className={styles.legalBarCornerRight} />
+        </div>
+
         <div className={styles.legalLeft}>
           <span className={styles.legalCopyright}>{legal.copyright}</span>
           <Link href={legal.legalNotice.href} className={styles.legalLink}>

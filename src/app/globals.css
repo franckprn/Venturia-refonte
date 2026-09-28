@@ -235,15 +235,30 @@ html[data-tone-transition="on"] {
  * Base
  * ------------------------------------------------------------------ */
 @layer base {
-  /* Fond crème posé sur html : sinon le rebond de scroll iOS montre du blanc */
+  /* Fond de <html> = charbon FIXE (--color-charcoal, jamais --ink : ce
+     dernier s'inverse pendant la Respiration, voir plus haut) — c'est
+     la zone de rebond du scroll (Mac ET iPhone) : tirer la page au-delà
+     du haut ou du bas montre désormais du charbon des deux côtés, y
+     compris en haut (accepté, demandé par Franck) — plutôt que la
+     couleur de la page qui aurait sauté d'un ton à l'autre pendant la
+     Respiration (l'ancien comportement, signalé dans « Respiration »
+     § « Exceptions à l'inversion » comme « à traiter avec le footer »).
+     `body`, lui, reste sur `var(--ground)` : c'est LUI qui couvre la
+     fenêtre visible en usage normal (jamais html, sauf pendant le
+     rebond) et qui doit donc continuer à s'inverser avec le reste de la
+     page pendant la Respiration. min-height: 100svh (jamais 100vh, qui
+     inclut la barre d'adresse mobile) : sans lui, une page plus courte
+     qu'un écran laisserait une bande de charbon (html) sous body avant
+     même tout rebond. */
   html {
-    background: var(--ground);
+    background: var(--color-charcoal);
     color: var(--ink);
     -webkit-text-size-adjust: 100%;
   }
 
   body {
     background: var(--ground);
+    min-height: 100svh;
     color: var(--ink);
     font-family: var(--font-sans), system-ui, sans-serif;
     font-size: var(--t-body);
