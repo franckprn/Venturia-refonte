@@ -36,6 +36,9 @@
 
   .right {
     grid-column: 7 / 13;
-    margin-top: 48px;
+    /* Règle du décalage (CLAUDE.md, « Pages services — gabarit ») :
+       32px sous le bas du H2, même valeur qu'en mobile (`.right` plus
+       haut) — ancienne valeur desktop (48px) retirée pour s'aligner sur
+       cette règle unique. */
   }
 }

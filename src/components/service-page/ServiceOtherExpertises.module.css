@@ -8,22 +8,111 @@
   color: var(--ink);
 }
 
-.grid {
+/* Liste verticale, 3 lignes pleine largeur (CLAUDE.md, « Autres
+   expertises ») — plus la grille en tiers d'origine. */
+.list {
   grid-column: 1 / -1;
   margin-top: 32px;
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  column-gap: var(--shell-gutter);
-  row-gap: 32px;
+  border-bottom: 1px solid var(--line);
 }
 
-.item {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding-top: 20px;
+/* Chaque ligne redéclare sa propre grille 12 colonnes interne, SANS
+   padding-inline (« Règle des deux axes ») : mêmes colonnes/gap que la
+   grille partagée. Toute la ligne est le lien (un seul <a> par ligne,
+   accessibilité) : `display: grid` sur l'ancre elle-même, comme
+   .cardAction ailleurs sur le site. Trait au-dessus de CHAQUE ligne (y
+   compris la première) porté par border-top — le trait sous la
+   dernière vient du border-bottom de .list ci-dessus, pas d'un
+   :last-child dédié. */
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: 8px;
+  padding-block: 24px;
   border-top: 1px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Inversion au survol/focus — effet retrouvé dans l'historique git
+   (commit dbfe3f2, « Services sans séparateurs avec inversion au
+   survol », home ; retiré depuis par 4987482) : mêmes paramètres
+   (fond --ink, textes --ground, 200ms, cubic-bezier(0,.55,.45,1),
+   dès 1024px uniquement). Ici `.row` EST le lien (un seul <a> par
+   ligne, CLAUDE.md « Autres expertises ») : `.row:hover` directement,
+   pas besoin du `:has(.link:hover)` de la version d'origine (qui
+   ciblait un lien étiré séparé, pas la ligne elle-même).
+   Fond sur un `::before` DÉDIÉ plutôt que sur `.row` lui-même — corrigé
+   après une 1ʳᵉ version qui le faisait déborder de la zone de contenu
+   (débord négatif) : `inset: 0` désormais, AUCUN débord, ni à gauche ni
+   à droite — le fond couvre exactement la boîte de `.row`, qui couvre
+   déjà exactement les colonnes 1-12 (grille interne sans padding-inline,
+   « Règle des deux axes »). La marge de 24px entre chaque texte et le
+   bord du fond n'est donc plus portée par un débord du fond, mais par
+   un `margin-left`/`margin-right` PERMANENT sur `.name`/`.link`
+   eux-mêmes (voir plus bas) : les textes ne bougent jamais au survol,
+   ils sont déjà à leur position finale au repos. `z-index: -1` (pas
+   besoin de remonter .name/.phrase/.link au-dessus : un enfant
+   positionné à z-index négatif peint sous tout contenu non positionné
+   de son propre bloc englobant). Coins arrondis 4px — même valeur que
+   le trait de la nav (nav.module.css .rule, `border-radius: 4px 4px 0
+   0`), palette fermée du site (CLAUDE.md, « Arrondis »), aucune
+   nouvelle valeur. */
+@media (min-width: 1024px) {
+  .row::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 4px;
+    background: transparent;
+    transition: background-color 200ms cubic-bezier(0, 0.55, 0.45, 1);
+  }
+
+  .name,
+  .phrase {
+    transition: color 200ms cubic-bezier(0, 0.55, 0.45, 1);
+  }
+
+  .row:hover::before,
+  .row:focus-visible::before {
+    background: var(--ink);
+  }
+
+  .row:hover .name,
+  .row:hover .phrase,
+  .row:focus-visible .name,
+  .row:focus-visible .phrase {
+    color: var(--ground);
+  }
+
+  /* Visuel du lien (ArrowLink as="span") : couleur ET filet suivent la
+     même inversion — arrow-link.module.css fixe `.link` en --ink en
+     permanence (jamais tone-aware), donc sans cette règle le lien
+     resterait illisible sur le fond --ink survolé. `.link` ici est la
+     classe de CE fichier (passée en `className` à ArrowLink, appliquée
+     en plus de la sienne) : pas besoin de toucher arrow-link.module.css. */
+  .link {
+    transition:
+      color 200ms cubic-bezier(0, 0.55, 0.45, 1),
+      border-color 200ms cubic-bezier(0, 0.55, 0.45, 1);
+  }
+
+  .row:hover .link,
+  .row:focus-visible .link {
+    color: var(--ground);
+    border-color: var(--ground);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row::before,
+  .name,
+  .phrase,
+  .link {
+    transition: none;
+  }
 }
 
 .name {
@@ -44,16 +133,49 @@
   color: var(--ink);
 }
 
-@media (min-width: 1024px) {
-  .item:nth-child(1) {
-    grid-column: 1 / 4;
+/* Visuel du lien (ArrowLink as="span" — arrow-link.module.css, filet et
+   flèche inchangés). Le survol/focus de LA LIGNE ENTIÈRE pilote la
+   flèche : `.link[data-direction="right"] .arrow` (arrow-link.module.css)
+   n'anime que sur le survol de l'élément lui-même, trop petit ici — cette
+   règle prend le relais via `.row:hover`/`:focus-visible`, ciblée par
+   attribut (`[data-direction="right"]`) plutôt que par la classe
+   `.arrow` (hashée, propre à arrow-link.module.css) pour ne dépendre
+   d'aucun import de classe entre les deux fichiers. */
+.row:hover [data-direction="right"] svg,
+.row:focus-visible [data-direction="right"] svg {
+  transform: translateX(4px);
+}
+
+@media (min-width: 768px) {
+  .row {
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: var(--shell-gutter);
+    row-gap: 0;
+    align-items: center;
   }
 
-  .item:nth-child(2) {
-    grid-column: 5 / 8;
+  /* Marge intérieure de 24px, PERMANENTE (au repos ET au survol — rien
+     ne bouge quand la ligne s'inverse) : `margin`, pas `padding`, pour
+     ne décaler que la BOÎTE du texte dans sa zone de grille, sans
+     agrandir une boîte qui porte elle-même une bordure/un soulignement
+     (.link ci-dessous). */
+  .name {
+    grid-column: 1 / 5;
+    margin-left: 24px;
   }
 
-  .item:nth-child(3) {
-    grid-column: 9 / 12;
+  .phrase {
+    grid-column: 5 / 10;
+  }
+
+  .link {
+    grid-column: 10 / 13;
+    justify-self: end;
+    /* `margin-right`, pas `padding-right` : le soulignement (border-bottom,
+       arrow-link.module.css) est dessiné sur la boîte du lien — un
+       padding l'étirerait jusqu'au bord de la colonne 12, un margin
+       laisse la boîte (et son soulignement) se terminer 24px plus tôt. */
+    margin-right: 24px;
   }
 }
+

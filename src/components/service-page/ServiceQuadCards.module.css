@@ -33,8 +33,12 @@
   row-gap: 32px;
 }
 
-.card {
+.item {
   grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.card {
   padding-top: 20px;
   border-top: 1px solid var(--line);
 }
@@ -58,19 +62,19 @@
 }
 
 @media (min-width: 1024px) {
-  .card:nth-child(1) {
+  .item:nth-child(1) {
     grid-column: 1 / 4;
   }
 
-  .card:nth-child(2) {
+  .item:nth-child(2) {
     grid-column: 4 / 7;
   }
 
-  .card:nth-child(3) {
+  .item:nth-child(3) {
     grid-column: 7 / 10;
   }
 
-  .card:nth-child(4) {
+  .item:nth-child(4) {
     grid-column: 10 / 13;
   }
 }

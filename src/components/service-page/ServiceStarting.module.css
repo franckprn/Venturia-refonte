@@ -1,0 +1,70 @@
+.text {
+  margin: 0;
+  max-width: 68ch;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+/* Ligne 4 de la grille partagée (ServiceSplitIntro occupe 1-3) — CLAUDE.md,
+   « Pages services — gabarit ». 64px sous le texte décalé (augmenté
+   depuis 48px — règle du gabarit § c : la section doit respirer
+   davantage entre le texte d'intro et la série qui le suit). */
+.items {
+  grid-column: 1 / -1;
+  grid-row: 4;
+  margin-top: 64px;
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: 32px;
+}
+
+.item {
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.itemTitle {
+  margin: 0;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-body);
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.itemText {
+  margin: 12px 0 0;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+/* Règle du gabarit § b (CLAUDE.md, « Pages services — gabarit ») : 3
+   colonnes de MÊME largeur réparties sur TOUTE la zone de contenu — pas
+   alignées sur les lignes de la grille partagée à 12 colonnes (un tiers
+   « 1/4, 5/8, 9/12 » calé sur cette grille laisserait la 3ᵉ colonne
+   s'arrêter avant le bord droit réel, une colonne 12 entière avant la
+   fin). `repeat(3, 1fr)` + un seul `column-gap` : largeur et espacement
+   égaux par construction, la 1ʳᵉ colonne touche le bord gauche, la 3ᵉ le
+   bord droit, la 2ᵉ tombe exactement au centre — aucun calcul manuel. */
+@media (min-width: 1024px) {
+  .items {
+    grid-template-columns: repeat(3, 1fr);
+    /* >= 2 gouttières de la grille partagée (2 × 20px = 40px). */
+    column-gap: 40px;
+  }
+
+  /* `.item` reste à `grid-column: 1 / -1` en mobile (empilé, pleine
+     largeur de la seule colonne) — à `auto` ici, sinon "-1" désigne
+     toujours la DERNIÈRE ligne de la grille (la 4ᵉ, avec 3 pistes),
+     donc chaque item s'étirerait quand même sur les 3 colonnes au lieu
+     d'occuper la sienne. */
+  .item {
+    grid-column: auto;
+  }
+}

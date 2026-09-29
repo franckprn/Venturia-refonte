@@ -203,6 +203,15 @@
   color: var(--fg);
 }
 
+/* Même exception, déclenchée par la Respiration rouge (page
+   /services/automations, src/lib/respiration.ts) plutôt que par une
+   tonalité de section statique — voir le commentaire jumeau,
+   rail.module.css. Additive, sans effet sur la home (attribut jamais
+   posé sur cette page). */
+html[data-inverted-accent="true"] .cardIcon {
+  color: var(--fg);
+}
+
 .cardIconSvg {
   width: 20px;
   height: 20px;

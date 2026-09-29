@@ -3,12 +3,13 @@ import { Shell } from "@/components/Shell";
 import { Section } from "@/components/Section";
 import { RailController, RailSlot, type RailConfig } from "@/components/layout/Rail";
 import { MobileRailStack } from "@/components/layout/MobileRailStack";
-import { IconArrowRight, IconConnect, IconFlow } from "@/components/layout/RailIcons";
+import { IconArrowRight, IconConnect, IconSwap } from "@/components/layout/RailIcons";
 import { ServiceHero } from "@/components/service-page/ServiceHero";
+import heroStyles from "@/components/service-page/ServiceHero.module.css";
 import { ServiceQuadCards } from "@/components/service-page/ServiceQuadCards";
-import { ServiceProcess } from "@/components/service-page/ServiceProcess";
-import { ServiceToolCompare } from "@/components/service-page/ServiceToolCompare";
-import { ServiceRollout } from "@/components/service-page/ServiceRollout";
+import { ServiceStarting } from "@/components/service-page/ServiceStarting";
+import { ServiceRedBand } from "@/components/service-page/ServiceRedBand";
+import { ServiceTool } from "@/components/service-page/ServiceTool";
 import { ServiceFaq } from "@/components/service-page/ServiceFaq";
 import { ServiceOtherExpertises } from "@/components/service-page/ServiceOtherExpertises";
 import { Footer } from "@/components/layout/Footer";
@@ -29,48 +30,45 @@ export const metadata: Metadata = {
   alternates: { canonical: "/services/automations" },
 };
 
-// Rail de cette page — cartons/icônes propres à l'Automatisation, cibles
-// de repos mesurées comme sur la home (CLAUDE.md, « Rail droit ») :
-//   1. quad       haut du H2 du bloc 2 (« Ce qui tourne seul… »)
-//   2. process    haut du paragraphe du bloc 3 (data-service-process-paragraph)
-//   3. rollout    bas du bloc 5 (data-service-rollout-end, edge "bottom")
+// Rail de cette page — 3 cartons, moteur INCHANGÉ (CLAUDE.md, « Pages
+// services — gabarit », « RAIL ») :
+//   1. quad             bas des 4 illustrations du bloc 2 (corrigé —
+//                        auparavant haut du H2)
+//   2. tool (NOUVEAU)   haut du H2 du bloc 5 (« L'outil »)
+//   3. other-expertises bas du bloc 7 (« Autres expertises »)
 // Mêmes sections pour l'ancrage desktop (RailSlot `anchor`) ET la
-// révélation mobile (`mobileReveal`) : pas de raison ici de décaler la
-// pile mobile d'une section de plus, contrairement au 3ᵉ carton de la
-// home (choix spécifique à son ancien design, pas une règle générale).
+// révélation mobile (`mobileReveal`).
 const AUTOMATISATION_RAIL_CONFIG: RailConfig = {
   cards: automatisation.rail,
-  icons: [IconConnect, IconFlow, IconArrowRight],
+  icons: [IconConnect, IconSwap, IconArrowRight],
   offsetTargets: [
     {
       varName: "--rail-card1-offset",
       sectionId: "quad",
-      selector: "#service-quad-title",
-      edge: "top",
+      selector: "[data-service-quad-illustrations-end]",
+      edge: "bottom",
     },
     {
       varName: "--rail-card2-offset",
-      sectionId: "process",
-      selector: "[data-service-process-paragraph]",
+      sectionId: "tool",
+      selector: "#service-tool-title",
       edge: "top",
     },
     {
       varName: "--rail-card3-offset",
-      sectionId: "rollout",
-      selector: "[data-service-rollout-end]",
+      sectionId: "other-expertises",
+      selector: "[data-service-other-expertises-end]",
       edge: "bottom",
     },
   ],
-  mobileReveal: ["quad", "process", "rollout"],
+  mobileReveal: ["quad", "tool", "other-expertises"],
 };
 
 // Page /services/automations — gabarit des pages services (CLAUDE.md,
-// « Pages services — gabarit ») : même construction Shell/Section que la
-// home (une seule grille pour que le rail se fige puis reste visible
-// jusqu'au bas de page), rail desktop (3 <RailSlot>) + pile mobile
-// (<MobileRailStack>) configurés pour CETTE page via `config` (voir
-// components/layout/Rail.tsx — la home, elle, ne passe aucun `config` et
-// garde donc son comportement d'avant cette extraction, inchangé).
+// « Pages services — gabarit »). Ordre : 1 Hero, 2 Ce qu'on automatise,
+// 3 Par où commencer, 4 Bande rouge, 5 L'outil, 6 FAQ, 7 Autres
+// expertises. Une seule grille pour toute la page (Shell/Section) : le
+// rail se fige puis reste visible jusqu'au bas — voir Rail.tsx.
 export default function AutomationsPage() {
   return (
     <>
@@ -78,10 +76,17 @@ export default function AutomationsPage() {
       <RailController config={AUTOMATISATION_RAIL_CONFIG} />
 
       <Shell>
+        {/* spacing="none" : le Hero gère son propre padding-block (voir
+            ServiceHero.module.css) — dès 1024px, hauteur = 100svh moins
+            la hauteur de la nav (le premier écran exact), la chaîne
+            calée en bas via une grille interne à ligne `1fr`. */}
         <Section
           name="hero"
           tone="light"
+          spacing="none"
           labelledBy="service-hero-title"
+          className={heroStyles.section}
+          bodyClassName={heroStyles.body}
           bodyStyle={{ rowGap: 0 }}
         >
           <ServiceHero {...automatisation.hero} />
@@ -94,30 +99,33 @@ export default function AutomationsPage() {
         <RailSlot cardIndex={0} anchor="quad" config={AUTOMATISATION_RAIL_CONFIG} />
 
         <Section
-          name="process"
+          name="starting"
           tone="light"
-          labelledBy="service-process-title"
+          labelledBy="service-starting-title"
           bodyStyle={{ rowGap: 0 }}
         >
-          <ServiceProcess {...automatisation.process} />
+          <ServiceStarting {...automatisation.starting} />
         </Section>
 
-        <RailSlot cardIndex={1} anchor="process" config={AUTOMATISATION_RAIL_CONFIG} />
+        {/* tone="light" (pas "accent") : comme la Respiration de la home,
+            cette section n'a pas de tonalité "accent" propre — c'est
+            l'inversion de toute la page (useRespirationInversion,
+            invertTo="accent") qui fait apparaître le rouge pendant la
+            lecture, jamais un fond statique. */}
+        <Section
+          name="redband"
+          tone="light"
+          labelledBy="service-redband-title"
+          bodyStyle={{ rowGap: 0 }}
+        >
+          <ServiceRedBand {...automatisation.redBand} />
+        </Section>
 
         <Section name="tool" tone="light" labelledBy="service-tool-title" bodyStyle={{ rowGap: 0 }}>
-          <ServiceToolCompare {...automatisation.tool} />
+          <ServiceTool {...automatisation.tool} />
         </Section>
 
-        <Section
-          name="rollout"
-          tone="light"
-          labelledBy="service-rollout-title"
-          bodyStyle={{ rowGap: 0 }}
-        >
-          <ServiceRollout {...automatisation.rollout} />
-        </Section>
-
-        <RailSlot cardIndex={2} anchor="rollout" config={AUTOMATISATION_RAIL_CONFIG} />
+        <RailSlot cardIndex={1} anchor="tool" config={AUTOMATISATION_RAIL_CONFIG} />
 
         <Section name="faq" tone="light" labelledBy="service-faq-title" bodyStyle={{ rowGap: 0 }}>
           <ServiceFaq {...automatisation.faq} />
@@ -126,6 +134,8 @@ export default function AutomationsPage() {
         <Section name="other-expertises" tone="light" bodyStyle={{ rowGap: 0 }}>
           <ServiceOtherExpertises {...automatisation.otherExpertises} />
         </Section>
+
+        <RailSlot cardIndex={2} anchor="other-expertises" config={AUTOMATISATION_RAIL_CONFIG} />
 
         <Section name="footer" tone="dark" className={footerStyles.section} bodyStyle={{ rowGap: 0 }}>
           <Footer />

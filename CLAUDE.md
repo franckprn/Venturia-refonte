@@ -580,23 +580,87 @@ Structure de fichiers, pour une nouvelle page service :
               même règle que le reste du site : texte dans content/*.ts,
               jamais en dur dans le JSX.
   composants  `components/service-page/*` (Service Hero/QuadCards/
-              SplitIntro/StepsThirds/Process/ToolCompare/Rollout/Faq/
-              OtherExpertises) — réutilisables tels quels par une
-              nouvelle page service, alimentés par son propre fichier de
-              contenu. `ServiceSplitIntro` porte la mise en page B
-              (label + titre colonnes 1-6, contenu colonnes 7-12 sur sa
-              PROPRE ligne — « Règle des deux axes ») : label/titre/axe
-              droit occupent les lignes 1/2/3 de la grille partagée de
-              la section (bodyStyle `rowGap:0`, comme
-              dernier-accompagnement.module.css) ; un bloc qui ajoute du
-              contenu après (encadré, tableau, schéma, note) continue
-              cette numérotation à partir de la ligne 4 dans SON PROPRE
-              module CSS — jamais dans celui de SplitIntro.
-              `ServiceStepsThirds` est le schéma en tiers (colonnes 1, 5,
-              9) réutilisé par le bloc « exemple de parcours »
-              (accentFrom, 6 étapes/2 lignes) ET le bloc « déroulé » (3
-              étapes/1 ligne, sans accent) — jamais le schéma animé du
-              Processus (home), une simple liste.
+              QuadIllustrations/SplitIntro/Starting/RedBand/
+              StepsThirds/Tool/Faq/OtherExpertises) — réutilisables tels
+              quels par une nouvelle page service, alimentés par son
+              propre fichier de contenu. `ServiceSplitIntro` porte la
+              mise en page B (label + titre colonnes 1-6, contenu
+              colonnes 7-12 sur sa PROPRE ligne — « Règle des deux
+              axes ») : label/titre/axe droit occupent les lignes 1/2/3
+              de la grille partagée de la section (bodyStyle
+              `rowGap:0`, comme dernier-accompagnement.module.css) ; un
+              bloc qui ajoute du contenu après (steps, encadré, tableau,
+              note) continue cette numérotation à partir de la ligne 4
+              dans SON PROPRE module CSS — jamais dans celui de
+              SplitIntro (exemples : `.items` dans ServiceStarting, ou
+              `.steps` dans ServiceStepsThirds quand il suit un
+              SplitIntro, comme dans ServiceTool).
+              `ServiceStepsThirds` est le schéma en tiers, statique (voir
+              « révélation » plus bas), réutilisé par tout bloc qui a
+              besoin d'une liste de 3 (ou multiple de 3) éléments
+              numérotés, sans `accentFrom` (tous les numéros en --ink) —
+              jamais le schéma animé du Processus (home), une simple
+              liste, trait 1px --ink au-dessus de chaque étape. Aucun
+              consommateur actuel (le bloc « L'outil » de la page
+              Automatisation est passé en paragraphes, voir plus bas) :
+              conservé tel quel pour une future page.
+
+Règle du décalage — quand un titre (colonnes 1-6) et un texte (colonnes
+7-12) partagent une section (mise en page B), le texte ne commence
+JAMAIS à la hauteur du titre : son haut s'aligne sur le bas du H2, plus
+32px (`ServiceSplitIntro.module.css .right`, même valeur qu'en mobile —
+l'ancienne valeur desktop, 48px, retirée pour s'aligner sur cette règle
+unique). Sous 1024px : empilés, comme le reste du gabarit.
+
+Trois règles supplémentaires du gabarit (corrigées après la 1ʳᵉ version
+de la page Automatisation, vérifiées sur TOUS les H2 et toutes les
+séries en tiers de cette page) :
+
+  a. largeur du H2   un H2 de section peut occuper TOUTE la largeur des
+                     colonnes 1-6 (moitié gauche de la zone de contenu) :
+                     aucune largeur maximale plus étroite ne doit le
+                     brider (`ServiceSplitIntro.module.css .title`,
+                     `grid-column: 1 / 7` — déjà la pleine moitié
+                     gauche, aucun `max-width` en ch dessus). Un H2 qui
+                     n'a pas de texte décalé en vis-à-vis (bloc « Ce
+                     qu'on automatise », Respiration rouge) peut occuper
+                     PLUS que 1-6 (jusqu'aux 12 colonnes entières) — la
+                     règle fixe un plancher, pas un plafond.
+
+  b. série de 3 en tiers   3 colonnes de MÊME largeur réparties sur
+                     TOUTE la zone de contenu : la 1ʳᵉ collée au bord
+                     gauche, la 3ᵉ au bord droit, la 2ᵉ exactement
+                     centrée entre les deux, espace entre colonnes >= 2
+                     gouttières de la grille partagée (40px). PAS alignée
+                     sur les lignes de la grille partagée à 12 colonnes
+                     (l'ancien motif « colonnes 1/5/9 », calé sur cette
+                     grille via `grid-column: 1/4, 5/8, 9/12`, laissait
+                     la 3ᵉ colonne s'arrêter une colonne entière avant le
+                     bord droit réel — jamais exactement centré ni
+                     flush) : `display: grid;
+                     grid-template-columns: repeat(3, 1fr); column-gap:
+                     40px;` sur un conteneur SANS padding-inline
+                     (« Règle des deux axes ») — largeur et espacement
+                     égaux par construction, centrage automatique, aucun
+                     calcul manuel. Piège corrigé : les items ne doivent
+                     PAS garder `grid-column: 1 / -1` hérité de
+                     l'empilement mobile — `-1` désigne la DERNIÈRE ligne
+                     de la grille (la 4ᵉ avec 3 pistes), donc un item
+                     s'étirerait quand même sur les 3 colonnes ; remettre
+                     `grid-column: auto` dans le média desktop.
+                     Largeur de colonne résultante (mesurée) : 352px à
+                     1440px de large (contenu 1136px), 512px à 1920px
+                     (contenu 1616px) — `(largeur du contenu − 2×40) / 3`.
+                     Implémenté dans `ServiceStarting.module.css .items`
+                     et `ServiceStepsThirds.module.css .steps`.
+
+  c. respiration intro → série   entre le texte d'intro décalé
+                     (colonnes 7-12) et la série qui le suit, l'écart est
+                     de 64px (augmenté depuis 48px — la section a besoin
+                     de respirer davantage à cette transition) :
+                     `ServiceStarting.module.css .items`,
+                     `margin-top: 64px`.
+
   révélation  `components/ScrollReveal.tsx` (`useScrollReveal`), même
               mécanique que ServicesRowsReveal.tsx (home : montée 16px +
               fondu, stagger 60ms, 400ms, `ScrollTrigger` `top 75%` une
@@ -608,21 +672,97 @@ Structure de fichiers, pour une nouvelle page service :
               directement sur les vrais éléments de la grille/liste — un
               `<div>` ajouté casserait un `grid-column`/`grid-row` posé
               sur l'élément lui-même. Hero exclu (voir plus bas).
+              Depuis la restructuration de la page Automatisation
+              (session « refonte structure Automatisation »), AUCUN bloc
+              de cette page ne l'utilise plus : la page est construite
+              dans son état final, statique — l'entrée reviendra dans un
+              prompt séparé. Le hook reste disponible tel quel pour une
+              future page service qui en aurait besoin avant ce prompt.
 
-H1 de page (--t-title-lg, globals.css) : 56px desktop / 32px mobile,
-intermédiaire entre --t-title (40/28) et --t-hero (72/40) — ce H1 porte
-le titre de la page, mais reste un titre de page secondaire, pas le hero
-de la home. Pas de calibrage cqi comme le hero (CLAUDE.md, « Hero
-(home) ») : colonnes 1-9 ici veut seulement dire que le texte peut
-occuper jusqu'à cette largeur avant de retourner à la ligne, pas qu'il
-doit l'occuper EXACTEMENT à toute largeur — un `grid-column: 1 / 10`
-simple suffit.
+H1 de page — deux approches selon le besoin de la page :
+  simple      (`--t-title-lg`, globals.css : 56px desktop / 32px mobile,
+              intermédiaire entre --t-title et --t-hero) — pas de
+              calibrage cqi, `grid-column: 1 / 10` suffit, le texte peut
+              occuper jusqu'à cette largeur avant de retourner à la
+              ligne sans devoir l'occuper EXACTEMENT.
+  calibré     (Automatisation, ServiceHero.module.css) — H1 sur les 12
+              colonnes ENTIÈRES, `line1`/`line2` explicites (comme
+              `line1`/`line2` du bloc de fin, content/footer.ts),
+              `line1` (la plus longue) calibrée pour occuper EXACTEMENT
+              100 % de la largeur du conteneur : même TECHNIQUE que
+              --hero-title-cqi (home) et --mass-title-cqi (footer), une
+              constante cqi mesurée Playwright — mais ici la cible est
+              12/12 colonnes (pas 9/12 comme le hero home), une relation
+              PUREMENT PROPORTIONNELLE au conteneur (pas affine) : un
+              seul calibrage suffit et reste EXACT à toute largeur,
+              comme le footer. `--service-hero-title-cqi: 9.1116`,
+              mesuré sur un `<span>` ISOLÉ (hors grille, hors container
+              query, même police/graisse/letter-spacing) plutôt que dans
+              la grille réelle : mesurer IN SITU avant calibrage crée une
+              boucle possible (la piste `1fr` du Shell peut grandir avec
+              le texte si celui-ci dépasse son min-content par défaut).
+              `white-space: nowrap` OBLIGATOIRE sur le h1 dès 1024px : à
+              une taille calibrée pile à la largeur du conteneur, un
+              retour à la ligne par mot (comportement par défaut) se
+              déclencherait à la moindre fraction de pixel — voir le
+              commentaire complet, ServiceHero.module.css. Choisir cette
+              approche pour un H1 qui doit être « le plus grand possible
+              sur 2 lignes » à une largeur donnée ; l'approche simple
+              reste valable pour un titre de page qui n'a pas ce besoin.
+
+Plus de label au-dessus du H1 (« AUTOMATISATION · TOULOUSE », retiré —
+corrigé après la 1ʳᵉ version, `ServiceHero.tsx`/types.ts/content : le
+champ `label` a disparu du type `ServiceHero`).
+
+Hauteur du Hero (Automatisation, ServiceHero.module.css) : dès 1024px et
+>= 800px de haut, EXACTEMENT le premier écran — `height: calc(100svh -
+var(--nav-h))` (`<main>` pousse déjà tout son contenu de `var(--nav-h)`,
+layout.tsx : sans soustraire cette valeur, le Hero déborderait du
+premier écran de sa hauteur). `spacing="none"` (page.tsx), `.body`
+(bodyClassName) reçoit `height:100%` et un `grid-template-rows`
+EXPLICITE : h1 / espaceur / sous-titre+CTA / espaceur / chaîne — les
+DEUX espaceurs partagent le MÊME plancher (`minmax(Y, 1fr)`) : CSS Grid
+répartit l'espace disponible à parts égales entre deux pistes `1fr`
+identiques, ce qui centre mécaniquement le sous-titre+CTA à égale
+distance du H1 et de la chaîne — aucune mesure JS. Le bouton « Réserver
+20 minutes » est aligné à droite (`justify-self: end` sur `.cta`) : sans
+lui, un lien `width: fit-content` (arrow-link.module.css) se cale au
+DÉBUT de sa zone de grille, pas à la fin. `padding-bottom: 48px` sur la
+section, la marge basse de la chaîne (aucun précédent direct d'élément
+« calé en bas » trouvé ailleurs sur la home, valeur de repli signalée à
+Franck). Sous 1024px : pas de hauteur figée, la page s'allonge
+librement, comme n'importe quelle autre section.
+Mesuré (Playwright, build de prod) — écart H1→sous-titre vs
+sous-titre→chaîne, égalité attendue : 69,41px / 69,42px à 1440×900,
+123,03px / 123,05px à 1920×1080 (écart résiduel < 0,02px, arrondi
+sous-pixel) ; bouton : bord droit = bord droit de la zone de contenu,
+haut = haut du sous-titre, EXACT aux deux tailles.
+Fenêtres courtes (< 800px de haut, ex. 1366×657, 1280×720 — Franck,
+hybride après mesure) : le contenu ne tient plus avec les espacements
+ci-dessus. 1. espacements internes resserrés (JAMAIS le H1) : padding-top
+120→48px, plancher des espaceurs 32→16px, gap interne de la chaîne
+24→16px, paddings de la notification/des étapes 14→10px. 2. si ça ne
+suffit toujours pas : `height` devient `min-height` — le Hero est alors
+autorisé à dépasser légèrement le premier écran plutôt que de couper la
+chaîne, exactement comme le plancher 240px du Hero de la home.
+`min-height` + `minmax(Xpx, 1fr)` couvrent les deux cas avec un seul
+mécanisme (si le contenu tient dans le plancher, la ligne 1fr absorbe le
+reste ; sinon la section grandit avec son contenu, jamais de clip).
+Mesuré (Playwright, build de prod, APRÈS retrait du label — le label
+occupait une ligne de grille entière, son retrait a redonné de la
+marge) : 1920×1080 et 1440×900 exacts (marge basse 48px, 0 dépassement) ;
+1280×720 tient désormais dans le premier écran (marge résiduelle 72,9px,
+largement positive) ; 1366×657 ne dépasse plus que de 7px (contre 72px
+avant le retrait du label, et 184px avant les resserrements internes de
+la session précédente) — chaîne entière, jamais coupée.
 
 Aucune animation d'entrée sur le bloc 1 (hero) de ces pages, contrairement
 à tous les autres blocs : sans photo, le H1 est très probablement
 l'élément LCP de la page — CLAUDE.md, « Animations » : « rien d'animé sur
 l'élément LCP ». Peint à 100 % d'opacité dès le premier rendu, comme le
-h1 de la home.
+h1 de la home. (La chaîne du Hero n'a, elle non plus, aucune animation
+dans cette page pour l'instant — elle en recevra une dans un prompt
+séparé.)
 
 Rail (desktop + pile mobile) rendu réutilisable pour ce gabarit —
 `RailConfig` (components/layout/Rail.tsx) : cartons, icônes, cibles de
@@ -630,17 +770,45 @@ repos desktop (`offsetTargets`) et sections de révélation mobile
 (`mobileReveal`) propres à CHAQUE page, passés en prop optionnelle
 `config` à `<RailSlot>`, `<RailController>` et `<MobileRailStack>` — leur
 moteur (sticky, mode relais, hystérésis, timing des icônes) reste un
-SEUL code partagé, inchangé, entre la home et les pages services.
+SEUL code partagé, inchangé, entre la home et les pages services — le
+moteur lui-même reste câblé pour EXACTEMENT 3 cartons (types tuple à 3
+dans Rail.tsx/MobileRailStack.tsx/rail.module.css, `cardIndex: 0|1|2`) :
+une future page qui aurait besoin d'un nombre différent de cartons devra
+généraliser ce moteur (décision à prendre avec Franck, pas une extension
+locale à une page).
 Défaut = `HOME_RAIL_CONFIG` (construit à partir des mêmes constantes
 qu'avant cette extraction) : la home ne passe aucun `config` et garde
 donc, à l'identique, son comportement d'avant — vérifié (captures +
 alignements de repos + mode relais, avant/après cette extraction, 0
 différence hors l'horloge du footer). Icônes : `RailIcons.tsx` reste un
 fichier UNIQUE et partagé, chaque page y ajoute les siennes en pur ajout
-(jamais retoucher un export existant) — `IconConnect` et `IconFlow`
-posées pour l'Automatisation, même construction que les 3 de la home
-(viewBox 20×20, trait 1.5px, `currentColor`, aucun remplissage, `play()`
-via GSAP context, ≤ 400ms).
+(jamais retoucher un export existant) — `IconConnect` (Automatisation,
+carton « n8n, en une phrase ») et `IconSwap` (Automatisation, carton
+« Déjà sur Make ou Zapier ? » — deux flèches courbes en sens opposés,
+l'idée d'un échange/bascule d'un outil vers un autre), même construction
+que les autres (viewBox 20×20, trait 1.5px, `currentColor`, aucun
+remplissage, `play()` via GSAP context, ≤ 400ms). `IconFlow` (posée pour
+une ancienne carte de cette page, « Un flux, c'est quoi ? ») reste dans
+le fichier, disponible pour une future page — la page Automatisation ne
+l'utilise plus (la chaîne du Hero montre déjà ce qu'est un flux, le
+carton faisait doublon, retiré).
+Cartons de la page Automatisation (3, ancrages propres à sa nouvelle
+structure) : 1 « n8n, en une phrase » → BAS des 4 illustrations du bloc 2
+« Automatisations e-commerce » (corrigé — auparavant haut du H2 ; label
+du bloc lui-même passé de « CE QU'ON AUTOMATISE » à « AUTOMATISATIONS
+E-COMMERCE ») — `[data-service-quad-illustrations-end]` posé sur le
+conteneur de la 1ʳᵉ illustration (`ServiceQuadCards.tsx`, les 4
+illustrations partagent la même hauteur, donc le même bas) ; 2 « On
+reprend vos scénarios » → haut du H2 du bloc 5 (L'outil) ; 3
+« On discute ? » → bas du bloc 7 (Autres expertises,
+`[data-service-other-expertises-end]` posé sur `.grid`,
+ServiceOtherExpertises.tsx — seul ajout à ce bloc par ailleurs
+inchangé). Pile mobile : même ordre, mêmes sections de révélation.
+Écart mesuré pour le nouvel ancrage du carton 1 : 0px (repos exact),
+IDENTIQUE en `prefers-reduced-motion: reduce` et en animations actives, à
+1440×900 et 1920×1080 (vérifié — ce bloc n'a de toute façon aucune
+révélation d'entrée sur cette page, statique, voir plus haut : aucune
+divergence possible entre les deux modes ici).
 
 Canonical (`alternates.canonical`) via `metadataBase` (`src/app/
 layout.tsx` — absent avant ces pages, ajouté : `new URL("https://
@@ -658,13 +826,208 @@ FAQ (`ServiceFaq.tsx`) : données structurées `FAQPage` (JSON-LD)
 générées DANS ce composant, à partir des mêmes questions-réponses que le
 rendu visuel — les deux ne peuvent pas diverger. Toutes les réponses
 visibles, jamais d'accordéon (contrairement à l'accordéon Services du
-menu mobile).
+menu mobile). Layout propre à ce bloc, PAS `ServiceSplitIntro` (label +
+h2 colonnes 1-6, liste colonnes 7-12 sur la MÊME ligne de grille, pas des
+lignes séparées) : dès 1024px, la colonne gauche (label + h2) passe en
+`position: sticky`, `top: calc(var(--rail-stick) + 48px)` (soit 112px —
+descendue de 48px sous le haut du rail à la demande de Franck) —
+nécessite
+`align-self: start` (sinon la colonne s'étire sur toute la hauteur de la
+ligne et le sticky n'a plus de marge où se figer) et que la ligne partage
+sa hauteur avec la liste (la plus grande des deux), sinon la colonne
+gauche n'a rien à parcourir. Sous 1024px : pas de sticky, empilé comme
+le reste du gabarit.
 
-Tableau de comparaison d'outils (bloc « L'outil », `ServiceToolCompare.
-tsx`) : un vrai `<table>` dès 1024px (traits --line, colonne mise en
-avant par la graisse SEULE — aucun gris, aucun fond de couleur, CLAUDE.md
-« Couleurs »), remplacé sous 1024px par des blocs empilés (un par
-colonne/outil) pour ne jamais imposer de défilement horizontal.
+Bloc « L'outil » (`ServiceTool.tsx`) — corrigé une seconde fois, plus de
+lignes ni de tiers : label + h2 (« Make, Zapier ou n8n ? ») colonnes 1-6
+pleine largeur (règle du gabarit § a) via `ServiceSplitIntro`, puis 4
+paragraphes en colonnes 7-12 (règle du décalage), style de paragraphe
+courant de la home (`services.module.css .paragraphs`/`.paragraph` :
+gap 16px, max-width 42ch) — §1 sans intertitre, §2-4 avec un intertitre
+en gras au DÉBUT de leur propre paragraphe (`<strong>`, même `<p>` que
+le texte, jamais séparé). « Gras » : `font-weight: 500` — Instrument
+Sans (corps) ne charge que 400/500 (CLAUDE.md, « Typographie »), un
+écart de seulement 100 entre le corps et le poids maximal disponible,
+sous le seuil de 200 qui justifierait un vrai gras ailleurs sur le site
+(sinon un soulignement) ; ici 500 est le poids le plus fort accessible
+sans charger une graisse de plus ni déclencher un gras synthétique du
+navigateur (`<strong>` par défaut = 700, absent du jeu chargé) — décision
+prise sur demande explicite de Franck (« en gras »), documentée comme
+exception ponctuelle à la règle générale d'emphase. `ServiceStepsThirds`
+n'est plus utilisé par ce bloc (composant toujours disponible pour une
+future page qui voudrait une liste en tiers). Plus de callout « Déjà sur
+Make ou Zapier ? » ni de tableau comparatif dans ce bloc (retirés de la
+page Automatisation — l'idée de reprise de scénario vit maintenant dans
+un carton du rail, voir plus haut) : `ServiceToolCompare.tsx` et son
+`<table>` ont été supprimés. Une future page service qui a besoin d'un
+tableau comparatif devra le reconstruire (pas de composant partagé prêt
+à l'emploi pour ça aujourd'hui). Le carton 2 du rail garde son ancre sur
+le haut du H2 (inchangé par cette correction).
+
+Autres expertises (`ServiceOtherExpertises.tsx`) : liste verticale (plus
+la grille en tiers d'origine) — label, puis 3 lignes empilées pleine
+largeur, trait 1px --line au-dessus de chaque ligne (porté par
+`border-top` sur la ligne elle-même) et sous la dernière (`border-bottom`
+sur le conteneur de liste). Toute la ligne est UN SEUL `<Link>` (nom,
+phrase et le visuel « En savoir plus » vivent tous les trois à
+l'intérieur, un seul lien par ligne pour l'accessibilité) — nom colonnes
+1-4, phrase colonnes 5-9, lien colonnes 10-12 (`justify-self: end`, bord
+droit aligné sur la colonne 12 — corrigé après la 1ʳᵉ version, colonnes
+1-3/4-9/10-12). Au moins 1 gouttière entre la fin du nom le plus long
+(« Référencement ») et le début de la phrase : vérifié EXACT, 20px (1
+gouttière) à 1024px ET à 1440px. Point de rupture PROPRE à ce bloc,
+768px (pas le 1024px du shell) : en dessous, nom/phrase/lien empilés
+dans chaque ligne. `ctaLabel` du contenu (`content/services/
+automatisation.ts`) passé de « Découvrir… » à « En savoir plus » — décidé
+pour cette page uniquement, `content/services.ts` (liens « Découvrir… »
+de la home) non touché, hors sujet de cette correction.
+Un `<a>` ne peut pas en contenir un autre : le visuel du lien reste
+`<ArrowLink>` (même composant, même style que les liens « Découvrir… »
+de la home), mais rendu via son nouveau prop `as="span"` — `ArrowLink.tsx`
+généralisé en pur ajout (`as?: "link" | "span"`, défaut `"link"` :
+AUCUN appel existant ne change de comportement) : `as="span"` rend le
+même balisage/classes en `<span>` plutôt qu'en `<Link>`, non focusable
+(un seul lien par ligne dans l'ordre de tabulation, l'ancêtre). Le
+survol/focus de la LIGNE ENTIÈRE doit faire glisser la flèche (pas
+seulement un survol du petit texte « En savoir plus ») : une règle dans
+ServiceOtherExpertises.module.css cible `[data-direction="right"] svg`
+par ATTRIBUT plutôt que par la classe `.arrow` d'arrow-link.module.css
+(hashée, non importable telle quelle depuis un autre fichier CSS module)
+— `arrow-link.module.css` lui-même reste inchangé.
+
+Inversion au survol/focus-visible de chaque ligne (corrigée après la 1ʳᵉ
+version) : fond --ink, textes (nom, phrase, visuel du lien) --ground,
+200ms, cubic-bezier(0,.55,.45,1), dès 1024px uniquement,
+`transition: none` en `prefers-reduced-motion`. EFFET RETROUVÉ dans
+l'historique git (jamais réinventé, comme demandé) — commit `dbfe3f2`
+(« Mise en page home : … Services sans séparateurs avec inversion au
+survol »), retiré ensuite par `4987482` (« Services : mise en page sans
+inversion charbon ») : mêmes paramètres exacts repris ici. Sur la home
+d'origine, l'effet ciblait `.row:has(.link:hover)` (un lien étiré
+séparé de la ligne) ; ici `.row` EST directement le lien (un seul `<a>`
+par ligne, voir plus haut), donc `.row:hover`/`:focus-visible` suffit,
+sans `:has()`. Le visuel du lien (`ArrowLink as="span"`) a besoin d'une
+règle en plus : `arrow-link.module.css` fixe sa couleur/son filet en
+--ink en permanence (jamais tone-aware) — `.link` (la classe de CE
+fichier, passée en plus à ArrowLink) bascule aussi vers --ground au
+survol de la ligne, sans toucher arrow-link.module.css.
+
+Fond du survol — corrigé une 3ᵉ fois : la 2ᵉ version (débord du fond
+au-delà de la zone de contenu, marge obtenue par un `inset` négatif sur
+le `::before`) débordait dans la marge du shell à gauche et jusqu'aux
+cartons du rail à droite — RIEN ne doit dépasser de la zone de contenu,
+ni à gauche ni à droite. Le `::before` DÉDIÉ sur `.row` reste (fond sur
+un enfant séparé, pas sur `.row` lui-même), mais avec `inset: 0` : il
+couvre EXACTEMENT la boîte de `.row`, qui couvre déjà exactement les
+colonnes 1-12 (grille interne sans padding-inline, « Règle des deux
+axes ») — bord gauche = bord gauche de la colonne 1, bord droit = bord
+droit de la colonne 12, écart 0px des deux côtés, vérifié à 1024/1440/
+1920. `z-index: -1` sur le `::before` inchangé (peint sous tout contenu
+non positionné de son bloc englobant). Coins arrondis 4px — même valeur
+que le trait de la nav (nav.module.css `.rule`, `border-radius: 4px 4px
+0 0`) : rien de neuf, la palette de rayons du site reste fermée
+(CLAUDE.md, « Arrondis »).
+La marge de 24px entre chaque texte et le bord du fond n'est donc plus
+portée par le fond (qui ne déborde plus) mais par un `margin` PERMANENT
+sur `.name` (`margin-left: 24px`) et `.link` (`margin-right: 24px`),
+dans le même bloc `@media (min-width: 768px)` que leurs `grid-column` —
+au repos ET au survol, rien ne bouge : ces textes sont déjà à leur
+position finale. `margin`, pas `padding` : `.link` porte un soulignement
+(border-bottom, arrow-link.module.css) dessiné sur SA PROPRE boîte — un
+padding l'aurait étiré jusqu'au bord de la colonne 12, un margin laisse
+la boîte (et son soulignement) se terminer 24px plus tôt. La phrase
+(colonnes 5-9) n'a pas bougé. Mesuré EXACT aux 3 tailles (1024/1440/
+1920) : 24px à gauche du nom, 24px à droite du lien, écart nom→phrase
+toujours >= 20px (« Référencement », le nom le plus long, ne revient
+jamais à la ligne — la marge de 24px réduit la largeur disponible mais
+le texte avait déjà de la marge, vérifié empiriquement plutôt que
+supposé), écart fond↔carton du rail 20px (> 0px) aux 3 tailles.
+Conséquence bienvenue : puisque le fond ne déborde plus jamais dans la
+colonne du rail, le `.slot` (rail.module.css, `z-index: 65`) qui
+commence juste après la colonne 12 n'intercepte plus rien — la nuance
+signalée à la correction précédente (quelques px de survol mort près du
+rail) a disparu avec elle, vérifié par `elementFromPoint` sur toute la
+largeur de chaque ligne (5 points, aucune interception) dans Chromium.
+
+Bug signalé (survol qui ne se déclenche qu'au clic dans Chrome, pas dans
+Safari) : INVESTIGUÉ, NON REPRODUIT. Méthode : `document.elementFromPoint`
+sur toute la largeur de chaque ligne (aucun élément étranger trouvé, tout
+appartient à la ligne elle-même), recherche de `@media (hover:`/`pointer:`
+dans tout le CSS du site (aucune occurrence), puis survol réel simulé
+(`mouse.move` ET `page.hover()` Playwright) dans Chromium ET WebKit
+headless — les deux déclenchent l'inversion normalement, sans clic
+préalable, dans les 3 lignes. Cause non trouvée sur le build testé ; à
+reproduire avec plus de détails (version de Chrome, OS, `next dev` vs
+build de prod — un artefact de Fast Refresh en dev est une piste
+plausible non exclue) avant de risquer une correction spéculative.
+
+Éléments neufs de la page Automatisation (chaîne du Hero, illustrations
+du bloc 2, bloc « Par où commencer ») : construits avec les tokens et le
+RAYON déjà en usage sur le site, aucune nouvelle valeur — CLAUDE.md,
+« Arrondis » reste une palette fermée (4px / 3px) :
+  chaîne du Hero    notification (fond --ink, texte --ground, pastille
+                    --accent) et les 4 étapes (bordure 1px --ink, trait
+                    2px --accent qui les relie, passé derrière — z-index
+                    0, cartes à 1, fond --ground opaque) : radius 4px
+                    partout (jamais 12px).
+  illustrations     (bloc 2, `ServiceQuadIllustrations.tsx`, aria-hidden)
+                    cadre `color-mix(in srgb, var(--ink) 7%, var(--ground))`
+                    — pas `--cream` : `--ground` est déjà le token vivant
+                    utilisé partout ailleurs sur ce gabarit ;
+                    `--color-cream` reste réservé aux deux surfaces qui
+                    doivent rester FIXES pendant une inversion (CLAUDE.md,
+                    « Couleurs »), hors sujet ici — ces illustrations ne
+                    sont d'ailleurs jamais visibles en même temps que la
+                    Respiration rouge du bloc 4 (sections trop éloignées).
+                    Radius 4px (jamais 12px). Mini-interfaces dessinées à
+                    la main (aucune image), leurs textes vivent dans
+                    `content/services/automatisation.ts`
+                    (`ServiceQuadIllustration`, types.ts, union à 4
+                    variantes).
+
+Bloc 4 — Respiration rouge (`ServiceRedBand.tsx`, ex-« bande rouge »,
+corrigée en variante du mécanisme de la Respiration de la home) : `tone=
+"light"` (page.tsx) comme la Respiration home, PAS `"accent"` — la
+section n'a pas de fond statique, c'est une inversion scroll-triggered
+qui fait apparaître le rouge derrière elle, exactement comme la home
+fait apparaître le charbon. Mécanisme extrait dans `src/lib/
+respiration.ts` (`useRespirationLineReveal` + `useRespirationInversion`)
+pour être PARTAGÉ sans dupliquer la logique (seuils, durée, easing,
+reduced-motion identiques dans les deux cas — RespirationReveal.tsx,
+home, appelle les deux hooks avec leurs valeurs par défaut, comportement
+byte-identique à avant cette extraction, vérifié par captures et mesure
+des attributs avant/pendant/après) :
+  home (défaut)     `useRespirationInversion(ref)` — attribut
+                    `data-inverted` sur `<html>`, règle déjà en place
+                    dans globals.css : --ink ET --ground échangent leurs
+                    valeurs littérales.
+  accent            `useRespirationInversion(ref, "accent")` — attribut
+                    DISTINCT `data-inverted-accent`, règle ADDITIVE dans
+                    globals.css (`--ground: var(--accent)` SEUL, --ink
+                    jamais touché : le texte de cette variante reste
+                    --ink en permanence, jamais inversé). N'affecte
+                    jamais la home (attribut jamais posé sur cette page).
+Contrairement à la Respiration home (une seule phrase, mise en page A),
+ce bloc garde son titre + texte + CTA existants (contenu inchangé) :
+seul le H2 porte la révélation en ligne masquée
+(`useRespirationLineReveal`, classes `.mask`/`.line` réutilisées depuis
+respiration.module.css plutôt que dupliquées) et sert d'ancre à
+l'inversion ; texte et CTA restent statiques. H2 sur les 12 colonnes
+ENTIÈRES (corrigé — auparavant 1-10, règle du gabarit § a) ; texte et
+lien restent en colonnes 7-12. Écart H2 → texte augmenté : 32px → 48px,
+la valeur STANDARD du site pour « titre de section → contenu » en
+desktop (CLAUDE.md, « Shell de page » — 32px n'est que la valeur
+mobile) — mesuré exact, 48px.
+Lisibilité pendant l'inversion (vérifié) : nav et cartons du rail lisent
+`data-tone="light"` (la section ne déclare jamais « accent »), donc
+`--fg: var(--ink)` — et puisque --ink ne bascule jamais dans cette
+variante, leur texte reste sombre, lisible sur le rouge. Piège corrigé :
+l'icône d'un carton du rail encore visible pendant la transition
+(--accent par défaut) devenait invisible sur fond rouge — exception
+ajoutée en pur ajout dans rail.module.css ET mobileRailStack.module.css
+(`html[data-inverted-accent="true"] .cardIcon { color: var(--fg); }`),
+jumelle de l'exception `[data-tone="accent"] .cardIcon` déjà en place,
+sans effet sur la home (attribut jamais posé).
 
 ## Bloc de fin (footer)
 

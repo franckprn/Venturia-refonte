@@ -1,0 +1,29 @@
+/* Style de paragraphe courant de la home (services.module.css
+   .paragraphs/.paragraph, CLAUDE.md « Services (home) ») : gap 16px,
+   max-width 42ch. */
+.paragraphs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 42ch;
+}
+
+.paragraph {
+  margin: 0;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+/* « Gras » — Instrument Sans (corps) ne charge que 400/500 (CLAUDE.md,
+   « Typographie ») : un écart de seulement 100 entre le corps (400) et
+   le maximum disponible, sous le seuil de 200 qui justifierait un vrai
+   gras ailleurs sur le site (sinon un soulignement). Ici, sur demande
+   explicite de Franck (« en gras »), 500 est le poids le plus fort
+   disponible sans charger une graisse supplémentaire ni déclencher un
+   gras synthétique du navigateur (`<strong>` par défaut, 700, absent du
+   jeu de graisses chargées). */
+.heading {
+  font-weight: 500;
+}

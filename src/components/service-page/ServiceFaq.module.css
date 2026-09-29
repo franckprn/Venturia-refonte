@@ -1,4 +1,31 @@
+.left {
+  grid-column: 1 / -1;
+}
+
+.label {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ink);
+}
+
+.title {
+  margin: 0;
+  margin-top: 16px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-title);
+  line-height: var(--t-title-lh);
+  letter-spacing: var(--t-title-ls);
+  color: var(--ink);
+  text-wrap: balance;
+}
+
 .list {
+  grid-column: 1 / -1;
+  margin-top: 32px;
   display: flex;
   flex-direction: column;
 }
@@ -30,4 +57,30 @@
   line-height: var(--t-body-lh);
   letter-spacing: var(--t-body-ls);
   color: var(--ink);
+}
+
+/* Colonne gauche sticky, top aligné sur le haut du rail (CLAUDE.md,
+   « Pages services — gabarit ») — même ligne de grille que .list (pas
+   des lignes séparées comme ServiceSplitIntro) : c'est ce partage de
+   ligne qui donne à la colonne gauche une hauteur de parcours (celle de
+   .list, la plus grande des deux) pendant laquelle rester figée.
+   align-self: start : sans lui, .left s'étire (stretch, défaut de
+   section.module.css .body) sur toute la hauteur de la ligne, et le
+   sticky n'a alors plus aucune marge pour se figer. */
+@media (min-width: 1024px) {
+  .left {
+    grid-column: 1 / 7;
+    grid-row: 1;
+    align-self: start;
+    position: sticky;
+    /* Descendue de 48px par rapport au haut du rail (var(--rail-stick),
+       64px) — demande de Franck : top final = 112px. */
+    top: calc(var(--rail-stick) + 48px);
+  }
+
+  .list {
+    grid-column: 7 / 13;
+    grid-row: 1;
+    margin-top: 0;
+  }
 }

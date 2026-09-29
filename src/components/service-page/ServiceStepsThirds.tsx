@@ -1,6 +1,3 @@
-"use client";
-
-import { useScrollReveal } from "@/components/ScrollReveal";
 import type { ServiceStep } from "@/content/services/types";
 import styles from "./ServiceStepsThirds.module.css";
 
@@ -18,20 +15,19 @@ type ServiceStepsThirdsProps = {
  * exception « série d'éléments égaux »), même style que les étapes du
  * Processus (home, processus.module.css `.step`/`.stepHeading`/
  * `.stepDescription`) : numéro + libellé en JetBrains Mono, description
- * en corps. Autant de lignes de tiers que nécessaire (3 étapes → 1
- * ligne, bloc 5 ; 6 étapes → 2 lignes, bloc 3) — pas de schéma animé
- * (SANS l'équivalent de ProcessusSchemaReveal.tsx), juste la liste.
- * Ni label ni titre ici : posés par le composant appelant (chaque bloc
- * a son propre agencement d'axe pour son en-tête, cf. ServiceProcess.tsx
- * / ServiceRollout.tsx).
+ * en corps. Autant de lignes de tiers que nécessaire selon l'appelant.
+ * Ni label ni titre ici : posés par le composant appelant (chaque bloc a
+ * son propre agencement d'axe pour son en-tête).
+ *
+ * Statique (pas de useScrollReveal) : page construite dans son état
+ * final, sans animation — l'entrée reviendra dans un prompt séparé
+ * (CLAUDE.md, « Pages services — gabarit »).
  */
 export function ServiceStepsThirds({ steps, accentFrom }: ServiceStepsThirdsProps) {
-  const { containerRef, setItemRef } = useScrollReveal<HTMLDivElement>(steps.length);
-
   return (
-    <div ref={containerRef} className={styles.steps}>
+    <div className={styles.steps}>
       {steps.map((step, i) => (
-        <div key={step.number} ref={setItemRef(i)} className={styles.step}>
+        <div key={step.number} className={styles.step}>
           <p className={styles.stepHeading}>
             <span
               className={styles.stepNumber}

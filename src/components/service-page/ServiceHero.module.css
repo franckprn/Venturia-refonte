@@ -1,34 +1,180 @@
 /* ------------------------------------------------------------------ *
- * Bloc 1 (hero) — pages /services/*. Lignes explicites sur la grille
- * externe (bodyStyle rowGap:0, page.tsx) : 1 label, 2 h1, 3 sous-titre
- * + bouton — même technique que .heading/.phrase/.paragraphs dans
- * services.module.css (home) ou .label/.title/.paragraph dans
- * dernier-accompagnement.module.css.
+ * Bloc 1 (hero) — pages /services/*. Plus de label au-dessus du H1
+ * (retiré, CLAUDE.md « Pages services — gabarit »). Lignes explicites
+ * sur la grille externe (bodyStyle rowGap:0, page.tsx) : 1 h1, 2
+ * espaceur, 3 sous-titre+CTA, 4 espaceur, 5 chaîne — DEUX lignes `1fr`
+ * de MÊME plancher (`minmax(Y, 1fr)`) : CSS Grid distribue l'espace
+ * disponible À PARTS ÉGALES entre deux pistes `1fr` identiques, ce qui
+ * centre mécaniquement la ligne sous-titre+CTA à égale distance du H1
+ * et de la chaîne — aucune mesure JS, aucun calcul manuel.
+ *
+ * `spacing="none"` (page.tsx) dès 1024px : le Hero occupe EXACTEMENT le
+ * premier écran, hauteur = 100svh − hauteur de la nav (`<main>` pousse
+ * déjà tout son contenu de `var(--nav-h)`, layout.tsx — sans soustraire
+ * cette valeur ici, le Hero déborderait du premier écran de sa hauteur).
+ * `.body` (bodyClassName) reçoit `height:100%` + les `grid-template-rows`
+ * ci-dessus : h1/sous-titre+CTA/chaîne s'empilent depuis le haut et le
+ * bas, les deux espaceurs absorbent l'espace restant. Sous 1024px :
+ * `.section` garde un padding-block simple (`--section-space` mobile,
+ * 72px), comme n'importe quelle autre section — pas de hauteur figée,
+ * la page peut s'allonger librement.
  * ------------------------------------------------------------------ */
 
-.label {
+.section {
+  padding-block: 72px;
+}
+
+@media (min-width: 1024px) {
+  .section {
+    height: calc(100svh - var(--nav-h));
+    padding-top: 120px;
+    /* Marge basse de la chaîne : même valeur que les autres éléments
+       calés en bas sur la home — aucun précédent direct trouvé (la
+       home n'a pas d'élément calé en bas de section de cette façon),
+       repli 48px signalé à Franck. */
+    padding-bottom: 48px;
+  }
+}
+
+/* Fenêtres courtes (< 800px de haut, ex. 1366×657, 1280×720) : le
+   contenu (label + h1 2 lignes + sous-titre/CTA + chaîne) ne tient plus
+   dans 100svh − nav avec les espacements ci-dessus — décision de
+   Franck, hybride :
+   1. espacements internes réduits (JAMAIS le H1 lui-même) : padding-top,
+      écart sous-titre→chaîne, paddings internes de la chaîne ;
+   2. si ça ne suffit toujours pas (1366×657) : `min-height` au lieu de
+      `height` — le Hero est alors autorisé à dépasser légèrement le
+      premier écran plutôt que de couper la chaîne, exactement comme le
+      plancher 240px du Hero de la home (CLAUDE.md, « Hero (home) »).
+   `min-height` + `minmax(Xpx, 1fr)` sur `.body` couvrent les DEUX cas
+   avec un seul mécanisme : si le contenu tient dans le plancher, la
+   ligne 1fr absorbe le reste (résultat identique à `height` fixe) ; s'il
+   dépasse, la section grandit avec son contenu (jamais de clip), la
+   ligne 1fr retombe à son minimum.
+   Mesuré (Playwright, build de prod) : 1280×720 tient désormais dans le
+   premier écran (marge basse résiduelle 8px, contre 48px au-dessus de
+   800px de haut) ; 1366×657 dépasse encore de 72px (contre 184px avant
+   ces réductions) — la chaîne reste entière, jamais coupée. */
+@media (min-width: 1024px) and (max-height: 799px) {
+  .section {
+    height: auto;
+    min-height: calc(100svh - var(--nav-h));
+    padding-top: 48px;
+  }
+}
+
+.body {
+  display: grid;
+}
+
+@media (min-width: 1024px) {
+  .body {
+    height: 100%;
+    /* minmax(32px, 1fr) × 2, MÊME plancher : au moins 32px de chaque
+       côté du sous-titre+CTA même si le contenu remplit presque tout
+       l'écran, et — les deux pistes étant de fraction 1fr IDENTIQUE —
+       tout espace au-delà de ce plancher se répartit à parts égales
+       entre les deux, centrant la ligne sous-titre+CTA. */
+    grid-template-rows: auto minmax(32px, 1fr) auto minmax(32px, 1fr) auto;
+  }
+}
+
+@media (min-width: 1024px) and (max-height: 799px) {
+  .body {
+    height: auto;
+    min-height: 100%;
+    grid-template-rows: auto minmax(16px, 1fr) auto minmax(16px, 1fr) auto;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Titre — 12 colonnes ENTIÈRES (contrairement au reste du gabarit,
+ * colonnes 1-9 habituellement) : c'est la seule page qui a besoin du
+ * texte le plus grand possible tout en tenant sur EXACTEMENT 2 lignes à
+ * 1440 et 1920px. `line1`/`line2` (ServiceHero.tsx) sont deux lignes
+ * EXPLICITES, jamais laissées au navigateur (même principe que
+ * `line1`/`line2` du bloc de fin, content/footer.ts) — `line1`, la plus
+ * longue des deux (« Agence automatisation »), est celle qui calibre la
+ * taille du texte.
+ *
+ * Calibrage géométrique — même TECHNIQUE que --hero-title-cqi (home,
+ * hero.module.css) et --mass-title-cqi (footer, footer.module.css) :
+ * une constante cqi mesurée par Playwright sur le texte/police/graisse
+ * réels, jamais un pourcentage codé à l'oeil. Mais contrairement au hero
+ * de la home (qui cible 9 COLONNES sur 12, une largeur AFFINE à cause
+ * des gouttières fixes en px — aucun multiplicateur cqi ne peut l'égaler
+ * exactement à toute largeur), ce titre cible la largeur ENTIÈRE du
+ * conteneur (12/12, comme le titre géant du footer, pas un
+ * sous-ensemble de colonnes) : cette largeur est purement
+ * PROPORTIONNELLE au conteneur (text = k·font-size, font-size =
+ * cqi×W/100 ⇒ text = cqi·k·W/100, une droite PAR L'ORIGINE) — un seul
+ * calibrage suffit et reste EXACT à toute largeur, sans le résidu
+ * d'erreur assumé pour le hero de la home. `.titleWrap` porte le
+ * container cqi (jamais le h1 lui-même, même précaution que .titleWrap
+ * au Hero) : W = largeur des 12 colonnes de cette page (identique à
+ * .titleWrap du hero home, aucun rail sur cette section).
+ *
+ * `--service-hero-title-cqi: 9.1116` mesuré Playwright (build de prod) :
+ * k = largeur de « Agence automatisation » à 100px / 100 = 10.975 (mesuré
+ * sur un <span> ISOLÉ — hors grille, hors container query — même police/
+ * graisse/letter-spacing ; nécessaire ici, contrairement au hero de la
+ * home, car mesurer DANS la grille réelle avant calibrage crée une boucle
+ * : la piste `1fr` du Shell peut grandir avec le texte si celui-ci
+ * dépasse son min-content par défaut). cqi = 100/k = 9.1116 fait tenir
+ * `line1` sur EXACTEMENT 100 % de la largeur de `.titleWrap` — vérifié
+ * 1 seule ligne (jamais de retour interne) et écart ≤ 0,1px (arrondi
+ * sous-pixel) à 1024, 1280, 1440, 1728, 1920px. `white-space: nowrap`
+ * (voir `.title` plus bas) est OBLIGATOIRE à cette précision : à une
+ * taille calibrée pile à la largeur du conteneur, un retour à la ligne
+ * par mot (comportement par défaut) se déclencherait à la moindre
+ * fraction de pixel. Recalibrer UNIQUEMENT si le texte, la police, la
+ * graisse OU la géométrie de la grille changent (CLAUDE.md, « Hero
+ * (home) », même règle). */
+.titleWrap {
+  grid-row: 1;
   grid-column: 1 / -1;
-  margin: 0;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--t-mono);
-  line-height: var(--t-mono-lh);
-  letter-spacing: var(--t-mono-ls);
-  color: var(--ink);
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .titleWrap {
+    container-type: inline-size;
+    --service-hero-title-cqi: 9.1116;
+  }
 }
 
 .title {
-  grid-column: 1 / -1;
   margin: 0;
-  margin-top: 16px;
+  width: 100%;
   font-family: var(--font-display), system-ui, sans-serif;
-  font-weight: 600;
+  font-weight: 800;
   font-size: var(--t-title-lg);
   line-height: var(--t-title-lg-lh);
   letter-spacing: var(--t-title-lg-ls);
   color: var(--ink);
+  /* Découpage forcé par line1/line2 (ServiceHero.tsx), jamais
+     text-wrap: balance ici : le point de coupe ne doit jamais dépendre
+     du navigateur (CLAUDE.md, même principe que le h1 du Hero home). */
+  text-wrap: wrap;
+}
+
+@media (min-width: 1024px) {
+  .title {
+    font-size: calc(var(--service-hero-title-cqi) * 1cqi);
+    line-height: 1.08;
+    /* `line1` est calibrée pour occuper EXACTEMENT 100 % de la largeur du
+       conteneur (voir le commentaire au-dessus de .titleWrap) : à cette
+       taille pile à la limite, un retour à la ligne interne (mot par
+       mot, comportement par défaut) se déclencherait à la moindre
+       fraction de pixel — `nowrap` garde chaque ligne EXPLICITE
+       (line1/line2, séparées par le <br/>) sur une seule ligne réelle,
+       jamais sous-coupée. */
+    white-space: nowrap;
+  }
 }
 
 .bottom {
+  grid-row: 3;
   grid-column: 1 / -1;
   margin-top: 32px;
   display: flex;
@@ -47,13 +193,186 @@
 }
 
 @media (min-width: 1024px) {
-  .title {
-    grid-column: 1 / 10; /* colonnes 1 à 9 */
-    margin-top: 24px;
+  .bottom {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: var(--shell-gutter);
+    /* Plus de margin-top fixe ici : les deux lignes `minmax(Y, 1fr)` de
+       `.body` (ci-dessus) portent maintenant tout l'écart au-dessus ET
+       en dessous de cette ligne — un margin-top fixe s'ajouterait
+       par-dessus et romprait l'égalité des deux écarts. */
+    margin-top: 0;
+    align-items: start;
   }
 
-  .bottom {
-    grid-column: 7 / 13; /* colonnes 7 à 12, sous le h1 */
-    margin-top: 48px;
+  .subtitle {
+    grid-column: 1 / 7;
+  }
+
+  .cta {
+    grid-column: 7 / 13;
+    /* Bouton aligné à droite : bord droit sur le bord droit de la zone
+       de contenu (fin de la colonne 12) — sans ça, un lien
+       `width: fit-content` (arrow-link.module.css) se cale au DÉBUT de
+       sa zone de grille (colonne 7), pas à la fin. */
+    justify-self: end;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Chaîne — notification + 4 étapes reliées par un trait --accent.
+ * Radius 4px partout (jamais 12px) : le site n'a que deux valeurs de
+ * rayon, 4px et 3px pour les tags (CLAUDE.md, « Arrondis ») — palette
+ * fermée, aucune nouvelle valeur pour ces éléments neufs.
+ * ------------------------------------------------------------------ */
+.chain {
+  grid-row: 5;
+  grid-column: 1 / -1;
+  align-self: end;
+  margin-top: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (min-width: 1024px) {
+  .chain {
+    /* La ligne 4 (minmax(32px, 1fr)) porte déjà tout l'écart au-dessus
+       de la chaîne — un margin-top fixe s'ajouterait par-dessus. */
+    margin-top: 0;
+  }
+}
+
+/* Fenêtres courtes (< 800px de haut) : paddings internes de la chaîne
+   resserrés (jamais le H1) — voir le commentaire de `.section` plus
+   haut. */
+@media (min-width: 1024px) and (max-height: 799px) {
+  .chain {
+    gap: 16px;
+  }
+}
+
+.notification {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 4px;
+  background: var(--ink);
+  color: var(--ground);
+}
+
+@media (min-width: 1024px) and (max-height: 799px) {
+  .notification {
+    padding: 10px 14px;
+  }
+}
+
+.notificationDot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.notificationLabel {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ground);
+}
+
+.notificationTitle {
+  margin: 4px 0 0;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-body);
+  line-height: 1.3;
+  color: var(--ground);
+}
+
+/* Mobile (< 1024px) : chaîne verticale — le trait --accent (.steps
+   ::before) devient une ligne verticale au lieu d'horizontale, voir
+   plus bas. */
+.steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.steps::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 19px;
+  width: 2px;
+  background: var(--accent);
+  z-index: 0;
+}
+
+.step {
+  position: relative;
+  z-index: 1;
+  padding: 14px;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  background: var(--ground);
+}
+
+@media (min-width: 1024px) and (max-height: 799px) {
+  .step {
+    padding: 10px;
+  }
+}
+
+.stepNumber {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ink);
+}
+
+.stepTitle {
+  margin: 6px 0 0;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-body);
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.stepStatus {
+  margin: 4px 0 0;
+  font-size: var(--t-small);
+  line-height: var(--t-small-lh);
+  letter-spacing: var(--t-small-ls);
+  color: var(--accent);
+}
+
+@media (min-width: 1024px) {
+  .steps {
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 20px;
+  }
+
+  /* Trait horizontal : passe derrière les cartes (z-index 0, cartes à
+     1 avec fond --ground opaque) — visible seulement dans les
+     interstices entre elles, ce qui donne l'impression qu'il les relie. */
+  .steps::before {
+    top: 24px;
+    bottom: auto;
+    left: 0;
+    right: 0;
+    width: auto;
+    height: 2px;
   }
 }

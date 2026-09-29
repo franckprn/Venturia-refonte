@@ -225,6 +225,17 @@ html[data-inverted="true"] {
   --ground: var(--color-charcoal);
 }
 
+/* Variante « accent » du même mécanisme (src/lib/respiration.ts,
+   `useRespirationInversion(ref, "accent")`) — bande rouge de la page
+   /services/automations (ServiceRedBand.tsx) : SEUL --ground bascule,
+   jamais --ink (le texte de cette variante reste --ink en permanence,
+   CLAUDE.md « Pages services — gabarit »). Additive : un attribut
+   DISTINCT de `data-inverted` ci-dessus, qui reste inchangé pour la
+   home. */
+html[data-inverted-accent="true"] {
+  --ground: var(--accent);
+}
+
 /* Transition posée sur une classe armée par JS APRÈS le premier rendu
    (voir RespirationReveal.tsx), jamais inconditionnellement sur `html` :
    sans ce garde-fou, un chargement en milieu de scroll qui démarre déjà

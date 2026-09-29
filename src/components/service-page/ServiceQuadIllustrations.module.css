@@ -1,0 +1,182 @@
+/* ------------------------------------------------------------------ *
+ * Illustrations décoratives du bloc 2. Radius 4px (jamais 12px, palette
+ * fermée — CLAUDE.md, « Arrondis ») ; fond color-mix sur --ground (pas
+ * --cream : cette page n'inverse jamais, --ground est le token vivant
+ * déjà utilisé partout ailleurs sur ce gabarit, --color-cream est
+ * réservé aux deux surfaces qui doivent rester fixes pendant la
+ * Respiration de la home — CLAUDE.md, « Couleurs »).
+ * ------------------------------------------------------------------ */
+
+.frame {
+  height: 220px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--ink) 7%, var(--ground));
+}
+
+.card {
+  width: 100%;
+  max-width: 220px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--ground);
+}
+
+/* ---- Fiche produit ---- */
+.product {
+  display: grid;
+  gap: 8px;
+}
+
+.productImage {
+  height: 56px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--ink) 10%, var(--ground));
+}
+
+.productName {
+  margin: 0;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.productFields {
+  display: grid;
+  gap: 4px;
+}
+
+.productField {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--ink);
+}
+
+.badge {
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* ---- Emails clients ---- */
+.emails {
+  display: grid;
+  gap: 8px;
+}
+
+.email,
+.emailDark {
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.emailDark {
+  border-color: var(--ink);
+  background: var(--ink);
+}
+
+.emailLabel,
+.emailLabelAccent {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.emailLabelAccent {
+  color: var(--accent);
+}
+
+.emailDark .emailSubject {
+  color: var(--ground);
+}
+
+.emailSubject {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+/* ---- Avis Google ---- */
+.review {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.reviewQuestion {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.stars {
+  display: flex;
+  gap: 3px;
+}
+
+.reviewButton {
+  padding: 8px 14px;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--ink);
+}
+
+/* ---- Factures ---- */
+.invoice {
+  display: grid;
+  gap: 12px;
+}
+
+.invoiceHeading {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.invoiceBars {
+  display: grid;
+  gap: 6px;
+}
+
+.invoiceBar {
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--ink) 16%, var(--ground));
+}
+
+.invoiceRecipients {
+  display: grid;
+  gap: 4px;
+}
+
+.invoiceRecipient {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--ink);
+}
+
+.invoiceCheck {
+  color: var(--accent);
+}

@@ -302,3 +302,49 @@ export const IconFlow = forwardRef<RailIconHandle, IconProps>(function IconFlow(
     </svg>
   );
 });
+
+/**
+ * Carton « Déjà sur Make ou Zapier ? » (page /services/automations) : deux
+ * flèches courbes en sens opposés, l'idée d'un échange/bascule d'un outil
+ * vers un autre — aucune des 5 icônes existantes ne porte cette idée de
+ * migration (IconConnect = relier, IconFlow = enchaîner). Chaque flèche est
+ * un seul <path> (ligne + chevron), même motif que IconArrowRight/IconFlow.
+ *
+ * Au déclenchement : la flèche du haut avance vers la droite puis revient,
+ * celle du bas vers la gauche puis revient, légèrement décalées (stagger
+ * 100ms) — une lecture « ça bascule d'un sens à l'autre ». 400ms au total,
+ * dans le budget du CLAUDE.md (« Rail droit », animations ≤ 400ms).
+ */
+export const IconSwap = forwardRef<RailIconHandle, IconProps>(function IconSwap({ className }, ref) {
+  const topRef = useRef<SVGPathElement>(null);
+  const bottomRef = useRef<SVGPathElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+
+  useEffect(() => {
+    ctxRef.current = gsap.context(() => {});
+    return () => ctxRef.current?.revert();
+  }, []);
+
+  useImperativeHandle(ref, () => ({
+    play: () => {
+      const top = topRef.current;
+      const bottom = bottomRef.current;
+      if (!top || !bottom) return;
+      ctxRef.current?.add(() => {
+        gsap
+          .timeline()
+          .to(top, { x: 1.5, duration: 0.2, ease: VENTURIA_EASE }, 0)
+          .to(top, { x: 0, duration: 0.2, ease: VENTURIA_EASE }, 0.2)
+          .to(bottom, { x: -1.5, duration: 0.2, ease: VENTURIA_EASE }, 0.1)
+          .to(bottom, { x: 0, duration: 0.2, ease: VENTURIA_EASE }, 0.3);
+      });
+    },
+  }));
+
+  return (
+    <svg {...SHARED_PROPS} className={className}>
+      <path ref={topRef} d="M4 7H14.5M12 4.5L14.5 7L12 9.5" />
+      <path ref={bottomRef} d="M16 13H5.5M8 10.5L5.5 13L8 15.5" />
+    </svg>
+  );
+});

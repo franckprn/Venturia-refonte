@@ -12,6 +12,15 @@ type ArrowLinkProps = {
    *  survol — CLAUDE.md, « Services (home) »). Par défaut "down". */
   direction?: ArrowDirection;
   className?: string;
+  /** "link" (défaut, comportement inchangé) rend un vrai `<Link>`.
+   *  "span" rend le même balisage/style visuel SANS lien propre — pour
+   *  un usage niché dans un ancêtre déjà cliquable (une ligne entière
+   *  transformée en `<Link>`, CLAUDE.md « Autres expertises ») : un `<a>`
+   *  imbriqué dans un `<a>` est invalide et casserait la zone cliquable
+   *  de l'ancêtre. Non focusable (pas de tabindex) : un seul lien par
+   *  ligne dans l'ordre de tabulation, l'ancêtre. `href` reste requis
+   *  dans les deux cas (simplicité de l'API), ignoré si `as="span"`. */
+  as?: "link" | "span";
 };
 
 const ARROW_PATH: Record<ArrowDirection, string> = {
@@ -41,7 +50,7 @@ const ARROW_PATH: Record<ArrowDirection, string> = {
  * droite) — seul l'ORDRE change, le balisage et les classes restent
  * les mêmes des deux côtés.
  */
-export function ArrowLink({ href, label, direction = "down", className }: ArrowLinkProps) {
+export function ArrowLink({ href, label, direction = "down", className, as = "link" }: ArrowLinkProps) {
   const arrow = (
     <svg
       className={styles.arrow}
@@ -61,23 +70,31 @@ export function ArrowLink({ href, label, direction = "down", className }: ArrowL
     </svg>
   );
 
+  const classNameFull = [styles.link, className].filter(Boolean).join(" ");
+  const content =
+    direction === "right" ? (
+      <>
+        {label}
+        {arrow}
+      </>
+    ) : (
+      <>
+        {arrow}
+        {label}
+      </>
+    );
+
+  if (as === "span") {
+    return (
+      <span className={classNameFull} data-direction={direction}>
+        {content}
+      </span>
+    );
+  }
+
   return (
-    <Link
-      href={href}
-      className={[styles.link, className].filter(Boolean).join(" ")}
-      data-direction={direction}
-    >
-      {direction === "right" ? (
-        <>
-          {label}
-          {arrow}
-        </>
-      ) : (
-        <>
-          {arrow}
-          {label}
-        </>
-      )}
+    <Link href={href} className={classNameFull} data-direction={direction}>
+      {content}
     </Link>
   );
 }

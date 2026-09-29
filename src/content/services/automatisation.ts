@@ -15,31 +15,57 @@ export const automatisation: ServicePageContent = {
   },
 
   hero: {
-    label: "AUTOMATISATION · TOULOUSE",
-    title: "Agence automatisation n8n à Toulouse",
+    titleLine1: "Agence automatisation",
+    titleLine2: "n8n à Toulouse",
     subtitle:
       "Fiches produits à jour et emails envoyés à chaque étape de la " +
-      "commande : on automatise votre boutique en ligne avec n8n, à " +
+      "commande : on automatise votre boutique en ligne avec n8n, à " +
       "partir de vos outils actuels.",
     cta: { label: "Réserver 20 minutes", href: "/contact" },
+    chain: {
+      notification: {
+        label: "VOTRE BOUTIQUE · À L'INSTANT",
+        title: "Nouvelle commande reçue",
+      },
+      steps: [
+        { number: "01", title: "Facture", status: "Envoyée au client et au comptable" },
+        { number: "02", title: "Stock", status: "À jour sur tous vos canaux" },
+        { number: "03", title: "Atelier", status: "Commande transmise à votre fabricant" },
+        { number: "04", title: "Avis", status: "Demande prévue après livraison" },
+      ],
+    },
   },
 
   quadBlock: {
-    label: "CE QU'ON AUTOMATISE",
+    label: "AUTOMATISATIONS E-COMMERCE",
     title: "Ce qui tourne seul dans votre boutique",
     cards: [
       {
         title: "Fiches produits",
         text:
-          "Prix, stocks, descriptions : vos fiches se mettent à jour à " +
+          "Prix, stocks, descriptions : vos fiches se mettent à jour à " +
           "partir de votre fichier fournisseur ou de votre outil de " +
           "gestion, sans ressaisie.",
+        illustration: {
+          kind: "product",
+          name: "Fiche produit",
+          fields: ["Prix", "Stock", "Description"],
+          badge: "↻ à jour",
+        },
       },
       {
         title: "Emails clients",
         text:
           "Confirmation, expédition, livraison, conseils d'utilisation, " +
-          "réachat : chaque client reçoit le bon message au bon moment.",
+          "réachat : chaque client reçoit le bon message au bon moment.",
+        illustration: {
+          kind: "emails",
+          emails: [
+            { label: "COMMANDE", subject: "Votre commande est confirmée" },
+            { label: "EXPÉDITION", subject: "Votre colis est en route" },
+            { label: "QUELQUES JOURS APRÈS", subject: "Nos conseils d'entretien" },
+          ],
+        },
       },
       {
         title: "Avis Google",
@@ -47,68 +73,64 @@ export const automatisation: ServicePageContent = {
           "Quelques jours après la livraison, vos clients reçoivent un " +
           "lien pour laisser un avis. Chaque nouvel avis rassure les " +
           "visiteurs suivants.",
+        illustration: {
+          kind: "review",
+          question: "Votre colis est bien arrivé ?",
+          buttonLabel: "Laisser un avis",
+        },
       },
       {
         title: "Factures",
         text:
           "Chaque commande génère sa facture, envoyée à votre client et " +
           "rangée pour votre comptable.",
+        illustration: {
+          kind: "invoice",
+          heading: "FACTURE",
+          recipients: ["→ Client ✓", "→ Comptable ✓"],
+        },
       },
     ],
   },
 
-  process: {
-    label: "EXEMPLE DE PARCOURS",
-    title: "Un email à chaque étape, de la commande au réachat",
-    paragraph:
-      "Votre plateforme envoie déjà la confirmation et l'avis " +
-      "d'expédition. On ajoute les messages qui suivent la livraison : " +
-      "ceux qui donnent envie de laisser un avis et de commander à " +
-      "nouveau. Chaque email part au bon moment, depuis votre outil " +
-      "d'emailing actuel.",
-    steps: [
+  starting: {
+    label: "PAR OÙ COMMENCER",
+    title: "Les premiers flux, selon votre boutique",
+    text:
+      "On commence par la tâche qui vous prend le plus de temps chaque " +
+      "semaine. Trois situations reviennent souvent.",
+    items: [
       {
-        number: "01",
-        label: "Commande",
-        description: "Confirmation et récapitulatif, dès la commande.",
+        title: "Vous vendez sur plusieurs canaux",
+        text:
+          "Site, marketplace, boutique physique : vos stocks et vos " +
+          "fiches produits restent alignés partout, sans ressaisie.",
       },
       {
-        number: "02",
-        label: "Expédition",
-        description: "Le numéro de suivi, dès le départ du colis.",
+        title: "Vous faites fabriquer vos produits",
+        text:
+          "Chaque commande part chez votre atelier ou votre fournisseur, " +
+          "avec les bonnes références.",
       },
       {
-        number: "03",
-        label: "Livraison",
-        description:
-          "Un message à l'arrivée du colis, avec vos coordonnées en cas " +
-          "de question.",
-      },
-      {
-        number: "04",
-        label: "Quelques jours après",
-        description:
-          "Les conseils d'utilisation et d'entretien du produit reçu.",
-      },
-      {
-        number: "05",
-        label: "Avis",
-        description: "Un lien direct pour laisser un avis Google.",
-      },
-      {
-        number: "06",
-        label: "Quelques semaines après",
-        description:
-          "Un produit complémentaire, ou un rappel quand il est temps de " +
-          "racheter.",
+        title: "Vous gérez tout seul",
+        text:
+          "Factures, demandes d'avis, emails de relance pour repasser " +
+          "commande : ce qui se répète part sans vous, et vous gardez " +
+          "votre temps pour vendre.",
       },
     ],
-    note: "Délais et messages réglés selon vos produits.",
+  },
+
+  redBand: {
+    title: "Quelle tâche vous prend le plus de temps ?",
+    text: "Lors du premier appel, on voit ensemble comment vous en décharger.",
+    cta: { label: "Réserver 20 minutes", href: "/contact" },
   },
 
   tool: {
     label: "L'OUTIL",
-    title: "Make, Zapier ou n8n : on construit tout sur n8n",
+    title: "Make, Zapier ou n8n ?",
     intro:
       "Zapier, Make et n8n répondent au même besoin : relier vos " +
       "outils pour que les tâches s'enchaînent seules. On a choisi n8n, " +
@@ -116,80 +138,23 @@ export const automatisation: ServicePageContent = {
       "raisons concrètes.",
     sections: [
       {
-        heading: "Un coût stable",
+        heading: "Un coût stable.",
         text:
           "Zapier facture chaque action, Make chaque étape exécutée. n8n " +
           "tourne sur un serveur au prix fixe, que votre boutique traite " +
           "dix commandes par mois ou mille.",
       },
       {
-        heading: "Un serveur en Europe",
+        heading: "Un serveur en Europe.",
         text:
           "On héberge n8n sur notre serveur en Europe et on s'occupe de " +
           "tout. Si vous préférez, on l'installe sur votre propre serveur.",
       },
       {
-        heading: "Votre boutique, déjà compatible",
+        heading: "Votre boutique, déjà compatible.",
         text:
           "Shopify et WooCommerce se connectent directement à n8n. " +
           "PrestaShop se branche aussi, via son API.",
-      },
-    ],
-    callout: {
-      title: "Déjà sur Make ou Zapier ?",
-      text:
-        "Vos scénarios tournent déjà sur Make ou Zapier ? On les " +
-        "reconstruit sur n8n, et vos outils restent les mêmes.",
-    },
-    table: {
-      columns: ["Zapier", "Make", "n8n, chez Venturia"],
-      rows: [
-        {
-          label: "Facturation",
-          values: ["À chaque action", "À chaque étape exécutée", "Prix fixe du serveur"],
-        },
-        {
-          label: "Hébergement",
-          values: [
-            "Serveurs de l'éditeur",
-            "Serveurs de l'éditeur",
-            "Notre serveur en Europe, ou le vôtre",
-          ],
-        },
-        {
-          label: "Quand le volume monte",
-          values: ["La facture suit", "La facture suit", "Le prix reste le même"],
-        },
-      ],
-    },
-  },
-
-  rollout: {
-    label: "DÉROULÉ",
-    title: "De votre premier message à vos premiers flux",
-    steps: [
-      {
-        number: "01",
-        label: "Votre boutique",
-        description:
-          "Vous nous envoyez votre site et la liste des outils que vous " +
-          "utilisez. On les étudie avant de vous appeler.",
-      },
-      {
-        number: "02",
-        label: "L'appel",
-        description:
-          "En 20 minutes, on choisit ensemble les tâches à automatiser " +
-          "en premier, et on vous dit combien de temps prendra leur " +
-          "mise en place.",
-      },
-      {
-        number: "03",
-        label: "La mise en service",
-        description:
-          "De quelques jours à quelques semaines, selon la complexité. " +
-          "Chaque flux est livré avec une notice écrite, puis ajusté " +
-          "selon vos retours.",
       },
     ],
   },
@@ -238,7 +203,7 @@ export const automatisation: ServicePageContent = {
           "Une demande d'avis après livraison se met en place vite ; " +
           "une mise à jour de fiches produits à partir de plusieurs " +
           "sources demande plus de temps. On vous donne le délai exact " +
-          "pendant l'appel.",
+          "pendant l'appel. Chaque flux est livré avec sa notice écrite.",
       },
     ],
   },
@@ -249,19 +214,19 @@ export const automatisation: ServicePageContent = {
       {
         name: "Référencement",
         phrase: "Être trouvé sur Google, et cité par les IA.",
-        ctaLabel: "Découvrir le référencement",
+        ctaLabel: "En savoir plus",
         href: "/services/referencement",
       },
       {
         name: "Publicité",
         phrase: "Plus de commandes, sans attendre.",
-        ctaLabel: "Découvrir la publicité",
+        ctaLabel: "En savoir plus",
         href: "/services/publicite",
       },
       {
         name: "Site internet",
         phrase: "Un site à votre image, pensé pour convertir.",
-        ctaLabel: "Découvrir la création de site",
+        ctaLabel: "En savoir plus",
         href: "/services/site-internet",
       },
     ],
@@ -277,12 +242,10 @@ export const automatisation: ServicePageContent = {
         "automatiquement la suivante.",
     },
     {
-      title: "Une tâche qui s'enchaîne seule",
-      resume: "Un flux, c'est quoi ?",
+      title: "On reprend vos scénarios",
+      resume: "Déjà sur Make ou Zapier ?",
       text:
-        "Un déclencheur, par exemple une nouvelle commande, puis une " +
-        "suite d'actions : facture envoyée, email au client, fiche " +
-        "produit mise à jour.",
+        "On les reconstruit sur n8n, et vos outils restent les mêmes.",
     },
     {
       title: "20 minutes, sans engagement",

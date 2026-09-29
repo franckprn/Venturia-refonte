@@ -242,6 +242,20 @@
   color: var(--fg);
 }
 
+/* Même exception, déclenchée par la Respiration rouge (page
+   /services/automations, src/lib/respiration.ts) plutôt que par une
+   tonalité de section statique : pendant que le fond de toute la page
+   bascule vers --accent, un carton du rail encore visible sur une
+   section data-tone="light" ne prend pas la règle ci-dessus (sa section
+   n'est pas "accent") — sans ce relais, son icône (--accent par défaut)
+   deviendrait rouge sur rouge. `html[data-inverted-accent="true"]`
+   n'est JAMAIS posé sur la home (attribut propre à cette page,
+   CLAUDE.md « Pages services — gabarit ») : règle additive, sans effet
+   ailleurs. */
+html[data-inverted-accent="true"] .cardIcon {
+  color: var(--fg);
+}
+
 .cardIconSvg {
   width: 20px;
   height: 20px;
