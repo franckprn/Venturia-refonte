@@ -39,59 +39,27 @@ export type ServiceHero = {
   chain: ServiceHeroChain;
 };
 
-/** Bloc 2 — 4 cartes en quarts, chacune précédée d'une illustration
- *  décorative (CLAUDE.md, « Pages services — gabarit »). `illustration`
- *  est optionnelle : une page sans mini-interface à dessiner peut
- *  laisser le bloc sans elle. */
-export type ServiceQuadIllustrationProduct = {
-  kind: "product";
-  /** "Fiche produit". */
+/** Bloc 2 — frise du parcours de commande : label + h2 (axe gauche,
+ *  pleine largeur, gabarit § a — pas de texte décalé en vis-à-vis),
+ *  puis 3 moments en tiers (gabarit § b) reliés par une ligne continue
+ *  (--line) portant un point par moment. `tasks` n'est volontairement
+ *  pas un tuple de longueur fixe : chaque moment porte un nombre de
+ *  tâches différent (1, 3 puis 2 sur la page Automatisation). */
+export type ServiceTimelineTask = {
   name: string;
-  /** Prix / Stock / Description, dans cet ordre. */
-  fields: [string, string, string];
-  /** "↻ à jour". */
-  badge: string;
-};
-
-export type ServiceQuadIllustrationEmails = {
-  kind: "emails";
-  emails: [
-    { label: string; subject: string },
-    { label: string; subject: string },
-    { label: string; subject: string },
-  ];
-};
-
-export type ServiceQuadIllustrationReview = {
-  kind: "review";
-  question: string;
-  buttonLabel: string;
-};
-
-export type ServiceQuadIllustrationInvoice = {
-  kind: "invoice";
-  /** "FACTURE". */
-  heading: string;
-  /** "→ Client ✓" / "→ Comptable ✓", dans cet ordre. */
-  recipients: [string, string];
-};
-
-export type ServiceQuadIllustration =
-  | ServiceQuadIllustrationProduct
-  | ServiceQuadIllustrationEmails
-  | ServiceQuadIllustrationReview
-  | ServiceQuadIllustrationInvoice;
-
-export type ServiceQuadCard = {
-  title: string;
   text: string;
-  illustration?: ServiceQuadIllustration;
 };
 
-export type ServiceQuadBlock = {
+export type ServiceTimelineMoment = {
+  /** JetBrains Mono majuscule — déjà en majuscules dans le contenu. */
+  label: string;
+  tasks: ServiceTimelineTask[];
+};
+
+export type ServiceTimelineBlock = {
   label: string;
   title: string;
-  cards: [ServiceQuadCard, ServiceQuadCard, ServiceQuadCard, ServiceQuadCard];
+  moments: [ServiceTimelineMoment, ServiceTimelineMoment, ServiceTimelineMoment];
 };
 
 /** Bloc 3 — « Par où commencer » : intro (mise en page B, ServiceSplitIntro)
@@ -181,7 +149,7 @@ export type ServiceOtherExpertisesBlock = {
 export type ServicePageContent = {
   meta: { title: string; description: string };
   hero: ServiceHero;
-  quadBlock: ServiceQuadBlock;
+  timeline: ServiceTimelineBlock;
   starting: ServiceStartingBlock;
   redBand: ServiceRedBandBlock;
   tool: ServiceToolBlock;

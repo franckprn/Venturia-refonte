@@ -36,59 +36,52 @@ export const automatisation: ServicePageContent = {
     },
   },
 
-  quadBlock: {
+  timeline: {
     label: "AUTOMATISATIONS E-COMMERCE",
     title: "Ce qui tourne seul dans votre boutique",
-    cards: [
+    moments: [
       {
-        title: "Fiches produits",
-        text:
-          "Prix, stocks, descriptions : vos fiches se mettent à jour à " +
-          "partir de votre fichier fournisseur ou de votre outil de " +
-          "gestion, sans ressaisie.",
-        illustration: {
-          kind: "product",
-          name: "Fiche produit",
-          fields: ["Prix", "Stock", "Description"],
-          badge: "↻ à jour",
-        },
+        label: "AVANT LA VENTE",
+        tasks: [
+          {
+            name: "Fiches produits",
+            text:
+              "Titres, prix et descriptions mis à jour sur tous vos " +
+              "canaux à partir d'un seul fichier.",
+          },
+        ],
       },
       {
-        title: "Emails clients",
-        text:
-          "Confirmation, expédition, livraison, conseils d'utilisation, " +
-          "réachat : chaque client reçoit le bon message au bon moment.",
-        illustration: {
-          kind: "emails",
-          emails: [
-            { label: "COMMANDE", subject: "Votre commande est confirmée" },
-            { label: "EXPÉDITION", subject: "Votre colis est en route" },
-            { label: "QUELQUES JOURS APRÈS", subject: "Nos conseils d'entretien" },
-          ],
-        },
+        label: "À LA COMMANDE",
+        tasks: [
+          {
+            name: "Facture",
+            text: "Générée et classée pour votre comptabilité.",
+          },
+          {
+            name: "Stock",
+            text: "Le même chiffre partout, à chaque vente.",
+          },
+          {
+            name: "Atelier",
+            text: "Le bon de fabrication part chez votre fabricant.",
+          },
+        ],
       },
       {
-        title: "Avis Google",
-        text:
-          "Quelques jours après la livraison, vos clients reçoivent un " +
-          "lien pour laisser un avis. Chaque nouvel avis rassure les " +
-          "visiteurs suivants.",
-        illustration: {
-          kind: "review",
-          question: "Votre colis est bien arrivé ?",
-          buttonLabel: "Laisser un avis",
-        },
-      },
-      {
-        title: "Factures",
-        text:
-          "Chaque commande génère sa facture, envoyée à votre client et " +
-          "rangée pour votre comptable.",
-        illustration: {
-          kind: "invoice",
-          heading: "FACTURE",
-          recipients: ["→ Client ✓", "→ Comptable ✓"],
-        },
+        label: "APRÈS LA LIVRAISON",
+        tasks: [
+          {
+            name: "Emails clients",
+            text:
+              "Suivi d'expédition, puis relance au bon moment pour " +
+              "repasser commande.",
+          },
+          {
+            name: "Avis Google",
+            text: "La demande part quand le colis est arrivé.",
+          },
+        ],
       },
     ],
   },

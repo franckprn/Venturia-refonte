@@ -6,7 +6,7 @@ import { MobileRailStack } from "@/components/layout/MobileRailStack";
 import { IconArrowRight, IconConnect, IconSwap } from "@/components/layout/RailIcons";
 import { ServiceHero } from "@/components/service-page/ServiceHero";
 import heroStyles from "@/components/service-page/ServiceHero.module.css";
-import { ServiceQuadCards } from "@/components/service-page/ServiceQuadCards";
+import { ServiceTimeline } from "@/components/service-page/ServiceTimeline";
 import { ServiceStarting } from "@/components/service-page/ServiceStarting";
 import { ServiceRedBand } from "@/components/service-page/ServiceRedBand";
 import { ServiceTool } from "@/components/service-page/ServiceTool";
@@ -32,9 +32,9 @@ export const metadata: Metadata = {
 
 // Rail de cette page — 3 cartons, moteur INCHANGÉ (CLAUDE.md, « Pages
 // services — gabarit », « RAIL ») :
-//   1. quad             bas des 4 illustrations du bloc 2 (corrigé —
-//                        auparavant haut du H2)
-//   2. tool (NOUVEAU)   haut du H2 du bloc 5 (« L'outil »)
+//   1. timeline         bas de la frise du bloc 2 (ancrage PROVISOIRE —
+//                        sera déplacé dans un prochain prompt)
+//   2. tool             haut du H2 du bloc 5 (« L'outil »)
 //   3. other-expertises bas du bloc 7 (« Autres expertises »)
 // Mêmes sections pour l'ancrage desktop (RailSlot `anchor`) ET la
 // révélation mobile (`mobileReveal`).
@@ -44,8 +44,8 @@ const AUTOMATISATION_RAIL_CONFIG: RailConfig = {
   offsetTargets: [
     {
       varName: "--rail-card1-offset",
-      sectionId: "quad",
-      selector: "[data-service-quad-illustrations-end]",
+      sectionId: "timeline",
+      selector: "[data-service-timeline-end]",
       edge: "bottom",
     },
     {
@@ -61,7 +61,7 @@ const AUTOMATISATION_RAIL_CONFIG: RailConfig = {
       edge: "bottom",
     },
   ],
-  mobileReveal: ["quad", "tool", "other-expertises"],
+  mobileReveal: ["timeline", "tool", "other-expertises"],
 };
 
 // Page /services/automations — gabarit des pages services (CLAUDE.md,
@@ -92,11 +92,11 @@ export default function AutomationsPage() {
           <ServiceHero {...automatisation.hero} />
         </Section>
 
-        <Section name="quad" tone="light" labelledBy="service-quad-title" bodyStyle={{ rowGap: 0 }}>
-          <ServiceQuadCards {...automatisation.quadBlock} headingId="service-quad-title" />
+        <Section name="timeline" tone="light" labelledBy="service-timeline-title" bodyStyle={{ rowGap: 0 }}>
+          <ServiceTimeline {...automatisation.timeline} headingId="service-timeline-title" />
         </Section>
 
-        <RailSlot cardIndex={0} anchor="quad" config={AUTOMATISATION_RAIL_CONFIG} />
+        <RailSlot cardIndex={0} anchor="timeline" config={AUTOMATISATION_RAIL_CONFIG} />
 
         <Section
           name="starting"

@@ -793,22 +793,24 @@ le fichier, disponible pour une future page — la page Automatisation ne
 l'utilise plus (la chaîne du Hero montre déjà ce qu'est un flux, le
 carton faisait doublon, retiré).
 Cartons de la page Automatisation (3, ancrages propres à sa nouvelle
-structure) : 1 « n8n, en une phrase » → BAS des 4 illustrations du bloc 2
-« Automatisations e-commerce » (corrigé — auparavant haut du H2 ; label
-du bloc lui-même passé de « CE QU'ON AUTOMATISE » à « AUTOMATISATIONS
-E-COMMERCE ») — `[data-service-quad-illustrations-end]` posé sur le
-conteneur de la 1ʳᵉ illustration (`ServiceQuadCards.tsx`, les 4
-illustrations partagent la même hauteur, donc le même bas) ; 2 « On
+structure) : 1 « n8n, en une phrase » → BAS de la frise du bloc 2
+« Automatisations e-commerce » (ANCRAGE PROVISOIRE — sera déplacé dans un
+prochain prompt) — `[data-service-timeline-end]` posé sur le conteneur
+de la frise lui-même (`ServiceTimeline.tsx`, pas sur une colonne
+précise : son `offsetHeight` englobe par construction la colonne la
+plus haute des 3 moments, quel que soit leur nombre de tâches) ; 2 « On
 reprend vos scénarios » → haut du H2 du bloc 5 (L'outil) ; 3
 « On discute ? » → bas du bloc 7 (Autres expertises,
 `[data-service-other-expertises-end]` posé sur `.grid`,
 ServiceOtherExpertises.tsx — seul ajout à ce bloc par ailleurs
 inchangé). Pile mobile : même ordre, mêmes sections de révélation.
-Écart mesuré pour le nouvel ancrage du carton 1 : 0px (repos exact),
-IDENTIQUE en `prefers-reduced-motion: reduce` et en animations actives, à
-1440×900 et 1920×1080 (vérifié — ce bloc n'a de toute façon aucune
-révélation d'entrée sur cette page, statique, voir plus haut : aucune
-divergence possible entre les deux modes ici).
+Écart mesuré pour l'ancrage du carton 1 : 0px (aux arrondis sub-pixel
+près — diffs mesurées entre −0,13px et +0,56px selon la largeur,
+cohérent avec le reste du site), IDENTIQUE en `prefers-reduced-motion:
+reduce` et en animations actives, à 1024×768, 1440×900, 1920×1080 et
+1366×657 (ce bloc n'a de toute façon aucune révélation d'entrée sur
+cette page, statique, voir plus haut : aucune divergence possible entre
+les deux modes ici).
 
 Canonical (`alternates.canonical`) via `metadataBase` (`src/app/
 layout.tsx` — absent avant ces pages, ajouté : `new URL("https://
@@ -961,29 +963,54 @@ reproduire avec plus de détails (version de Chrome, OS, `next dev` vs
 build de prod — un artefact de Fast Refresh en dev est une piste
 plausible non exclue) avant de risquer une correction spéculative.
 
-Éléments neufs de la page Automatisation (chaîne du Hero, illustrations
-du bloc 2, bloc « Par où commencer ») : construits avec les tokens et le
-RAYON déjà en usage sur le site, aucune nouvelle valeur — CLAUDE.md,
-« Arrondis » reste une palette fermée (4px / 3px) :
+Éléments neufs de la page Automatisation (chaîne du Hero, bloc « Par où
+commencer ») : construits avec les tokens et le RAYON déjà en usage sur
+le site, aucune nouvelle valeur — CLAUDE.md, « Arrondis » reste une
+palette fermée (4px / 3px) :
   chaîne du Hero    notification (fond --ink, texte --ground, pastille
                     --accent) et les 4 étapes (bordure 1px --ink, trait
                     2px --accent qui les relie, passé derrière — z-index
                     0, cartes à 1, fond --ground opaque) : radius 4px
                     partout (jamais 12px).
-  illustrations     (bloc 2, `ServiceQuadIllustrations.tsx`, aria-hidden)
-                    cadre `color-mix(in srgb, var(--ink) 7%, var(--ground))`
-                    — pas `--cream` : `--ground` est déjà le token vivant
-                    utilisé partout ailleurs sur ce gabarit ;
-                    `--color-cream` reste réservé aux deux surfaces qui
-                    doivent rester FIXES pendant une inversion (CLAUDE.md,
-                    « Couleurs »), hors sujet ici — ces illustrations ne
-                    sont d'ailleurs jamais visibles en même temps que la
-                    Respiration rouge du bloc 4 (sections trop éloignées).
-                    Radius 4px (jamais 12px). Mini-interfaces dessinées à
-                    la main (aucune image), leurs textes vivent dans
-                    `content/services/automatisation.ts`
-                    (`ServiceQuadIllustration`, types.ts, union à 4
-                    variantes).
+
+Bloc 2 — frise du parcours de commande (`ServiceTimeline.tsx`, remplace
+les 4 cartes + mini-illustrations d'origine, `ServiceQuadCards.tsx` et
+`ServiceQuadIllustrations.tsx` supprimés — plus aucune page ne les
+utilisait) : label + h2 inchangés (« AUTOMATISATIONS E-COMMERCE » /
+« Ce qui tourne seul dans votre boutique », gabarit § a, pleine largeur
+1-6, pas de texte décalé en vis-à-vis), puis 3 moments en tiers (gabarit
+§ b : `repeat(3, 1fr)`, column-gap 40px, grille interne SANS
+padding-inline — 1ʳᵉ colonne au bord gauche du contenu, 3ᵉ au bord
+droit) reliés par une ligne continue (--line) portant un point par
+moment (--ink, 6-8px — 7px retenu).
+Ligne et point, UN SEUL mécanisme réutilisé aux deux largeurs (desktop :
+ligne horizontale ; mobile : verticale, collée au bord gauche du
+contenu) : la ligne est un unique `::before` posé sur le conteneur de la
+frise lui-même (jamais par moment) — continue par construction, jamais
+interrompue par les `column-gap` puisqu'elle n'est pas posée sur les
+colonnes. Le point (7px, position absolute) se centre sur une ligne de
+1px par un calcul générique, pas approché : la ligne occupe l'intervalle
+[0, 1px[ sur son axe (centre à 0,5px), le point doit donc démarrer à
+0,5 − 3,5 = −3px pour que son propre centre tombe au même endroit —
+vérifié EXACT (0px d'écart, Playwright) aux 2 orientations, à
+1024/1440/1920/1366×657 (desktop, centrage vertical) et à 390px
+(mobile, centrage horizontal).
+Espacements verticaux à l'intérieur d'un moment (mesurés, exacts) :
+ligne → label 24px, label → 1ʳᵉ tâche 16px, tâche → tâche suivante 24px,
+nom → phrase 6px. Mobile : ligne collée au bord gauche du contenu
+(`left: 0`), texte décalé de 24px (`margin-left`, pas `padding` sur le
+moment — le point reste positionné par rapport au bord du conteneur,
+pas du texte), 40px entre deux moments empilés (mesuré exact aux 2
+intervalles). Typo : nom de tâche en Instrument Sans 500 (jamais
+Bricolage, contrairement aux titres de tiers de `ServiceStarting`) à la
+taille `--t-body` (même taille que ces titres, poids différent — demande
+explicite de Franck) ; phrase en Instrument Sans 400, `--t-body`
+également (corps de texte du gabarit, CLAUDE.md « Typographie »).
+`data-service-timeline-end` posé sur le conteneur de la frise lui-même
+(pas une colonne précise) — ancre PROVISOIRE du carton 1 du rail, voir
+plus haut. Statique (pas de `useScrollReveal`, pas d'animation) comme le
+reste de cette page à ce stade — CLAUDE.md, « Pages services —
+gabarit ».
 
 Bloc 4 — Respiration rouge (`ServiceRedBand.tsx`, ex-« bande rouge »,
 corrigée en variante du mécanisme de la Respiration de la home) : `tone=

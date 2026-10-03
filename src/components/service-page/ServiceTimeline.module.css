@@ -1,0 +1,141 @@
+.label {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ink);
+}
+
+.title {
+  grid-column: 1 / -1;
+  margin: 0;
+  margin-top: 16px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-title);
+  line-height: var(--t-title-lh);
+  letter-spacing: var(--t-title-ls);
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+/* Mobile (< 1024px) : frise VERTICALE — une seule ligne (--line) collée
+   au bord gauche du contenu (left: 0), empilement des moments avec un
+   point chacun sur cette ligne, texte décalé à droite (margin-left,
+   pas padding sur .moment : le point se positionne par rapport au bord
+   gauche de .moment, qui doit donc rester à 0, voir .dot). */
+.timeline {
+  grid-column: 1 / -1;
+  margin-top: 64px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+}
+
+.moment {
+  position: relative;
+  min-width: 0;
+}
+
+/* 7px, centré sur la ligne de 1px (var(--line)) : la ligne occupe les
+   pixels [0, 1[ sur son axe (centre à 0,5px) ; le point, 7px, doit
+   donc démarrer à 0,5 − 3,5 = −3px pour que son propre centre tombe au
+   même endroit — exact, pas approché (vérifié Playwright). */
+.dot {
+  position: absolute;
+  top: 5px;
+  left: -3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.momentLabel {
+  margin: 0;
+  margin-left: 24px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ink);
+}
+
+.tasks {
+  margin-left: 24px;
+  margin-top: 16px;
+  display: grid;
+  row-gap: 24px;
+}
+
+.taskName {
+  margin: 0;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: var(--t-body);
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.taskText {
+  margin: 6px 0 0;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+/* Desktop (>= 1024px) : frise HORIZONTALE — 3 tiers de même largeur sur
+   toute la zone de contenu (gabarit § b : repeat(3, 1fr), column-gap
+   40px, grille interne SANS padding-inline — la 1ʳᵉ colonne touche le
+   bord gauche du contenu, la 3ᵉ le bord droit). La ligne devient
+   horizontale, posée UNE SEULE FOIS sur .timeline (pas par moment) :
+   continue par construction, jamais interrompue par les gaps entre
+   colonnes. Chaque point reste positionné par rapport à SON moment
+   (bord gauche de sa colonne = 0px, par construction). */
+@media (min-width: 1024px) {
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0 40px;
+  }
+
+  .timeline::before {
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: auto;
+    width: auto;
+    height: 1px;
+  }
+
+  .moment {
+    padding-top: 24px;
+  }
+
+  /* Centrage identique à la version mobile, sur l'axe vertical cette
+     fois : la ligne (1px, top: 0) a son centre à 0,5px, le point (7px)
+     démarre donc à −3px pour centrer son propre milieu au même endroit. */
+  .dot {
+    top: -3px;
+    left: 0;
+  }
+
+  .momentLabel,
+  .tasks {
+    margin-left: 0;
+  }
+}
