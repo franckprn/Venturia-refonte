@@ -78,6 +78,23 @@ export type ServiceStartingBlock = {
   items: [ServiceStartingItem, ServiceStartingItem, ServiceStartingItem];
 };
 
+/** Bloc 3bis — « Autres activités » : mise en page B (ServiceSplitIntro),
+ *  intro + liste de lignes nom/phrase (pas de tiers, pas de carte — juste
+ *  des traits --line), entre « Par où commencer » et la Respiration
+ *  rouge. */
+export type ServiceOtherActivityItem = {
+  name: string;
+  text: string;
+};
+
+export type ServiceOtherActivitiesBlock = {
+  label: string;
+  title: string;
+  /** Axe droit (colonnes 7-12, sous le bas du H2 + 32px). */
+  intro: string;
+  items: ServiceOtherActivityItem[];
+};
+
 /** Bloc 4 — Respiration rouge (tone="light", PAS "accent" — le rouge
  *  vient d'une inversion scroll-triggered, src/lib/respiration.ts, pas
  *  d'un fond statique) : H2 très grand + texte + CTA. */
@@ -151,6 +168,7 @@ export type ServicePageContent = {
   hero: ServiceHero;
   timeline: ServiceTimelineBlock;
   starting: ServiceStartingBlock;
+  otherActivities: ServiceOtherActivitiesBlock;
   redBand: ServiceRedBandBlock;
   tool: ServiceToolBlock;
   faq: ServiceFaqBlock;

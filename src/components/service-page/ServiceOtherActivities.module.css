@@ -1,0 +1,65 @@
+/* Intro — même taille/graisse/couleur que l'intro de « Par où commencer »
+   (ServiceStarting.module.css .text) : PAS son max-width (68ch) — ici
+   l'intro ET la liste doivent atteindre le bord droit du contenu (colonne
+   12), comme le reste de la mise en page B de ce bloc. */
+.intro {
+  margin: 0;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+/* 32px entre le bas de l'intro et le trait du haut de la liste (porté
+   par le border-top de la première .row, pas par .list lui-même) —
+   demande de Franck. Trait sous la DERNIÈRE ligne porté par
+   border-bottom ici, même motif que ServiceOtherExpertises.module.css
+   .list / ServiceFaq.module.css .item : chaque .row porte son propre
+   border-top (donc un trait au-dessus de la première aussi), .list son
+   propre border-bottom (trait sous la dernière, sans :last-child). */
+.list {
+  margin-top: 32px;
+  border-bottom: 1px solid var(--line);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: 6px;
+  padding-block: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.name {
+  margin: 0;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: var(--t-body);
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.text {
+  margin: 0;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+/* Desktop : 2 sous-colonnes (nom / phrase) alignées d'une ligne à
+   l'autre — chaque .row est un conteneur grid indépendant, mais le
+   MÊME gabarit de colonnes (fractions, pas max-content) sur une boîte
+   de largeur identique (celle de .right, 6 des 12 colonnes partagées)
+   donne des colonnes de même largeur sur toutes les lignes, sans
+   mesure JS. Ratio 2fr/3fr (pas 1fr/2fr) : à 1024px, la colonne des
+   noms y serait trop étroite pour « Tableaux de bord » (le plus long)
+   sur une seule ligne — vérifié Playwright. */
+@media (min-width: 1024px) {
+  .row {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 4fr);
+    column-gap: var(--shell-gutter);
+    row-gap: 0;
+    align-items: baseline;
+  }
+}

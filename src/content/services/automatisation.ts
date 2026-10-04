@@ -115,6 +115,34 @@ export const automatisation: ServicePageContent = {
     ],
   },
 
+  otherActivities: {
+    label: "AUTRES ACTIVITÉS",
+    title: "Automatisation pour artisans, cabinets et entreprises de services",
+    intro: "On automatise aussi vos tâches qui se répètent.",
+    items: [
+      {
+        name: "Prospects",
+        text: "Chaque demande reçue sur votre site arrive dans votre CRM, avec une relance programmée.",
+      },
+      {
+        name: "Tableaux de bord",
+        text: "Vos chiffres de la semaine réunis dans un seul tableau, chaque lundi matin.",
+      },
+      {
+        name: "Comptabilité",
+        text: "Factures envoyées, classées et transmises à votre comptable dès leur émission.",
+      },
+      {
+        name: "Devis",
+        text: "Le devis part en PDF depuis votre téléphone, en quelques clics.",
+      },
+      {
+        name: "Agents IA",
+        text: "Un agent lit les emails entrants, les classe et prépare les réponses que vous validez.",
+      },
+    ],
+  },
+
   redBand: {
     title: "Quelle tâche vous prend le plus de temps ?",
     text: "Lors du premier appel, on voit ensemble comment vous en décharger.",

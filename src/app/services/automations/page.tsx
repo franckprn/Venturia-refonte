@@ -8,6 +8,7 @@ import { ServiceHero } from "@/components/service-page/ServiceHero";
 import heroStyles from "@/components/service-page/ServiceHero.module.css";
 import { ServiceTimeline } from "@/components/service-page/ServiceTimeline";
 import { ServiceStarting } from "@/components/service-page/ServiceStarting";
+import { ServiceOtherActivities } from "@/components/service-page/ServiceOtherActivities";
 import { ServiceRedBand } from "@/components/service-page/ServiceRedBand";
 import { ServiceTool } from "@/components/service-page/ServiceTool";
 import { ServiceFaq } from "@/components/service-page/ServiceFaq";
@@ -66,9 +67,10 @@ const AUTOMATISATION_RAIL_CONFIG: RailConfig = {
 
 // Page /services/automations — gabarit des pages services (CLAUDE.md,
 // « Pages services — gabarit »). Ordre : 1 Hero, 2 Ce qu'on automatise,
-// 3 Par où commencer, 4 Bande rouge, 5 L'outil, 6 FAQ, 7 Autres
-// expertises. Une seule grille pour toute la page (Shell/Section) : le
-// rail se fige puis reste visible jusqu'au bas — voir Rail.tsx.
+// 3 Par où commencer, 3bis Autres activités, 4 Bande rouge, 5 L'outil,
+// 6 FAQ, 7 Autres expertises. Une seule grille pour toute la page
+// (Shell/Section) : le rail se fige puis reste visible jusqu'au bas —
+// voir Rail.tsx.
 export default function AutomationsPage() {
   return (
     <>
@@ -105,6 +107,15 @@ export default function AutomationsPage() {
           bodyStyle={{ rowGap: 0 }}
         >
           <ServiceStarting {...automatisation.starting} />
+        </Section>
+
+        <Section
+          name="autres-activites"
+          tone="light"
+          labelledBy="service-other-activities-title"
+          bodyStyle={{ rowGap: 0 }}
+        >
+          <ServiceOtherActivities {...automatisation.otherActivities} />
         </Section>
 
         {/* tone="light" (pas "accent") : comme la Respiration de la home,

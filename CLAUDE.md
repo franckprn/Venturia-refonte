@@ -1012,6 +1012,57 @@ plus haut. Statique (pas de `useScrollReveal`, pas d'animation) comme le
 reste de cette page à ce stade — CLAUDE.md, « Pages services —
 gabarit ».
 
+Bloc 3bis — « Autres activités » (`ServiceOtherActivities.tsx`), entre
+« Par où commencer » et la Respiration rouge : mise en page B via
+`ServiceSplitIntro` (label + h2 colonnes 1-6 pleine largeur) — intro PUIS
+liste toutes deux dans `.right` (colonnes 7-12), PAS une ligne de grille
+séparée comme les tiers de `ServiceStarting` : c'est ce partage de ligne
+(ligne 3 de la grille partagée) qui garantit que l'intro ET la liste
+atteignent le bord droit du contenu (colonne 12), sans dépendre d'une
+largeur en ch. Intro : même taille/graisse/couleur que l'intro de
+« Par où commencer » (`ServiceStarting.module.css .text`) mais SANS son
+`max-width: 68ch` — repris ici casserait l'alignement au bord droit du
+contenu à partir de ~1600px de large (vérifié : écart de ~28px à 1920px
+avant retrait du max-width). 32px entre le bas de l'intro et le trait du
+haut de la liste (`.list { margin-top: 32px }`) — mesuré exact à
+390/1024/1440/1920/1366×657.
+Liste (PAS des cartes : aucun fond, aucune bordure de boîte) : une ligne
+par activité, trait 1px `--line` au-dessus de CHAQUE ligne (`border-top`
+sur `.row`, y compris la première) et sous la dernière (`border-bottom`
+sur `.list`) — même motif que `ServiceOtherExpertises.module.css .list`/
+`ServiceFaq.module.css .item`. `padding-block: 24px` par ligne —
+**valeur réutilisée** de ces deux mêmes listes (déjà 24px aux deux
+endroits), pas une nouvelle valeur. Nom : Instrument Sans 500, `--t-body`
+(comme `.taskName` de `ServiceTimeline.module.css`) ; phrase : Instrument
+Sans 400, `--t-body` (corps courant).
+Dès 1024px : 2 sous-colonnes (nom / phrase) par `grid-template-columns`
+sur `.row` — `minmax(0, 3fr) minmax(0, 4fr)`, `column-gap:
+var(--shell-gutter)` (20px). Alignement d'une ligne à l'autre GARANTI
+PAR CONSTRUCTION (0px, jamais mesuré en JS) : chaque `.row` est un
+conteneur grid indépendant, mais TOUTES partagent le même gabarit de
+colonnes en fractions (pas `max-content`) sur une boîte de largeur
+identique (`.right`, 6 des 12 colonnes partagées) — des fractions
+identiques sur des largeurs identiques donnent des colonnes identiques,
+sans mesure. Ratio 3fr/4fr (pas 2fr/3fr, ni le 1fr/2fr initial) :
+calibré pour qu'aucun nom ne casse sur deux lignes à 1024px — le point
+le plus défavorable, la colonne des noms y étant la plus étroite
+(« Tableaux de bord », le nom le plus long, a besoin de ~138px ; 2fr/3fr
+n'en donnait que 132px et cassait sur 2 lignes, mesuré ; 3fr/4fr en
+donne ~141px, vérifié sur UNE seule ligne à 1024/1440/1920/1366×657,
+build de prod). Sous 1024px : `.row` repasse à 1 seule colonne, nom
+au-dessus de la phrase (`margin-top: 6px` entre les deux, même valeur
+que nom→phrase dans `ServiceTimeline.module.css`).
+Ancre de section `id="autres-activites"` (`name="autres-activites"` sur
+le `<Section>`, page.tsx — l'`id` par défaut de `Section` reprend `name`)
+— réservée au lien du carton 1 du rail dans un prochain prompt, pas
+encore câblée. Rail : AUCUNE modification apportée par ce bloc (aucun
+`RailSlot` ajouté, les 3 cartons existants restent ancrés sur
+`timeline`/`tool`/`other-expertises`, inchangés — leur `grid-row`
+référence ces sections par nom, pas une position relative dans le DOM,
+donc l'insertion de ce bloc entre deux sections existantes ne les
+affecte pas). Statique, comme le reste de la page à ce stade (pas de
+`useScrollReveal`).
+
 Bloc 4 — Respiration rouge (`ServiceRedBand.tsx`, ex-« bande rouge »,
 corrigée en variante du mécanisme de la Respiration de la home) : `tone=
 "light"` (page.tsx) comme la Respiration home, PAS `"accent"` — la
