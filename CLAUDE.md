@@ -124,7 +124,9 @@ transparent)`, même opacité que --line aujourd'hui.
 ## Typographie
 
 Titres : Bricolage Grotesque (600, 800)
-Corps  : Instrument Sans (400, 500)
+Corps  : Instrument Sans, police variable (axe 400-700, un seul fichier) ;
+         600 = noms et intertitres dans les listes des pages services ;
+         500 ailleurs
 Mono   : JetBrains Mono (400, 500)
 
 --t-mono:  13px   mono,        lh 1.3,  ls +.01em   labels, méta, tags

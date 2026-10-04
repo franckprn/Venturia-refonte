@@ -16,14 +16,10 @@
   color: var(--ink);
 }
 
-/* « Gras » — Instrument Sans (corps) ne charge que 400/500 (CLAUDE.md,
-   « Typographie ») : un écart de seulement 100 entre le corps (400) et
-   le maximum disponible, sous le seuil de 200 qui justifierait un vrai
-   gras ailleurs sur le site (sinon un soulignement). Ici, sur demande
-   explicite de Franck (« en gras »), 500 est le poids le plus fort
-   disponible sans charger une graisse supplémentaire ni déclencher un
-   gras synthétique du navigateur (`<strong>` par défaut, 700, absent du
-   jeu de graisses chargées). */
+/* Intertitres en gras des §2-4 — Instrument Sans 600 (CLAUDE.md,
+   « Typographie » : 600 = noms et intertitres dans les listes des pages
+   services), la même police variable 400-700 déjà chargée pour le
+   reste du corps de texte, aucun fichier supplémentaire. */
 .heading {
-  font-weight: 500;
+  font-weight: 600;
 }
