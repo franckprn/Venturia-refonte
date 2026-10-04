@@ -247,6 +247,14 @@ export const automatisation: ServicePageContent = {
           "sources demande plus de temps. On vous donne le délai exact " +
           "pendant l'appel. Chaque flux est livré avec sa notice écrite.",
       },
+      {
+        question: "Qui fait évoluer les flux ensuite ?",
+        answer:
+          "On s'en charge : vous nous dites ce qui change, on met le " +
+          "flux à jour. Quand un réglage change souvent (un modèle " +
+          "d'email, un délai), on le place dans un tableau que vous " +
+          "modifiez vous-même, et on vous montre comment faire.",
+      },
     ],
   },
 
