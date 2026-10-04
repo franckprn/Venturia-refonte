@@ -4,6 +4,7 @@
 // ici ne présuppose une image.
 
 import type { RailCardContent } from "@/content/rail";
+import type { IntegrationIconSlug } from "@/components/service-page/integrationIcons";
 
 /** Bloc 1 — hero. H1 sur les 12 colonnes (pas 1-9, contrairement à
  *  l'ancienne version) ; sous-titre (1-6) + CTA (7-12) sur la même
@@ -132,8 +133,39 @@ export type ServiceToolBlock = {
   title: string;
   /** §1 — paragraphe d'intro, sans intertitre. */
   intro: string;
-  /** §2, §3, §4. */
-  sections: [ServiceToolSection, ServiceToolSection, ServiceToolSection];
+  /** §2, §3 — réduit de 3 à 2 : « Votre boutique, déjà compatible. »
+   *  devenu doublon du contenu du bloc Intégrations, retiré. */
+  sections: [ServiceToolSection, ServiceToolSection];
+};
+
+/** Bloc 5bis — « Intégrations », entre L'outil et la FAQ. Mise en page B
+ *  (ServiceSplitIntro : label + h2 colonnes 1-6 pleine largeur, intro
+ *  colonnes 7-12 sous le bas du h2 + 32px, SANS max-width — comme
+ *  ServiceOtherActivities, l'intro doit atteindre le bord droit du
+ *  contenu), puis une grille de tuiles PLEINE LARGEUR (colonnes 1-12,
+ *  sa propre ligne de grille à la suite de ServiceSplitIntro — même
+ *  motif que `.items` dans ServiceStarting.module.css), puis une ligne
+ *  finale. `icon` est un slug simple-icons (voir
+ *  `components/service-page/integrationIcons.ts`) : seuls les outils
+ *  qui ont un logo dans ce catalogue apparaissent dans `tools` — les
+ *  outils sans logo (Outlook, Excel, Word, Slack, Pipedrive, OpenAI) ne
+ *  sont cités que dans `outro`, en texte, jamais avec un pictogramme
+ *  inventé (CLAUDE.md, « Détails faciles à oublier » n'en parle pas
+ *  explicitly, mais aucun logo ne doit être approximé). */
+export type ServiceIntegrationTool = {
+  name: string;
+  icon: IntegrationIconSlug;
+};
+
+export type ServiceIntegrationsBlock = {
+  label: string;
+  title: string;
+  /** Axe droit (colonnes 7-12, sous le bas du H2 + 32px), pleine
+   *  largeur jusqu'à la colonne 12 (pas de max-width en ch). */
+  intro: string;
+  tools: ServiceIntegrationTool[];
+  /** Ligne finale sous la grille, axe gauche. */
+  outro: string;
 };
 
 export type ServiceFaqItem = {
@@ -171,6 +203,7 @@ export type ServicePageContent = {
   otherActivities: ServiceOtherActivitiesBlock;
   redBand: ServiceRedBandBlock;
   tool: ServiceToolBlock;
+  integrations: ServiceIntegrationsBlock;
   faq: ServiceFaqBlock;
   otherExpertises: ServiceOtherExpertisesBlock;
   /** Les 3 cartons du rail — même type que content/rail.ts (home) :

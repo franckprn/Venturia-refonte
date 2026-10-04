@@ -864,7 +864,62 @@ un carton du rail, voir plus haut) : `ServiceToolCompare.tsx` et son
 `<table>` ont été supprimés. Une future page service qui a besoin d'un
 tableau comparatif devra le reconstruire (pas de composant partagé prêt
 à l'emploi pour ça aujourd'hui). Le carton 2 du rail garde son ancre sur
-le haut du H2 (inchangé par cette correction).
+le haut du H2 (inchangé par cette correction). `sections` est passé de 3
+à 2 éléments (`ServiceToolBlock.sections`, content/services/types.ts) :
+le 3ᵉ, « Votre boutique, déjà compatible. », est devenu un doublon du
+bloc Intégrations ci-dessous et a été retiré d'ici.
+
+Bloc 5bis — Intégrations (`ServiceIntegrations.tsx`), entre L'outil et
+la FAQ : mise en page B (`ServiceSplitIntro`, label + h2 colonnes 1-6
+pleine largeur), intro colonnes 7-12 SANS `max-width` (comme
+`ServiceOtherActivities.module.css .intro` : l'intro doit atteindre le
+bord droit du contenu, colonne 12 — pas de limite en ch ici), puis une
+grille de tuiles PLEINE LARGEUR (colonnes 1-12, sa propre ligne de
+grille à la suite de `ServiceSplitIntro` — même motif que `.items` dans
+`ServiceStarting.module.css`), 64px sous l'intro (règle du gabarit § c),
+puis une ligne finale 24px sous la grille, axe gauche.
+Logos (`src/components/service-page/integrationIcons.ts`) : chemins
+SVG (`path` seul, `viewBox="0 0 24 24"`) recopiés EN DUR depuis le
+paquet `simple-icons` (CC0) plutôt qu'importés au runtime — ce paquet
+compte plus de 3000 icônes et seules 12 sont utilisées ; `simple-icons`
+reste en devDependency (source lors de l'extraction uniquement, jamais
+importé par le code de l'app) — vérifié : aucune des deux références
+(`ServiceIntegrations`/`integrationIcons`) n'apparaît dans le
+`page_client-reference-manifest.js` de la route (composants 100 %
+serveur, aucun JS client ajouté) et le dossier `.next/static/chunks`
+fait un poids IDENTIQUE au octet près avant/après cette section — seul
+le HTML pré-rendu grandit (~39 Ko, les 12 SVG inline). `fill="currentColor"`
+sur chaque `<svg>`, jamais de couleur de marque : résout vers `--ink`
+comme le reste du texte du site. N'INVENTE AUCUN logo pour un outil
+absent du catalogue : seuls les 12 outils qui ONT un logo dans
+simple-icons apparaissent dans la grille (Shopify, WooCommerce,
+PrestaShop, Gmail, Brevo, Google Sheets, Google Drive, Notion,
+Telegram, WhatsApp, HubSpot, Claude) ; les 6 absents du catalogue
+(Outlook, Excel, Word, Slack, Pipedrive, OpenAI — pas seulement des
+produits Microsoft) ne sont cités qu'en texte, dans la ligne finale.
+Grille dessinée par des traits `--line` (pas de fond, pas d'ombre) :
+`border-top`/`border-left` sur le conteneur, `border-right`/
+`border-bottom` sur chaque tuile — un seul trait à chaque jonction,
+jamais doublé. 6 tuiles par rangée dès 1024px, 3 en dessous —
+`grid-template-columns: repeat(n, minmax(0, 1fr))`, JAMAIS `repeat(n,
+1fr)` seul : un nom en `white-space: nowrap` donnerait sinon à chaque
+piste un minimum automatique égal à sa largeur de contenu (même piège
+que `ServiceOtherActivities.module.css .row`, déjà documenté pour le
+ratio 3fr/4fr) — mesuré AVANT cette correction : 12px de débordement
+horizontal à 390px (`scrollWidth` 402 contre `clientWidth` 390) et des
+tuiles d'une rangée inégales (jusqu'à 25px d'écart) ; après correction,
+écart de largeur entre tuiles ≤ 0,02px à toutes les largeurs testées.
+Nom de l'outil : Instrument Sans 400, 12px (pas `--t-small`, 15px) —
+CLAUDE.md autorise explicitement une taille sous `--t-body` « si un nom
+casse » : mesuré (Playwright, même font-family/poids/letter-spacing que
+`.name`), le nom le plus long (« WooCommerce ») fait 90px à 12px contre
+97,6px à 13px, pour ~100-104px de large utile une fois le padding
+(8px) déduit dans la piste la plus étroite (6 colonnes à 1024px,
+~120px). Carton 2 du rail inchangé (ancré sur le H2 de L'outil,
+AVANT cette section dans le DOM) : son offset mesuré
+(`--rail-card2-offset`) reste identique (153px) à 1024/1440/1920px,
+preuve que l'insertion de ce bloc plus loin dans la page ne le
+perturbe pas.
 
 Autres expertises (`ServiceOtherExpertises.tsx`) : liste verticale (plus
 la grille en tiers d'origine) — label, puis 3 lignes empilées pleine

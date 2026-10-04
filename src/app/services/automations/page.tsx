@@ -11,6 +11,7 @@ import { ServiceStarting } from "@/components/service-page/ServiceStarting";
 import { ServiceOtherActivities } from "@/components/service-page/ServiceOtherActivities";
 import { ServiceRedBand } from "@/components/service-page/ServiceRedBand";
 import { ServiceTool } from "@/components/service-page/ServiceTool";
+import { ServiceIntegrations } from "@/components/service-page/ServiceIntegrations";
 import { ServiceFaq } from "@/components/service-page/ServiceFaq";
 import { ServiceOtherExpertises } from "@/components/service-page/ServiceOtherExpertises";
 import { Footer } from "@/components/layout/Footer";
@@ -68,9 +69,9 @@ const AUTOMATISATION_RAIL_CONFIG: RailConfig = {
 // Page /services/automations — gabarit des pages services (CLAUDE.md,
 // « Pages services — gabarit »). Ordre : 1 Hero, 2 Ce qu'on automatise,
 // 3 Par où commencer, 3bis Autres activités, 4 Bande rouge, 5 L'outil,
-// 6 FAQ, 7 Autres expertises. Une seule grille pour toute la page
-// (Shell/Section) : le rail se fige puis reste visible jusqu'au bas —
-// voir Rail.tsx.
+// 5bis Intégrations, 6 FAQ, 7 Autres expertises. Une seule grille pour
+// toute la page (Shell/Section) : le rail se fige puis reste visible
+// jusqu'au bas — voir Rail.tsx.
 export default function AutomationsPage() {
   return (
     <>
@@ -137,6 +138,15 @@ export default function AutomationsPage() {
         </Section>
 
         <RailSlot cardIndex={1} anchor="tool" config={AUTOMATISATION_RAIL_CONFIG} />
+
+        <Section
+          name="integrations"
+          tone="light"
+          labelledBy="service-integrations-title"
+          bodyStyle={{ rowGap: 0 }}
+        >
+          <ServiceIntegrations {...automatisation.integrations} />
+        </Section>
 
         <Section name="faq" tone="light" labelledBy="service-faq-title" bodyStyle={{ rowGap: 0 }}>
           <ServiceFaq {...automatisation.faq} />

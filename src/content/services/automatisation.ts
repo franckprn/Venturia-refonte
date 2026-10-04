@@ -171,13 +171,34 @@ export const automatisation: ServicePageContent = {
           "On héberge n8n sur notre serveur en Europe et on s'occupe de " +
           "tout. Si vous préférez, on l'installe sur votre propre serveur.",
       },
-      {
-        heading: "Votre boutique, déjà compatible.",
-        text:
-          "Shopify et WooCommerce se connectent directement à n8n. " +
-          "PrestaShop se branche aussi, via son API.",
-      },
     ],
+  },
+
+  integrations: {
+    label: "INTÉGRATIONS",
+    title: "Connectez vos outils entre eux",
+    intro:
+      "Votre boutique, votre messagerie, vos tableaux : n8n les " +
+      "relie entre eux, et vous gardez les outils que vous utilisez " +
+      "déjà. Shopify et WooCommerce se connectent nativement, " +
+      "PrestaShop via son API.",
+    tools: [
+      { name: "Shopify", icon: "shopify" },
+      { name: "WooCommerce", icon: "woocommerce" },
+      { name: "PrestaShop", icon: "prestashop" },
+      { name: "Gmail", icon: "gmail" },
+      { name: "Brevo", icon: "brevo" },
+      { name: "Google Sheets", icon: "googlesheets" },
+      { name: "Google Drive", icon: "googledrive" },
+      { name: "Notion", icon: "notion" },
+      { name: "Telegram", icon: "telegram" },
+      { name: "WhatsApp", icon: "whatsapp" },
+      { name: "HubSpot", icon: "hubspot" },
+      { name: "Claude", icon: "claude" },
+    ],
+    outro:
+      "Outlook, Excel, Word, Slack, Pipedrive, OpenAI : on les " +
+      "relie aussi, comme tout outil qui dispose d'une API.",
   },
 
   faq: {

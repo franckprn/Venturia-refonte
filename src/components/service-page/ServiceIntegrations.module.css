@@ -1,0 +1,86 @@
+/* Intro — même motif que ServiceOtherActivities.module.css .intro : PAS
+   de max-width, l'intro doit atteindre le bord droit du contenu (colonne
+   12), comme la grille qui suit. */
+.intro {
+  margin: 0;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+/* Ligne 4 de la grille partagée (ServiceSplitIntro occupe 1-3) — même
+   motif que ServiceStarting.module.css .items : pleine largeur (1-12),
+   64px sous l'intro (règle du gabarit § c, CLAUDE.md « Pages services —
+   gabarit »). Grille dessinée par des traits --line (pas de fond, pas
+   d'ombre) : border-top/left sur le conteneur, border-right/bottom sur
+   chaque tuile — un seul trait à chaque jonction, jamais doublé. */
+.grid {
+  grid-column: 1 / -1;
+  grid-row: 4;
+  margin-top: 64px;
+  display: grid;
+  /* minmax(0, 1fr), pas 1fr seul : un nom en nowrap (voir .name) donnerait
+     sinon à chaque piste un minimum automatique égal à sa largeur de
+     contenu, et la somme de ces minimums dépasse la largeur disponible —
+     même piège que ServiceOtherActivities.module.css .row (CLAUDE.md,
+     commentaire sur le ratio 3fr/4fr), qui déborderait la grille ET la
+     fenêtre (scrollWidth > clientWidth) plutôt que de se répartir en
+     colonnes égales. */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 20px 8px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.logo {
+  flex: none;
+  color: var(--ink);
+}
+
+/* 12px, pas --t-small (15px) : le nom le plus long (« WooCommerce »)
+   doit tenir sur une seule ligne dans la piste la plus étroite (6
+   colonnes à 1024px, ~120px) — mesuré (Playwright, même font-family/
+   weight/letter-spacing que ce sélecteur) : 90px à 12px contre 97,6px à
+   13px, pour ~104px de large utile une fois le padding déduit.
+   CLAUDE.md, « Pages services — gabarit » § Intégrations autorise
+   explicitement une taille sous --t-body pour cette grille. */
+.name {
+  margin: 0;
+  max-width: 100%;
+  font-size: 12px;
+  line-height: 1.3;
+  letter-spacing: var(--t-small-ls);
+  color: var(--ink);
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Ligne 5, axe gauche, 24px sous la grille. */
+.outro {
+  grid-column: 1 / -1;
+  grid-row: 5;
+  margin: 0;
+  margin-top: 24px;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
