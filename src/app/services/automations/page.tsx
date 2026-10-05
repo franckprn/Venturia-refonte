@@ -10,6 +10,7 @@ import { ServiceTimeline } from "@/components/service-page/ServiceTimeline";
 import { ServiceStarting } from "@/components/service-page/ServiceStarting";
 import { ServiceOtherActivities } from "@/components/service-page/ServiceOtherActivities";
 import { ServiceRedBand } from "@/components/service-page/ServiceRedBand";
+import { ServiceCalculator } from "@/components/service-page/ServiceCalculator";
 import { ServiceTool } from "@/components/service-page/ServiceTool";
 import { ServiceIntegrations } from "@/components/service-page/ServiceIntegrations";
 import { ServiceFaq } from "@/components/service-page/ServiceFaq";
@@ -68,10 +69,13 @@ const AUTOMATISATION_RAIL_CONFIG: RailConfig = {
 
 // Page /services/automations — gabarit des pages services (CLAUDE.md,
 // « Pages services — gabarit »). Ordre : 1 Hero, 2 Ce qu'on automatise,
-// 3 Par où commencer, 3bis Autres activités, 4 Bande rouge, 5 L'outil,
-// 5bis Intégrations, 6 FAQ, 7 Autres expertises. Une seule grille pour
-// toute la page (Shell/Section) : le rail se fige puis reste visible
-// jusqu'au bas — voir Rail.tsx.
+// 3 Par où commencer, 3bis Autres activités, 4 Bande rouge, 4bis
+// Calculateur, 5 L'outil, 5bis Intégrations, 6 FAQ, 7 Autres expertises.
+// Une seule grille pour toute la page (Shell/Section) : le rail se fige
+// puis reste visible jusqu'au bas — voir Rail.tsx. Le Calculateur
+// n'ajoute aucun RailSlot ni ancrage : les cartons 1/2/3 restent sur
+// hero/tool/other-expertises, inchangés (mesure DOM indépendante de ce
+// qui est inséré entre deux sections).
 export default function AutomationsPage() {
   return (
     <>
@@ -131,6 +135,15 @@ export default function AutomationsPage() {
           bodyStyle={{ rowGap: 0 }}
         >
           <ServiceRedBand {...automatisation.redBand} />
+        </Section>
+
+        <Section
+          name="calculator"
+          tone="light"
+          labelledBy="service-calculator-title"
+          bodyStyle={{ rowGap: 0 }}
+        >
+          <ServiceCalculator {...automatisation.calculator} />
         </Section>
 
         <Section name="tool" tone="light" labelledBy="service-tool-title" bodyStyle={{ rowGap: 0 }}>

@@ -1,0 +1,106 @@
+/* ------------------------------------------------------------------ *
+ * Bloc 4bis des pages /services/* — « Calculateur », entre la
+ * Respiration rouge et L'outil (CLAUDE.md, « Pages services —
+ * gabarit »). Tout vit dans `.right` de ServiceSplitIntro (colonnes
+ * 7-12, sous le bas du h2 + 32px) : pas de grille pleine largeur ici,
+ * contrairement à `.items` de ServiceStarting.module.css.
+ * ------------------------------------------------------------------ */
+
+.fields {
+  display: grid;
+  gap: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  margin: 0;
+  font-size: var(--t-small);
+  line-height: var(--t-small-lh);
+  letter-spacing: var(--t-small-ls);
+  color: var(--ink);
+}
+
+/* `type="text"` (pas `number`) : aucune flèche native, aucune
+   modification de valeur à la molette — CLAUDE.md « Calculateur »,
+   demande explicite de Franck. `font-size: var(--t-body)` vaut 16px
+   sous 768px (globals.css) : le minimum qui évite le zoom automatique
+   de Safari iOS à la mise au point (CLAUDE.md, « Détails faciles à
+   oublier »). */
+.input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: transparent;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  color: var(--ink);
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.result {
+  margin-top: 32px;
+}
+
+.resultLine {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Même traitement que les « chiffres » de Dernier accompagnement
+   (dernier-accompagnement.module.css) — seul précédent de nombre-vedette
+   sur le site, réutilisé plutôt qu'une nouvelle taille. */
+.resultValue {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-title);
+  line-height: var(--t-title-lh);
+  letter-spacing: var(--t-title-ls);
+  color: var(--ink);
+}
+
+.resultSuffix {
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+.euroLine {
+  margin: 0;
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: var(--t-small);
+  line-height: var(--t-small-lh);
+  letter-spacing: var(--t-small-ls);
+  color: var(--ink);
+}
+
+.note {
+  margin: 0;
+  margin-top: 16px;
+  font-size: var(--t-small);
+  line-height: var(--t-small-lh);
+  letter-spacing: var(--t-small-ls);
+  color: var(--ink);
+}
+
+.cta {
+  margin-top: 32px;
+}

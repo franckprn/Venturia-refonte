@@ -156,6 +156,22 @@ export const automatisation: ServicePageContent = {
     cta: { label: "Réserver 20 minutes", href: "/contact" },
   },
 
+  calculator: {
+    label: "CALCULEZ",
+    title: "Ce que vous coûte une tâche faite à la main",
+    minutesLabel: "Durée de la tâche (en minutes)",
+    minutesDefault: 15,
+    countLabel: "Nombre de fois par semaine",
+    countDefault: 10,
+    hourlyCostLabel: "Votre coût horaire (en €)",
+    resultSuffix: "heures par an",
+    euroPrefix: "soit",
+    euroSuffix: "par an",
+    emptyValue: "—",
+    note: "Calcul sur 52 semaines.",
+    cta: { label: "Réserver 20 minutes", href: "/contact" },
+  },
+
   tool: {
     label: "L'OUTIL",
     title: "Make, Zapier ou n8n ?",

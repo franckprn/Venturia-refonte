@@ -108,6 +108,39 @@ export type ServiceRedBandBlock = {
 /** Étape numérotée (bloc 5) — même forme que ProcessusStep
  *  (content/processus.ts), pas réimportée : ce type vit dans le gabarit
  *  services, indépendant de la home. */
+/** Bloc 4bis — « Calculateur », entre la Respiration rouge et L'outil.
+ *  Mise en page B (ServiceSplitIntro : label + h2 colonnes 1-6 pleine
+ *  largeur) — TOUT le contenu dynamique (3 champs, résultat, note, CTA)
+ *  reste dans l'axe droit (colonnes 7-12, sous le bas du h2 + 32px),
+ *  jamais une grille pleine largeur séparée comme `.items`
+ *  (ServiceStarting) : rien ici n'a besoin des 12 colonnes. Les bornes
+ *  de validation (1-480 minutes, 1-500 fois, 1-1000 €) sont des
+ *  constantes de calcul, pas du texte — elles vivent dans
+ *  ServiceCalculator.tsx, pas ici. */
+export type ServiceCalculatorBlock = {
+  label: string;
+  title: string;
+  minutesLabel: string;
+  /** Valeur de départ du champ 1, affichée au premier rendu. */
+  minutesDefault: number;
+  countLabel: string;
+  /** Valeur de départ du champ 2. */
+  countDefault: number;
+  /** Champ 3, facultatif — pas de valeur de départ (vide). */
+  hourlyCostLabel: string;
+  /** Suffixe après le nombre d'heures (« heures par an »). */
+  resultSuffix: string;
+  /** Avant le montant en euros (« soit »). */
+  euroPrefix: string;
+  /** Après le montant en euros (« par an »). */
+  euroSuffix: string;
+  /** Résultat affiché à la place d'un nombre quand une valeur saisie est
+   *  invalide (vide, 0, négative, non numérique) — « — ». */
+  emptyValue: string;
+  note: string;
+  cta: { label: string; href: string };
+};
+
 export type ServiceStep = {
   /** Sert de texte au numéro (JetBrains Mono) — écrit tel quel ("01",
    *  "02"…), aucun padding calculé au rendu. */
@@ -202,6 +235,7 @@ export type ServicePageContent = {
   starting: ServiceStartingBlock;
   otherActivities: ServiceOtherActivitiesBlock;
   redBand: ServiceRedBandBlock;
+  calculator: ServiceCalculatorBlock;
   tool: ServiceToolBlock;
   integrations: ServiceIntegrationsBlock;
   faq: ServiceFaqBlock;

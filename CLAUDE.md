@@ -1199,6 +1199,56 @@ ajoutée en pur ajout dans rail.module.css ET mobileRailStack.module.css
 jumelle de l'exception `[data-tone="accent"] .cardIcon` déjà en place,
 sans effet sur la home (attribut jamais posé).
 
+Bloc 4bis — Calculateur (`ServiceCalculator.tsx`, entre la Respiration
+rouge et L'outil) : mise en page B via `ServiceSplitIntro` (label + h2
+colonnes 1-6 pleine largeur), mais TOUT le contenu dynamique (3 champs,
+résultat, note, CTA) reste dans l'axe droit (`.right`, colonnes 7-12,
+sous le bas du h2 + 32px) — rien en pleine largeur, contrairement à
+`.items` de `ServiceStarting` : ce bloc n'a pas besoin des 12 colonnes.
+Seul composant client de la page (`"use client"`) ; `ServiceSplitIntro`
+et le reste du gabarit restent serveur.
+Calcul, dérivé à chaque rendu (pas de `useEffect`) : heures/an = minutes
+× fois par semaine × 52 / 60, arrondi à l'AFFICHAGE seulement — le
+calcul des euros réutilise la valeur non arrondie (euros/an = heures non
+arrondies × coût horaire, arrondi). Formatage `fr-FR`
+(`Intl.NumberFormat("fr-FR")`, vérifié Node 22 ET Playwright/Chromium :
+séparateur de milliers U+202F de base, aucun calcul manuel) ; U+00A0
+ajouté explicitement avant « € » (CLAUDE.md, « Texte »).
+Champs `type="text"` + `inputMode="decimal"` — JAMAIS `type="number"` :
+demande explicite de Franck, aucune flèche native, aucune modification
+de valeur à la molette (vérifié Playwright, Chromium ET WebKit : valeur
+inchangée après un `wheel()` sur un champ focus, aucun spinner visible
+aux captures). Parsing maison (`parseLocaleNumber`) : virgule décimale
+acceptée (« 7,5 » = 7.5), espaces ignorés (y compris un séparateur de
+milliers tapé à la main) — tout le reste (lettres, plusieurs
+points/virgules...) retourne `null`, jamais un NaN propagé. Invalide
+(vide, 0, négatif, non numérique) → résultat « — » (`emptyValue`,
+content, jamais en dur) ; une valeur positive hors bornes (minutes
+1-480, fois 1-500, coût 1-1000 — constantes de calcul dans
+`ServiceCalculator.tsx`, pas du texte donc pas dans `content/*.ts`) est
+bornée en silence, sans retour visuel. Ligne euros affichée seulement si
+le champ coût est rempli (`costRaw.trim() !== ""`), indépendamment de la
+validité de la valeur saisie.
+Nombre résultat : `--t-title` (40px desktop / 28px mobile), Bricolage
+Grotesque 600 — réutilise le traitement des « chiffres » de Dernier
+accompagnement (`dernier-accompagnement.module.css`), seul précédent de
+nombre-vedette sur le site, plutôt qu'une nouvelle taille. Champs :
+bordure `--line`, radius 4px, fond transparent, texte `--ink`,
+`font-size: var(--t-body)` (16px sous 768px — minimum anti-zoom Safari
+iOS, CLAUDE.md « Détails faciles à oublier »), zone tactile >= 44px ;
+focus visible `outline: 2px solid var(--accent); outline-offset: 2px`
+(même convention que les cartons du rail et le reste du site). Chaque
+`<input>` a un `<label htmlFor>` dédié (vérifié `getByLabel` sur les 3
+champs) ; résultat dans une zone `aria-live="polite"` (note statique
+exclue, hors de cette zone). CTA = même composant que le Hero
+(`<ArrowLink direction="right">`), vers `/contact`.
+Rail : AUCUNE modification — les 3 cartons restent ancrés sur
+hero/tool/other-expertises (mesure DOM indépendante de ce qui est
+inséré entre deux sections) ; vérifié, `--rail-card2-offset` reste à
+153px à 1024/1440/1920/1366×657, identique à avant ce bloc. Poids JS
+ajouté par la page : ~7,3 Ko (mesuré en comparant la somme des chunks
+`.next/static/chunks` avant/après, build de prod).
+
 ## Bloc de fin (footer)
 
 Titre géant (« ON PEUT VOUS AIDER ? », lien entier vers /contact) aligné
