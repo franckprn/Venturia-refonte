@@ -831,15 +831,23 @@ générique `:where(h1…, [id]) { scroll-margin-top: var(--scroll-offset)
 section (`--section-space`) donnant déjà la respiration nécessaire sous
 le H2 ; mesuré 153px d'écart H2/nav après clic à 1024px et 1440px.
 
-Bug PRÉ-EXISTANT découvert pendant la vérification de ce carton (sans
-lien avec son contenu ni son ancrage — reproduit à l'identique sur le
-code d'avant cette session) : en mode relais, à 1366×657 uniquement
-(parmi les tailles de contrôle), les cartons 2 et 3 se chevauchent
-brièvement pendant le balayage de scroll (zone ~6840-7005px de scroll).
-Non corrigé ici (hors périmètre de ce prompt, qui n'autorisait aucune
-modification de la logique du moteur du rail) — signalé à Franck,
-reproductible via un balayage de scroll pas-à-pas à cette résolution
-précise.
+Résidu flottant < 1px entre les cartons 2 et 3 en mode relais, à
+1366×657 (parmi les tailles de contrôle) — diagnostiqué, pas corrigé :
+la position de repos du carton suivant est calculée deux fois,
+indépendamment (une fois dans l'effet de `<RailSlot>` qui écrit son
+propre `--rail-cardX-offset`, une fois dans `RailController` qui refait
+le même parcours `offsetParent`/`offsetTop` pour `--rail-cardX-relay-
+height`) — deux sommations flottantes du même chemin DOM ne tombent pas
+toujours bit-à-bit au même résultat. Mesuré (Playwright, Chromium ET
+WebKit, DPR 1 et 2, balayage pas-à-pas ET molette) : jamais plus de
+0,75px sur tout l'historique de cette page, invisible à l'œil — pas un
+vrai chevauchement. Volontairement non corrigé : le risque de régression
+d'une correction dépasserait le bénéfice d'un défaut sous-pixel
+invisible. Si un jour visible (écran/zoom particulier) : option B,
+soustraire une marge de 1px à `restsPx[i+1]` avant de calculer
+`relayHeight` dans `RailController` (Rail.tsx) — convertit le résidu en
+écart invisible plutôt qu'en chevauchement, quel que soit le signe de
+l'erreur flottante.
 
 Canonical (`alternates.canonical`) via `metadataBase` (`src/app/
 layout.tsx` — absent avant ces pages, ajouté : `new URL("https://
