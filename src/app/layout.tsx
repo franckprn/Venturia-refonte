@@ -55,6 +55,8 @@ export default function RootLayout({
     <html
       lang="fr"
       className={`${display.variable} ${sans.variable} ${mono.variable}`}
+      // data-chain-anim est posé sur <html> par un script inline avant l'hydratation (ServiceHeroChainReveal.tsx) : attendu, pas une vraie divergence.
+      suppressHydrationWarning
     >
       <body>
         <Nav />
