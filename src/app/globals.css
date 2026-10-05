@@ -301,6 +301,14 @@ html[data-tone-transition="on"] {
   :where(h1, h2, h3, h4, h5, h6, [id]) {
     scroll-margin-top: var(--scroll-offset);
   }
+
+  /* Page Automatisation, lien du carton 1 du rail (#autres-activites) :
+     la section porte déjà 120px/72px de padding-top (--section-space),
+     qui donne la respiration sous la nav — pas besoin des 20px en plus
+     de --scroll-offset ici, la hauteur de la nav seule suffit. */
+  #autres-activites {
+    scroll-margin-top: var(--nav-h);
+  }
 }
 
 /* Champs de formulaire >= 16px sur mobile, sinon Safari iOS zoome au focus */

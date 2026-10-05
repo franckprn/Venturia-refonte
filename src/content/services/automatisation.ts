@@ -10,8 +10,9 @@ export const automatisation: ServicePageContent = {
   meta: {
     title: "Agence automatisation n8n à Toulouse",
     description:
-      "Agence n8n à Toulouse : on automatise les tâches qui se répètent " +
-      "dans votre boutique en ligne, des fiches produits aux emails clients.",
+      "Agence n8n à Toulouse : on automatise votre e-commerce ou " +
+      "votre PME (fiches produits, articles de blog, stock, emails " +
+      "clients).",
   },
 
   hero: {
@@ -48,6 +49,12 @@ export const automatisation: ServicePageContent = {
             text:
               "Titres, prix et descriptions mis à jour sur tous vos " +
               "canaux à partir d'un seul fichier.",
+          },
+          {
+            name: "Articles de blog",
+            text:
+              "Un brouillon rédigé à partir de vos sujets, que vous " +
+              "relisez avant publication.",
           },
         ],
       },
@@ -284,12 +291,12 @@ export const automatisation: ServicePageContent = {
 
   rail: [
     {
-      title: "L'outil qui relie vos applications",
-      resume: "n8n, en une phrase",
+      title: "Vous vendez des services ?",
+      resume: "Les mêmes flux, pour votre activité",
       text:
-        "n8n connecte votre boutique, votre outil d'emailing et vos " +
-        "autres logiciels, pour que chaque tâche déclenche " +
-        "automatiquement la suivante.",
+        "Devis, factures, suivi des prospects : on automatise aussi " +
+        "les artisans et les entreprises de services.",
+      href: "#autres-activites",
     },
     {
       title: "On reprend vos scénarios",

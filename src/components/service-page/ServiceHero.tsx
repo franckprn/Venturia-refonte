@@ -22,8 +22,10 @@ import styles from "./ServiceHero.module.css";
  * LCP de cette page — CLAUDE.md, « Animations » : « rien d'animé sur
  * l'élément LCP ». Peint à 100 % d'opacité dès le premier rendu.
  *
- * Aucun carton du rail dans ce bloc (CLAUDE.md, RAIL) : page.tsx n'ancre
- * aucun <RailSlot> sur la section "hero".
+ * Le carton 1 du rail s'ancre sur ce bloc (CLAUDE.md, « Pages services —
+ * gabarit » § RAIL) : `<RailSlot anchor="hero">` (page.tsx) vise
+ * `#service-hero-title` (haut du h1), pas une cible à l'intérieur de ce
+ * composant — rien à changer ici pour ça.
  */
 export function ServiceHero({
   titleLine1,

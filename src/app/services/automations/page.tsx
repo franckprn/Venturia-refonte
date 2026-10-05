@@ -34,10 +34,10 @@ export const metadata: Metadata = {
 
 // Rail de cette page — 3 cartons, moteur INCHANGÉ (CLAUDE.md, « Pages
 // services — gabarit », « RAIL ») :
-//   1. timeline         bas de la frise du bloc 2 (ancrage PROVISOIRE —
-//                        sera déplacé dans un prochain prompt)
-//   2. tool             haut du H2 du bloc 5 (« L'outil »)
-//   3. other-expertises bas du bloc 7 (« Autres expertises »)
+//   1. hero              haut du H1 (#service-hero-title) — carton
+//                        cliquable (href), même mécanisme que le carton 3
+//   2. tool              haut du H2 du bloc 5 (« L'outil »)
+//   3. other-expertises  bas du bloc 7 (« Autres expertises »)
 // Mêmes sections pour l'ancrage desktop (RailSlot `anchor`) ET la
 // révélation mobile (`mobileReveal`).
 const AUTOMATISATION_RAIL_CONFIG: RailConfig = {
@@ -46,9 +46,9 @@ const AUTOMATISATION_RAIL_CONFIG: RailConfig = {
   offsetTargets: [
     {
       varName: "--rail-card1-offset",
-      sectionId: "timeline",
-      selector: "[data-service-timeline-end]",
-      edge: "bottom",
+      sectionId: "hero",
+      selector: "#service-hero-title",
+      edge: "top",
     },
     {
       varName: "--rail-card2-offset",
@@ -63,7 +63,7 @@ const AUTOMATISATION_RAIL_CONFIG: RailConfig = {
       edge: "bottom",
     },
   ],
-  mobileReveal: ["timeline", "tool", "other-expertises"],
+  mobileReveal: ["hero", "tool", "other-expertises"],
 };
 
 // Page /services/automations — gabarit des pages services (CLAUDE.md,
@@ -95,11 +95,11 @@ export default function AutomationsPage() {
           <ServiceHero {...automatisation.hero} />
         </Section>
 
+        <RailSlot cardIndex={0} anchor="hero" config={AUTOMATISATION_RAIL_CONFIG} />
+
         <Section name="timeline" tone="light" labelledBy="service-timeline-title" bodyStyle={{ rowGap: 0 }}>
           <ServiceTimeline {...automatisation.timeline} headingId="service-timeline-title" />
         </Section>
-
-        <RailSlot cardIndex={0} anchor="timeline" config={AUTOMATISATION_RAIL_CONFIG} />
 
         <Section
           name="starting"

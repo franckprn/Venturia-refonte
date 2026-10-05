@@ -785,7 +785,8 @@ alignements de repos + mode relais, avant/après cette extraction, 0
 différence hors l'horloge du footer). Icônes : `RailIcons.tsx` reste un
 fichier UNIQUE et partagé, chaque page y ajoute les siennes en pur ajout
 (jamais retoucher un export existant) — `IconConnect` (Automatisation,
-carton « n8n, en une phrase ») et `IconSwap` (Automatisation, carton
+carton 1 — « Vous vendez des services ? » depuis une session suivante,
+icône inchangée) et `IconSwap` (Automatisation, carton
 « Déjà sur Make ou Zapier ? » — deux flèches courbes en sens opposés,
 l'idée d'un échange/bascule d'un outil vers un autre), même construction
 que les autres (viewBox 20×20, trait 1.5px, `currentColor`, aucun
@@ -795,24 +796,50 @@ le fichier, disponible pour une future page — la page Automatisation ne
 l'utilise plus (la chaîne du Hero montre déjà ce qu'est un flux, le
 carton faisait doublon, retiré).
 Cartons de la page Automatisation (3, ancrages propres à sa nouvelle
-structure) : 1 « n8n, en une phrase » → BAS de la frise du bloc 2
-« Automatisations e-commerce » (ANCRAGE PROVISOIRE — sera déplacé dans un
-prochain prompt) — `[data-service-timeline-end]` posé sur le conteneur
-de la frise lui-même (`ServiceTimeline.tsx`, pas sur une colonne
-précise : son `offsetHeight` englobe par construction la colonne la
-plus haute des 3 moments, quel que soit leur nombre de tâches) ; 2 « On
+structure) : 1 « Vous vendez des services ? » → haut du H1 du Hero
+(`#service-hero-title`, `anchor="hero"`) — ancrage définitif (remplace
+l'ancrage provisoire sur la frise d'une session précédente) ; 2 « On
 reprend vos scénarios » → haut du H2 du bloc 5 (L'outil) ; 3
 « On discute ? » → bas du bloc 7 (Autres expertises,
 `[data-service-other-expertises-end]` posé sur `.grid`,
-ServiceOtherExpertises.tsx — seul ajout à ce bloc par ailleurs
-inchangé). Pile mobile : même ordre, mêmes sections de révélation.
-Écart mesuré pour l'ancrage du carton 1 : 0px (aux arrondis sub-pixel
-près — diffs mesurées entre −0,13px et +0,56px selon la largeur,
-cohérent avec le reste du site), IDENTIQUE en `prefers-reduced-motion:
-reduce` et en animations actives, à 1024×768, 1440×900, 1920×1080 et
-1366×657 (ce bloc n'a de toute façon aucune révélation d'entrée sur
-cette page, statique, voir plus haut : aucune divergence possible entre
-les deux modes ici).
+ServiceOtherExpertises.tsx). Pile mobile : même ordre, mêmes sections de
+révélation (`mobileReveal: ["hero", "tool", "other-expertises"]`) — le
+carton 1 y entre donc dès le haut de page, comme sur le rail desktop
+(avant : entrée seulement à la frise, divergent du desktop).
+Conséquence assumée de l'ancrage sur le Hero : le carton 1 est visible
+DÈS LE CHARGEMENT de la page (sa ligne de grille démarre à `hero-start`),
+contrairement aux cartons 2/3 et à l'ancien comportement « rien pendant
+le Hero » — seul ce carton déroge à cette règle sur cette page,
+volontairement (demande de Franck). Écart mesuré haut du carton / haut
+du H1 : 0px à 1024×768, 1440×900, 1920×1080, 1366×657 et 1280×720.
+
+Le carton 1 est ENTIÈREMENT CLIQUABLE (`href: "#autres-activites"`),
+exactement le même mécanisme que le carton 3 (`card.href` déjà géré par
+`RailCardArticle`/`MobileCard`, aucune modification de Rail.tsx ni de
+MobileRailStack.tsx n'a été nécessaire) — mais SANS son style visuel
+distinctif : filet `var(--fg)` comme les cartons 1/2 ordinaires (pas
+`var(--accent)`), aucun soulignement du titre au survol (ces deux
+comportements restent scopés à `action={cardIndex === 2}` dans Rail.tsx,
+volontairement non étendu). Nom accessible = concaténation visible du
+titre + texte (identique au carton 3, pas d'aria-label dédié) ; focus
+visible via la règle générale `.card:focus-visible` (non scopée à
+`cardAction`, s'applique donc ici aussi). La cible, `#autres-activites`
+(id par défaut de `<Section name="autres-activites">`), porte un
+`scroll-margin-top: var(--nav-h)` dédié (globals.css, après la règle
+générique `:where(h1…, [id]) { scroll-margin-top: var(--scroll-offset)
+}`) — la hauteur de la nav seule suffit ici, le padding-top de la
+section (`--section-space`) donnant déjà la respiration nécessaire sous
+le H2 ; mesuré 153px d'écart H2/nav après clic à 1024px et 1440px.
+
+Bug PRÉ-EXISTANT découvert pendant la vérification de ce carton (sans
+lien avec son contenu ni son ancrage — reproduit à l'identique sur le
+code d'avant cette session) : en mode relais, à 1366×657 uniquement
+(parmi les tailles de contrôle), les cartons 2 et 3 se chevauchent
+brièvement pendant le balayage de scroll (zone ~6840-7005px de scroll).
+Non corrigé ici (hors périmètre de ce prompt, qui n'autorisait aucune
+modification de la logique du moteur du rail) — signalé à Franck,
+reproductible via un balayage de scroll pas-à-pas à cette résolution
+précise.
 
 Canonical (`alternates.canonical`) via `metadataBase` (`src/app/
 layout.tsx` — absent avant ces pages, ajouté : `new URL("https://
