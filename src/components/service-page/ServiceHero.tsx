@@ -1,5 +1,6 @@
 import { ArrowLink } from "@/components/ArrowLink";
 import type { ServiceHero as ServiceHeroContent } from "@/content/services/types";
+import { ServiceHeroChainReveal } from "./ServiceHeroChainReveal";
 import styles from "./ServiceHero.module.css";
 
 /**
@@ -17,10 +18,11 @@ import styles from "./ServiceHero.module.css";
  * 5 chaîne — les deux espaceurs (`minmax(Y, 1fr)`, même Y) centrent la
  * ligne sous-titre+CTA à égale distance du H1 et de la chaîne.
  *
- * Aucune animation d'entrée ici (contrairement aux autres blocs, voir
- * ScrollReveal.tsx) : sans photo, le h1 est très probablement l'élément
- * LCP de cette page — CLAUDE.md, « Animations » : « rien d'animé sur
- * l'élément LCP ». Peint à 100 % d'opacité dès le premier rendu.
+ * Aucune animation sur h1/sous-titre/CTA : sans photo, le h1 est très
+ * probablement l'élément LCP de cette page — CLAUDE.md, « Animations » :
+ * « rien d'animé sur l'élément LCP ». Peint à 100 % d'opacité dès le
+ * premier rendu. Seule la chaîne est animée, dans `ServiceHeroChainReveal`
+ * (composant client séparé — ce composant-ci reste serveur).
  *
  * Le carton 1 du rail s'ancre sur ce bloc (CLAUDE.md, « Pages services —
  * gabarit » § RAIL) : `<RailSlot anchor="hero">` (page.tsx) vise
@@ -47,24 +49,7 @@ export function ServiceHero({
         <p className={styles.subtitle}>{subtitle}</p>
         <ArrowLink href={cta.href} label={cta.label} direction="right" className={styles.cta} />
       </div>
-      <div className={styles.chain}>
-        <div className={styles.notification}>
-          <span className={styles.notificationDot} aria-hidden="true" />
-          <span>
-            <p className={styles.notificationLabel}>{chain.notification.label}</p>
-            <p className={styles.notificationTitle}>{chain.notification.title}</p>
-          </span>
-        </div>
-        <div className={styles.steps}>
-          {chain.steps.map((step) => (
-            <div key={step.number} className={styles.step}>
-              <p className={styles.stepNumber}>{step.number}</p>
-              <p className={styles.stepTitle}>{step.title}</p>
-              <p className={styles.stepStatus}>{step.status}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <ServiceHeroChainReveal chain={chain} />
     </>
   );
 }

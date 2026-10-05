@@ -758,13 +758,40 @@ largement positive) ; 1366×657 ne dépasse plus que de 7px (contre 72px
 avant le retrait du label, et 184px avant les resserrements internes de
 la session précédente) — chaîne entière, jamais coupée.
 
-Aucune animation d'entrée sur le bloc 1 (hero) de ces pages, contrairement
-à tous les autres blocs : sans photo, le H1 est très probablement
-l'élément LCP de la page — CLAUDE.md, « Animations » : « rien d'animé sur
-l'élément LCP ». Peint à 100 % d'opacité dès le premier rendu, comme le
-h1 de la home. (La chaîne du Hero n'a, elle non plus, aucune animation
-dans cette page pour l'instant — elle en recevra une dans un prompt
-séparé.)
+Aucune animation d'entrée sur h1/sous-titre/CTA du bloc 1 (hero) de ces
+pages, contrairement à tous les autres blocs : sans photo, le H1 est très
+probablement l'élément LCP de la page — CLAUDE.md, « Animations » : « rien
+d'animé sur l'élément LCP ». Peint à 100 % d'opacité dès le premier rendu,
+comme le h1 de la home.
+
+La chaîne du Hero (notification + 4 étapes), elle, est animée —
+`ServiceHeroChainReveal.tsx`, composant client séparé de `ServiceHero.tsx`
+(qui reste serveur). Séquence UNIQUE au chargement : notification puis
+01→04, stagger 350ms, chaque étape 300ms (opacity + y 8px→0), chaque
+connecteur 250ms (scaleX desktop / scaleY mobile, se termine au moment où
+l'étape suivante apparaît) — durée totale ≈1,7s. ≥1024px : jouée au
+montage. <1024px : ScrollTrigger `top 80%`, une seule fois (y compris si
+la chaîne est déjà à l'écran au chargement). `prefers-reduced-motion` :
+état final immédiat. Les connecteurs sont de VRAIS éléments DOM (`.step`,
+`.connector` en alternance dans la grille, pistes dédiées 20px/16px) —
+plus un `::before` unique : GSAP ne peut pas animer un pseudo-élément.
+Anti-flash (chaîne au-dessus de la ligne de flottaison) : un `<script>`
+inline, rendu PAR `ServiceHeroChainReveal.tsx` lui-même (jamais le layout
+racine), pose `data-chain-anim="pending"` sur `<html>` avant le premier
+paint — scope l'attribut aux seules pages qui ont une chaîne, sans test de
+pathname. `useLayoutEffect` (jamais `useEffect`) pour la section critique
+(masquer + retirer l'attribut) ; la construction de la timeline est
+déportée dans un `useEffect` séparé, après le premier paint. Filet de
+sécurité 4s côté script : si l'hydratation traîne au-delà, l'attribut est
+retiré tout seul (état final visible, jamais bloqué) — et si le composant
+s'hydrate après ce filet, il détecte l'attribut déjà absent et ne pose ni
+ne joue plus rien (pas de second flash).
+CLS résiduel ≈ 0,012 sur `.bottom` (sous-titre + CTA) du Hero, lié au swap
+de police (next/font, `display: swap`) qui devient parfois mesurable à
+cause de l'écriture de style synchrone de `useLayoutEffect` — sans rapport
+avec la chaîne elle-même (opacity/transform pur, 0 décalage mesuré sur ses
+propres éléments) : accepté, sous le seuil « bon » de 0,1 ; à remesurer
+sur preview Vercel.
 
 Rail (desktop + pile mobile) rendu réutilisable pour ce gabarit —
 `RailConfig` (components/layout/Rail.tsx) : cartons, icônes, cibles de

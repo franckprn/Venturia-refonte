@@ -296,34 +296,35 @@
   color: var(--ground);
 }
 
-/* Mobile (< 1024px) : chaîne verticale — le trait --accent (.steps
-   ::before) devient une ligne verticale au lieu d'horizontale, voir
-   plus bas. */
+/* Mobile (< 1024px) : chaîne verticale. Le trait --accent entre deux
+   étapes (.connector) est un vrai élément DOM — plus un ::before
+   unique continu — depuis que ServiceHeroChainReveal.tsx l'anime en
+   scaleY (GSAP ne peut pas cibler un pseudo-élément). Il vit dans une
+   piste de grille DÉDIÉE de 16px entre deux cartes (grid-template-rows
+   explicite), jamais en position absolute : géométrie identique à
+   l'ancien ::before (visible seulement dans l'interstice entre deux
+   cartes), mais obtenue par la grille plutôt que par un calque
+   superposé — plus besoin de position/z-index sur .step. */
 .steps {
-  position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
-}
-
-.steps::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 19px;
-  width: 2px;
-  background: var(--accent);
-  z-index: 0;
+  grid-template-rows: auto 16px auto 16px auto 16px auto;
 }
 
 .step {
-  position: relative;
-  z-index: 1;
   padding: 14px;
   border: 1px solid var(--ink);
   border-radius: 4px;
   background: var(--ground);
+}
+
+.connector {
+  align-self: stretch;
+  justify-self: start;
+  width: 2px;
+  margin-left: 19px;
+  background: var(--accent);
+  transform-origin: top;
 }
 
 @media (min-width: 1024px) and (max-height: 799px) {
@@ -359,20 +360,65 @@
 }
 
 @media (min-width: 1024px) {
+  /* 7 pistes explicites (étape, interstice, étape, …) plutôt que
+     `repeat(4, 1fr); column-gap: 20px` : un connecteur occupe
+     désormais sa PROPRE piste de 20px (même largeur totale consommée
+     par les gouttières qu'avant — géométrie des 4 cartes inchangée au
+     pixel), au lieu d'être superposé en pseudo-élément derrière elles. */
   .steps {
-    grid-template-columns: repeat(4, 1fr);
-    column-gap: 20px;
+    grid-template-columns: 1fr 20px 1fr 20px 1fr 20px 1fr;
+    grid-template-rows: auto;
   }
 
-  /* Trait horizontal : passe derrière les cartes (z-index 0, cartes à
-     1 avec fond --ground opaque) — visible seulement dans les
-     interstices entre elles, ce qui donne l'impression qu'il les relie. */
-  .steps::before {
-    top: 24px;
-    bottom: auto;
-    left: 0;
-    right: 0;
+  .connector {
+    align-self: start;
+    justify-self: stretch;
     width: auto;
     height: 2px;
+    margin-left: 0;
+    margin-top: 24px;
+    transform-origin: left;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * État pré-hydratation (anti-flash) — la chaîne est au-dessus de la
+ * ligne de flottaison : sans ce garde-fou, le HTML serveur l'affiche
+ * déjà visible, le temps que l'hydratation démarre (potentiellement
+ * plusieurs secondes sur un réseau lent), avant que GSAP ne la masque
+ * puis la révèle — un flash « visible → masqué → révélé ».
+ *
+ * `data-chain-anim="pending"` est posé sur <html> par un script inline
+ * RENDU PAR `ServiceHeroChainReveal.tsx` lui-même (jamais le layout
+ * racine — ça scope l'attribut aux seules pages qui ont une chaîne),
+ * exécuté AVANT que ce bloc ne soit peint — jamais en CSS pur par
+ * défaut (CLAUDE.md, « Animations » : rien ne doit rester à opacity 0
+ * si le JS ne charge pas) : sans ce script (JS désactivé, ou
+ * prefers-reduced-motion), l'attribut n'existe jamais, ces règles ne
+ * s'appliquent jamais, la chaîne reste visible. Le composant pose le
+ * MÊME état en JS (gsap.set) puis retire l'attribut avant de jouer sa
+ * timeline : la bascule CSS → GSAP n'est donc jamais visible. Si
+ * l'hydratation échoue ou traîne, le script retire lui-même l'attribut
+ * après un délai de sécurité (4s, voir ServiceHeroChainReveal.tsx) — la
+ * chaîne redevient visible à son état final, jamais bloquée ; si le
+ * composant s'hydrate APRÈS ce délai, il détecte l'attribut absent et
+ * ne pose ni ne joue plus rien (pas de second flash). */
+html[data-chain-anim="pending"] .notification {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+html[data-chain-anim="pending"] .step {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+html[data-chain-anim="pending"] .connector {
+  transform: scaleY(0);
+}
+
+@media (min-width: 1024px) {
+  html[data-chain-anim="pending"] .connector {
+    transform: scaleX(0);
   }
 }
