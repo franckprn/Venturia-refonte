@@ -2186,7 +2186,7 @@ Lancer le dev server et capturer la page avec Playwright en 390px et en
 1440px, puis ouvrir les captures et les regarder. Ne pas déclarer une page
 correcte sans l'avoir vue.
 
-Trois contrôles chiffrés, dans la console de la page :
+Cinq contrôles chiffrés, dans la console de la page :
 1. pas de scroll horizontal
    document.documentElement.scrollWidth === document.documentElement.clientWidth
 2. méga-menu OUVERT en 1440, sa hauteur reste sous 55 % de la fenêtre
@@ -2197,6 +2197,26 @@ Trois contrôles chiffrés, dans la console de la page :
    empilés, jusqu'au bas de la page — en mode relais (fenêtre courte,
    voir « Rail droit » § « Mode relais »), un seul à la fois est figé,
    sans jamais se chevaucher ni être coupé par le bas de la fenêtre
+4. H1 calibré en cqi sur deux lignes (`line1`/`line2` explicites,
+   ServiceHero.module.css ou hero.module.css) : mesurer la largeur
+   RÉELLE de CHAQUE ligne (`Range.getBoundingClientRect()` sur le nœud
+   texte, pas `h1.getBoundingClientRect()` — l'élément garde la largeur
+   de son conteneur même quand le texte déborde) et comparer les DEUX à
+   la largeur du conteneur, jamais seulement `line1` en supposant qu'elle
+   est la plus longue — c'est une mesure, pas une hypothèse (piège
+   rencontré sur /services/seo : `line1` avait un caractère de plus que
+   `line2` mais rendait plus étroite ; calibrer sur la mauvaise ligne l'a
+   fait déborder de 14 à 32px sans que `scrollWidth` ne le révèle, voir
+   point 1 — l'écart tombait dans la colonne du rail, qui peut absorber
+   un léger débordement sans élargir la page). Recalibrer sur la ligne
+   réellement la plus large si un écart existe.
+5. mesures du rail (`--rail-card1/2/3-offset`, `--rail-card1/2/3-relay-
+   height`) : attendre au moins 300ms après le chargement avant de lire
+   une custom property sur `document.documentElement` — elle est écrite
+   par un `useEffect` (Rail.tsx), pas disponible tout de suite après
+   `load`. La lire trop tôt renvoie le repli statique de globals.css
+   (20px/100vh), pas la valeur mesurée : un écart qui disparaît en
+   patientant n'est pas une régression.
 
 Puis navigation complète au clavier, du premier lien au dernier.
 Corriger avant de rendre la main.
