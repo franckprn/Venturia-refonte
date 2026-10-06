@@ -12,7 +12,11 @@ export type HeroContent = {
   /** Sous-titre, une seule phrase (plus de second CTA « Comment
    *  améliorer mon référencement ? », retiré — voir CLAUDE.md § 1). */
   subtitle: string;
-  ctaSecondary: { label: string; href: string };
+  /** `isLink: false` → rendu en <span> (ArrowLink `as="span"`,
+   *  HeroReveal.tsx) tant que `/realisations` n'existe pas — même
+   *  convention isLink que content/nav.ts/content/footer.ts, un lien
+   *  mort est pire qu'un texte simple. */
+  ctaSecondary: { label: string; href: string; isLink: boolean };
   /** Texte alternatif de la photo du Hero (jamais en dur dans le JSX —
    *  CLAUDE.md, « Hero (home) »). */
   photoAlt: string;
@@ -27,6 +31,7 @@ export const hero: HeroContent = {
   ctaSecondary: {
     label: "Ce que ça donne concrètement",
     href: "/realisations",
+    isLink: false,
   },
   photoAlt: "Ordinateur portable ouvert sur Google Search Console",
 };

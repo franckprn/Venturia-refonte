@@ -43,9 +43,10 @@ export const footer = {
     {
       title: "VENTURIA",
       entries: [
-        { label: "Réalisations", href: "/realisations", isLink: true },
+        // Pages pas encore publiées : isLink: false → <span>.
+        { label: "Réalisations", href: "/realisations", isLink: false },
         { label: "Blog", href: "/blog", isLink: true },
-        { label: "À propos", href: "/a-propos", isLink: true },
+        { label: "À propos", href: "/a-propos", isLink: false },
         { label: "Contact", href: "/contact", isLink: true },
       ],
     },
@@ -73,9 +74,12 @@ export const footer = {
 
   legal: {
     copyright: "© 2026 Venturia",
-    legalNotice: { label: "Mentions légales", href: "/mentions-legales" },
-    privacy: { label: "Confidentialité", href: "/confidentialite" },
-  },
+    // Pages pas encore publiées : même convention isLink que les
+    // colonnes de liens ci-dessus (FooterLinkEntry) — <span> tant que
+    // false (Footer.tsx).
+    legalNotice: { label: "Mentions légales", href: "/mentions-legales", isLink: false },
+    privacy: { label: "Confidentialité", href: "/politique-de-confidentialite", isLink: false },
+  } satisfies { copyright: string; legalNotice: FooterLinkEntry; privacy: FooterLinkEntry },
 };
 
 export type FooterContent = typeof footer;

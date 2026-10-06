@@ -197,11 +197,20 @@ export function Nav() {
               >
                 {nav.trigger}
               </button>
-              {nav.topLinks.map((entry) => (
-                <Link key={entry.href} href={entry.href} className={styles.link}>
-                  {entry.label}
-                </Link>
-              ))}
+              {nav.topLinks.map((entry) =>
+                entry.isLink ? (
+                  <Link key={entry.href} href={entry.href} className={styles.link}>
+                    {entry.label}
+                  </Link>
+                ) : (
+                  // Page pas encore publiée : <span>, pas <a> — même
+                  // convention que le panneau mobile du méga-menu
+                  // (MegaMenu.tsx), un lien mort est pire qu'un texte simple.
+                  <span key={entry.href} className={`${styles.link} ${styles.linkStatic}`}>
+                    {entry.label}
+                  </span>
+                ),
+              )}
             </div>
           </div>
 

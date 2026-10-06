@@ -97,12 +97,20 @@ export function Footer() {
 
         <div className={styles.legalLeft}>
           <span className={styles.legalCopyright}>{legal.copyright}</span>
-          <Link href={legal.legalNotice.href} className={styles.legalLink}>
-            {legal.legalNotice.label}
-          </Link>
-          <Link href={legal.privacy.href} className={styles.legalLink}>
-            {legal.privacy.label}
-          </Link>
+          {legal.legalNotice.isLink ? (
+            <Link href={legal.legalNotice.href} className={styles.legalLink}>
+              {legal.legalNotice.label}
+            </Link>
+          ) : (
+            <span className={styles.legalLinkDisabled}>{legal.legalNotice.label}</span>
+          )}
+          {legal.privacy.isLink ? (
+            <Link href={legal.privacy.href} className={styles.legalLink}>
+              {legal.privacy.label}
+            </Link>
+          ) : (
+            <span className={styles.legalLinkDisabled}>{legal.privacy.label}</span>
+          )}
         </div>
         <LocalTime />
       </div>

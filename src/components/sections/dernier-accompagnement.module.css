@@ -233,6 +233,17 @@
   outline-offset: 2px;
 }
 
+/* Page pas encore publiée (<span>, voir DernierAccompagnement.tsx) :
+   même gabarit que .link, sans aucune affordance interactive. */
+.linkDisabled {
+  cursor: default;
+}
+
+.linkDisabled:hover,
+.linkDisabled:focus-visible {
+  padding-bottom: 0;
+}
+
 .linkArrow {
   flex: none;
 }

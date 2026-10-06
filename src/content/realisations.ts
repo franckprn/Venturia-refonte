@@ -38,6 +38,11 @@ export type RealisationsContent = {
    *  DernierAccompagnement.tsx). */
   linkLabel: string;
   linkHref: string;
+  /** false → rendu en <span> (DernierAccompagnement.tsx) tant que
+   *  `/realisations/inoko` n'existe pas — même convention isLink que
+   *  content/nav.ts/content/footer.ts, un lien mort est pire qu'un
+   *  texte simple. */
+  linkIsLink: boolean;
   /** Chemin public de l'image (next/image). Absente pour l'instant. */
   image?: string;
   /** alt en français, ce que montrera la photo une fois fournie. */
@@ -74,6 +79,7 @@ export const realisations: RealisationsContent = {
   ],
   linkLabel: "Voir comment",
   linkHref: "/realisations/inoko",
+  linkIsLink: false,
   image: "/images/realisations/inoko-mobilier-van-toulouse.jpg",
   imageAlt: "Mobilier modulable Inoko installé dans un van, à Toulouse",
 };

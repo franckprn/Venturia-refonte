@@ -125,6 +125,16 @@
   outline-offset: 2px;
 }
 
+/* Entrée pas encore publiée (<span>, voir Nav.tsx) : même gabarit que
+   .link, sans aucune affordance interactive. */
+.linkStatic {
+  cursor: default;
+}
+
+.linkStatic:hover {
+  color: var(--fg);
+}
+
 /* « Menu » : seul visible sous 1024px, caché au-dessus. Pas de
    hamburger. --t-mono, comme prescrit pour ce déclencheur précis. */
 .menu {

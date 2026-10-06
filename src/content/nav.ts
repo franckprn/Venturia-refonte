@@ -50,7 +50,9 @@ export const nav = {
   logoAriaLabel: "Venturia, retour à l'accueil",
 
   topLinks: [
-    { label: "Réalisations", href: "/realisations", isLink: true },
+    // Page pas encore publiée : isLink: false → <span> dans la barre
+    // desktop (Nav.tsx) ET dans le panneau mobile (MegaMenu.tsx).
+    { label: "Réalisations", href: "/realisations", isLink: false },
     { label: "Contact", href: "/contact", isLink: true },
   ] as NavEntry[],
 

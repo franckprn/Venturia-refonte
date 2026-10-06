@@ -64,25 +64,50 @@ export function DernierAccompagnement() {
         }
       />
 
-      <Link href={r.linkHref} className={styles.link}>
-        {r.linkLabel}
-        <svg
-          className={styles.linkArrow}
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          aria-hidden="true"
-        >
-          <path
-            d="M2.5 8H13M9 3.5L13.5 8L9 12.5"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </Link>
+      {r.linkIsLink ? (
+        <Link href={r.linkHref} className={styles.link}>
+          {r.linkLabel}
+          <svg
+            className={styles.linkArrow}
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M2.5 8H13M9 3.5L13.5 8L9 12.5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </Link>
+      ) : (
+        // Page pas encore publiée : <span>, pas <a> — même convention
+        // que content/nav.ts/content/footer.ts, un lien mort est pire
+        // qu'un texte simple.
+        <span className={`${styles.link} ${styles.linkDisabled}`}>
+          {r.linkLabel}
+          <svg
+            className={styles.linkArrow}
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M2.5 8H13M9 3.5L13.5 8L9 12.5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+      )}
     </>
   );
 }

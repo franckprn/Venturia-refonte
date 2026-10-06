@@ -359,15 +359,26 @@
   opacity: 0.7;
 }
 
-.legalLink {
+.legalLink,
+.legalLinkDisabled {
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: var(--t-mono);
   line-height: var(--t-mono-lh);
   letter-spacing: var(--t-mono-ls);
   color: var(--ground);
   opacity: 0.7;
-  text-decoration: none;
   border-bottom: 1px solid transparent;
+}
+
+/* Pages pas encore publiées (mentions légales, confidentialité) :
+   <span>, pas <a> — un lien mort est pire qu'un texte simple, même
+   convention que .columnLinkDisabled plus haut. */
+.legalLinkDisabled {
+  text-decoration: none;
+}
+
+.legalLink {
+  text-decoration: none;
   transition: border-color 200ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 

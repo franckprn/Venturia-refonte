@@ -107,7 +107,12 @@ export function HeroReveal() {
         </p>
 
         <div ref={actionsRef} className={styles.actions}>
-          <ArrowLink href={hero.ctaSecondary.href} label={hero.ctaSecondary.label} direction="down" />
+          <ArrowLink
+            href={hero.ctaSecondary.href}
+            label={hero.ctaSecondary.label}
+            direction="down"
+            as={hero.ctaSecondary.isLink ? "link" : "span"}
+          />
         </div>
       </div>
     </>
