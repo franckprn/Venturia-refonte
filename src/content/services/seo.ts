@@ -26,13 +26,26 @@ export const seo: SeoServiceContent = {
       "Belgique.",
   },
 
-  // Mesuré Playwright (build de prod, même méthode que
-  // --service-hero-title-cqi d'Automatisation, ServiceHero.module.css) :
-  // k = largeur de « Référencement naturel » (titleLine1, la plus
-  // longue des deux lignes) à 100px / 100 = 10.9920 (mesurée sur un
-  // <span> ISOLÉ, même police/graisse/letter-spacing que le h1 réel).
-  // cqi = 100/k = 9.0975.
-  heroTitleCqi: 9.0975,
+  // Recalibré (session « page Création de site », 2026-10-06) :
+  // `titleLine1` (« Référencement naturel ») avait été supposée la plus
+  // longue des deux lignes, comme sur Automatisation/Publicité — erreur :
+  // mesuré, c'est `titleLine2` (« e-commerce à Toulouse », identique au
+  // texte de la page Création de site) qui est la plus large une fois
+  // rendue (1120,9px vs 1058,8px à 100px, isolé), bien que `line1` ait un
+  // caractère de plus. Le h1 reste `white-space: nowrap` PAR LIGNE
+  // (ServiceHero.module.css) : à l'ancienne valeur (9.0975, calibrée sur
+  // `line1`), `line2` débordait du conteneur de 14 à 32px selon la
+  // largeur d'écran — invisible au contrôle `scrollWidth` (l'écart
+  // tombait dans la colonne du rail, qui absorbe un léger débordement
+  // sans élargir la page) mais visible à l'œil (capture Playwright,
+  // "Toulouse" tronqué). k = largeur de « e-commerce à Toulouse » à
+  // 100px / 100 = 11,2090625 (mesurée sur un <span> ISOLÉ, même
+  // police/graisse/letter-spacing que le h1 réel — même valeur que
+  // content/services/creation-site.ts, texte strictement identique).
+  // cqi = 100/k = 8,9214 — vérifié EXACT sur `line2` (delta ≤ 0,11px,
+  // aucun débordement) à 1024/1280/1440/1728/1920px ; `line1` garde
+  // 14 à 31px de marge selon la largeur, jamais serrée.
+  heroTitleCqi: 8.9214,
 
   hero: {
     titleLine1: "Référencement naturel",
@@ -289,7 +302,7 @@ export const seo: SeoServiceContent = {
         name: "Site internet",
         phrase: "Un site à votre image, pensé pour convertir.",
         ctaLabel: "En savoir plus",
-        href: "/services/site-internet",
+        href: "/services/creation-site",
       },
     ],
   },

@@ -85,8 +85,8 @@ export const services: [Service, Service, Service, Service] = [
         "sans dépenser un euro de plus pour les faire venir.",
     ],
     ctaLabel: "Découvrir la création de site",
-    href: "/services/site-internet",
-    isLink: false,
+    href: "/services/creation-site",
+    isLink: true,
   },
   {
     name: "Automatisation",

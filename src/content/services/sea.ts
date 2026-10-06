@@ -297,7 +297,7 @@ export const publicite: PubliciteServiceContent = {
         name: "Site internet",
         phrase: "Un site à votre image, pensé pour convertir.",
         ctaLabel: "En savoir plus",
-        href: "/services/site-internet",
+        href: "/services/creation-site",
       },
     ],
   },

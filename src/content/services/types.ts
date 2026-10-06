@@ -357,3 +357,65 @@ export type SeoServiceContent = ServicePageContentBase & {
   priceFactors: ServiceOtherActivitiesBlock;
   crossLink: ServiceCrossLinkBlock;
 };
+
+/** Bloc « Calculateur » de la page Création de site (/services/creation-site)
+ *  — même mécanique de saisie que ServiceCalculator/ServiceRoasCalculator
+ *  (type="text"+inputMode="decimal", virgule acceptée, parsing partagé via
+ *  src/lib/localeNumber.ts) mais formule, champs ET validation propres à
+ *  cette page : composant et type séparés, comme ServiceRoasCalculator
+ *  l'est déjà de ServiceCalculator. Les 3 champs suivent la même règle que
+ *  la marge de ServiceRoasCalculator (pas celle, plus permissive, de
+ *  ServiceCalculator) : vide, 0, négatif, non numérique OU hors bornes →
+ *  TOUS les résultats affichent `emptyValue`, jamais un bornage silencieux
+ *  — demande explicite de Franck. Les bornes elles-mêmes (visiteurs
+ *  1-1 000 000, taux 0,1-20 %, panier 1-10 000 €) sont des constantes de
+ *  calcul, pas du texte — elles vivent dans ServiceRateCalculator.tsx. */
+export type ServiceRateCalculatorBlock = {
+  label: string;
+  title: string;
+  visitorsLabel: string;
+  /** Valeur de départ du champ 1, affichée au premier rendu. */
+  visitorsDefault: number;
+  rateLabel: string;
+  /** Valeur de départ du champ 2 (en %, ex. 1 pour "1 %"). */
+  rateDefault: number;
+  basketLabel: string;
+  /** Valeur de départ du champ 3. */
+  basketDefault: number;
+  /** Précède le montant actuel (« Chiffre d'affaires actuel : »). */
+  currentLabel: string;
+  /** Suffixe après le montant actuel (« par mois »). */
+  currentSuffix: string;
+  /** Précède le montant du gain mensuel (« Avec 0,5 point de plus : »). */
+  gainLabel: string;
+  /** Suffixe après le montant du gain mensuel (« par mois »). */
+  gainSuffix: string;
+  /** Avant le montant annuel (« Soit »). */
+  yearlyPrefix: string;
+  /** Après le montant annuel (« par an »). */
+  yearlySuffix: string;
+  note: string;
+  /** Résultat affiché à la place d'un montant quand une valeur saisie est
+   *  invalide (vide, 0, négative, non numérique, hors bornes) — « — ». */
+  emptyValue: string;
+  cta: { label: string; href: string };
+};
+
+/** Contenu de la page Création de site (/services/creation-site) — gabarit
+ *  de base + calculateur de taux d'achat (moment fort, juste après le
+ *  Hero), renvoi vers le référencement. `otherActivities` (champ de base)
+ *  porte le bloc Plateformes (section 5) ; `included` est une SECONDE
+ *  instance de ServiceOtherActivities (même composant, réutilisé tel
+ *  quel — comme `appartient`/`priceFactors` sur Publicité/Référencement)
+ *  pour le bloc « Inclus dans le forfait » (section 7), avec son propre
+ *  headingId pour éviter le doublon avec celui de `otherActivities`. Pas
+ *  de `inokoCase` : aucun cas client sur cette page. */
+export type CreationSiteServiceContent = ServicePageContentBase & {
+  /** Mesurée Playwright, propre au texte de `hero.titleLine1` de CETTE
+   *  page (voir ServiceHero.tsx `titleCqi`) — omis : la page garde la
+   *  valeur par défaut du CSS (celle d'Automatisation, 9.1116). */
+  heroTitleCqi?: number;
+  rateCalculator: ServiceRateCalculatorBlock;
+  included: ServiceOtherActivitiesBlock;
+  crossLink: ServiceCrossLinkBlock;
+};

@@ -434,3 +434,48 @@ export const IconSwap = forwardRef<RailIconHandle, IconProps>(function IconSwap(
     </svg>
   );
 });
+
+/**
+ * Carton « Quelle plateforme ? » (page /services/creation-site) : trois
+ * carrés empilés en diagonale — l'idée de plusieurs plateformes possibles,
+ * parmi lesquelles choisir. Aucune des 8 icônes existantes ne porte cette
+ * idée de choix (IconConnect = relier, IconSwap = migrer d'un outil à
+ * l'autre, IconFlow = enchaîner des étapes) — nouvelle icône, ajout pur.
+ *
+ * Au déclenchement (figement, comme IconSparkle) : le carré du dessus se
+ * décale légèrement puis revient, comme si on le soulevait pour regarder
+ * ceux du dessous — aller-retour, 400ms au total.
+ */
+export const IconLayers = forwardRef<RailIconHandle, IconProps>(function IconLayers(
+  { className },
+  ref,
+) {
+  const topRef = useRef<SVGRectElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+
+  useEffect(() => {
+    ctxRef.current = gsap.context(() => {});
+    return () => ctxRef.current?.revert();
+  }, []);
+
+  useImperativeHandle(ref, () => ({
+    play: () => {
+      const el = topRef.current;
+      if (!el) return;
+      ctxRef.current?.add(() => {
+        gsap
+          .timeline()
+          .to(el, { x: -2, y: -2, duration: 0.2, ease: VENTURIA_EASE })
+          .to(el, { x: 0, y: 0, duration: 0.2, ease: VENTURIA_EASE });
+      });
+    },
+  }));
+
+  return (
+    <svg {...SHARED_PROPS} className={className}>
+      <rect x="5" y="11" width="10" height="5.5" rx="0.6" />
+      <rect x="4" y="7.25" width="10" height="5.5" rx="0.6" />
+      <rect ref={topRef} x="3" y="3.5" width="10" height="5.5" rx="0.6" />
+    </svg>
+  );
+});

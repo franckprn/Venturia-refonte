@@ -321,6 +321,12 @@ html[data-tone-transition="on"] {
   #geo {
     scroll-margin-top: var(--nav-h);
   }
+
+  /* Page Création de site, lien du carton 2 du rail (#plateformes) :
+     même motif que #autres-activites/#campagnes/#geo ci-dessus. */
+  #plateformes {
+    scroll-margin-top: var(--nav-h);
+  }
 }
 
 /* Champs de formulaire >= 16px sur mobile, sinon Safari iOS zoome au focus */
