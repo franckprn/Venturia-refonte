@@ -201,6 +201,65 @@ export type ServiceIntegrationsBlock = {
   outro: string;
 };
 
+/** Bloc 2 (page Publicité) — cas client Inoko, moment fort de la page.
+ *  Mise en page B (ServiceSplitIntro : label + h2 colonnes 1-6, texte
+ *  colonnes 7-12), puis un visuel pleine largeur (sa propre ligne de
+ *  grille, à partir de la ligne 4 — même motif que `.items` de
+ *  ServiceStarting) : « 1 € investi » (1 carré --ink, colonnes 1-6) et
+ *  « N € de chiffre d'affaires » (N carrés --accent, colonnes 7-12),
+ *  puis une ligne de définition. `revenue.squares` vient du chiffre
+ *  donné par Franck (ROAS) — jamais recalculé ni inventé ici. */
+export type ServiceInokoCaseBlock = {
+  label: string;
+  title: string;
+  text: string;
+  invested: { amount: string; label: string };
+  revenue: { amount: string; label: string; squares: number };
+  definition: string;
+};
+
+/** Bloc « Google Ads + Référencement » (page Publicité) — mise en page B
+ *  (ServiceSplitIntro), un paragraphe simple (axe droit) suivi d'un lien
+ *  vers une autre page service. Trop différent de ServiceTool (pas
+ *  d'intertitres) et de ServiceRedBand (pas d'inversion) pour les
+ *  réutiliser : composant dédié, minimal. */
+export type ServiceCrossLinkBlock = {
+  label: string;
+  title: string;
+  text: string;
+  cta: { label: string; href: string };
+};
+
+/** Bloc « Calculateur » de la page Publicité — même mécanique de saisie
+ *  que ServiceCalculatorBlock (type="text"+inputMode="decimal", virgule
+ *  acceptée, parsing partagé via src/lib/localeNumber.ts) mais formule
+ *  et champs propres à cette page (marge brute → ROAS minimum, panier
+ *  moyen → coût maximum par commande) : pas une généralisation de
+ *  ServiceCalculatorBlock, un type et un composant séparés. Les bornes
+ *  de validation (marge 1-99 %) sont des constantes de calcul, pas du
+ *  texte — elles vivent dans ServiceRoasCalculator.tsx, pas ici. */
+export type ServiceRoasCalculatorBlock = {
+  label: string;
+  title: string;
+  marginLabel: string;
+  /** Valeur de départ du champ marge, affichée au premier rendu. */
+  marginDefault: number;
+  /** Champ facultatif — pas de valeur de départ (vide). */
+  basketLabel: string;
+  /** Précède le nombre (« ROAS minimum : »). */
+  roasResultLabel: string;
+  /** Phrase statique sous le résultat ROAS. */
+  roasHelp: string;
+  /** Précède le nombre en euros (« Coût maximum par commande : »). */
+  costResultLabel: string;
+  note: string;
+  /** Résultat affiché à la place d'un nombre quand une valeur saisie est
+   *  invalide (vide, 0, négative, non numérique, hors bornes pour la
+   *  marge) — « — ». */
+  emptyValue: string;
+  cta: { label: string; href: string };
+};
+
 export type ServiceFaqItem = {
   question: string;
   answer: string;
@@ -228,20 +287,54 @@ export type ServiceOtherExpertisesBlock = {
   items: ServiceOtherExpertise[];
 };
 
-export type ServicePageContent = {
+/** Champs communs aux pages /services/* qui réutilisent le gabarit de
+ *  base (CLAUDE.md, « Pages services — gabarit ») — hero, frise, « par
+ *  où commencer », liste B, respiration rouge, FAQ, autres expertises,
+ *  rail. Chaque page ajoute ensuite SES blocs propres (voir
+ *  `ServicePageContent`, Automatisation, et `PubliciteServiceContent`,
+ *  Publicité) — toutes les pages du gabarit n'utilisent pas forcément
+ *  les mêmes blocs intermédiaires (calculateur, outil, intégrations…). */
+export type ServicePageContentBase = {
   meta: { title: string; description: string };
   hero: ServiceHero;
   timeline: ServiceTimelineBlock;
   starting: ServiceStartingBlock;
   otherActivities: ServiceOtherActivitiesBlock;
   redBand: ServiceRedBandBlock;
-  calculator: ServiceCalculatorBlock;
-  tool: ServiceToolBlock;
-  integrations: ServiceIntegrationsBlock;
   faq: ServiceFaqBlock;
   otherExpertises: ServiceOtherExpertisesBlock;
   /** Les 3 cartons du rail — même type que content/rail.ts (home) :
    *  `title`/`text` toujours visibles, `resume` réservé à la pile
    *  mobile REPLIÉE, `href` seulement sur le carton d'action (3ᵉ). */
   rail: [RailCardContent, RailCardContent, RailCardContent];
+};
+
+/** Contenu de la page Automatisation — INCHANGÉ (mêmes champs requis
+ *  qu'avant l'introduction de `ServicePageContentBase`, simple
+ *  refactor : `ServicePageContent` reste exactement le même type
+ *  qu'avant pour tout consommateur existant). */
+export type ServicePageContent = ServicePageContentBase & {
+  calculator: ServiceCalculatorBlock;
+  tool: ServiceToolBlock;
+  integrations: ServiceIntegrationsBlock;
+};
+
+/** Contenu de la page Publicité — gabarit de base + ses blocs propres
+ *  (cas Inoko, calculateur ROAS, renvoi vers le référencement). Pas de
+ *  `calculator`/`tool`/`integrations` : cette page ne les utilise pas. */
+export type PubliciteServiceContent = ServicePageContentBase & {
+  /** Mesurée Playwright, propre au texte de `hero.titleLine1` de CETTE
+   *  page (voir ServiceHero.tsx `titleCqi`) — omis : la page garde la
+   *  valeur par défaut du CSS (celle d'Automatisation, 9.1116). */
+  heroTitleCqi?: number;
+  inokoCase: ServiceInokoCaseBlock;
+  roasCalculator: ServiceRoasCalculatorBlock;
+  crossLink: ServiceCrossLinkBlock;
+  /** Bloc 9 — « Ce qui vous appartient », une SECONDE instance de
+   *  ServiceOtherActivities (même composant que `otherActivities`,
+   *  réutilisé tel quel — CLAUDE.md, « Pages services — gabarit »), pas
+   *  une généralisation : chaque page ne porte qu'une seule section
+   *  `otherActivities` du gabarit de base (« Les campagnes » ici), ce
+   *  bloc-ci vit à part. */
+  appartient: ServiceOtherActivitiesBlock;
 };

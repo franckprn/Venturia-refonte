@@ -2,6 +2,16 @@ import { ServiceSplitIntro } from "./ServiceSplitIntro";
 import type { ServiceOtherActivitiesBlock } from "@/content/services/types";
 import styles from "./ServiceOtherActivities.module.css";
 
+type ServiceOtherActivitiesProps = ServiceOtherActivitiesBlock & {
+  /** id du h2, par défaut "service-other-activities-title" (valeur
+   *  d'origine, en dur) — à passer explicitement seulement quand ce
+   *  composant est utilisé PLUSIEURS fois sur la même page (page
+   *  Publicité : « Les campagnes » ET « Ce qui vous appartient »), pour
+   *  éviter un id dupliqué dans le HTML. Omis, comportement identique
+   *  à avant ce prop. */
+  headingId?: string;
+};
+
 /**
  * Bloc 3bis des pages /services/* — « Autres activités », entre
  * « Par où commencer » et la Respiration rouge. Mise en page B
@@ -17,9 +27,10 @@ export function ServiceOtherActivities({
   title,
   intro,
   items,
-}: ServiceOtherActivitiesBlock) {
+  headingId = "service-other-activities-title",
+}: ServiceOtherActivitiesProps) {
   return (
-    <ServiceSplitIntro label={label} title={title} headingId="service-other-activities-title">
+    <ServiceSplitIntro label={label} title={title} headingId={headingId}>
       <p className={styles.intro}>{intro}</p>
       <div className={styles.list}>
         {items.map((item) => (

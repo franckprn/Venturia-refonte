@@ -28,14 +28,17 @@ export type NavCaseStudy = {
 
 // Méga-menu desktop, colonne SERVICES : les 4 services, dans le même
 // ordre que la section Services de la home (Référencement, Publicité,
-// Site internet, Automatisation). Automatisation seule a une page
-// réelle aujourd'hui (/services/automations, sans barre finale — Google
-// l'indexe ainsi) : seule entrée en isLink: true, les 3 autres restent
-// en <span> tant que leurs pages n'existent pas (CLAUDE.md, « AVANT MISE
-// EN LIGNE »).
+// Site internet, Automatisation). Automatisation et Publicité ont
+// chacune une page réelle aujourd'hui (/services/automations, sans
+// barre finale — Google l'indexe ainsi ; /services/sea, idem) : ces
+// deux entrées en isLink: true, les 2 autres restent en <span> tant que
+// leurs pages n'existent pas (CLAUDE.md, « AVANT MISE EN LIGNE »).
+// Adresses /services/sea et /services/seo : les anciennes adresses de
+// ces deux pages, déjà indexées par Google, conservées telles quelles
+// — demande explicite de Franck.
 const SERVICES_ENTRIES: NavEntry[] = [
-  { label: "Référencement", href: "/services/referencement", isLink: false },
-  { label: "Publicité", href: "/services/publicite", isLink: false },
+  { label: "Référencement", href: "/services/seo", isLink: false },
+  { label: "Publicité", href: "/services/sea", isLink: true },
   { label: "Site internet", href: "/services/site-internet", isLink: false },
   { label: "Automatisation", href: "/services/automations", isLink: true },
 ];

@@ -304,6 +304,92 @@ export const IconFlow = forwardRef<RailIconHandle, IconProps>(function IconFlow(
 });
 
 /**
+ * Carton « Vous vendez en ligne ? » (page /services/sea) : une
+ * étiquette de prix — l'idée d'un produit affiché avec son prix dans
+ * Google Shopping. Un seul <path> (forme de l'étiquette) + un rond pour
+ * le trou, comme IconClock (cadran à fill: none, le trait passe
+ * visuellement par son centre).
+ *
+ * Au déclenchement (signal de fin du h1, comme IconConnect) : l'étiquette
+ * bascule légèrement (rotation around son coin d'attache, haut-gauche),
+ * comme si on venait de l'accrocher — aller-retour, 400ms au total.
+ */
+export const IconTag = forwardRef<RailIconHandle, IconProps>(function IconTag({ className }, ref) {
+  const groupRef = useRef<SVGGElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+
+  useEffect(() => {
+    ctxRef.current = gsap.context(() => {});
+    return () => ctxRef.current?.revert();
+  }, []);
+
+  useImperativeHandle(ref, () => ({
+    play: () => {
+      const el = groupRef.current;
+      if (!el) return;
+      ctxRef.current?.add(() => {
+        gsap
+          .timeline()
+          .to(el, { rotation: 8, svgOrigin: "5 5", duration: 0.2, ease: VENTURIA_EASE })
+          .to(el, { rotation: 0, svgOrigin: "5 5", duration: 0.2, ease: VENTURIA_EASE });
+      });
+    },
+  }));
+
+  return (
+    <svg {...SHARED_PROPS} className={className}>
+      <g ref={groupRef}>
+        <path d="M5 2.5H11.5L17.5 8.5V11.5L10.5 18.5L2.5 10.5V3.5C2.5 2.94772 2.94772 2.5 3.5 2.5H5Z" fill="none" />
+        <circle cx="6.25" cy="6.25" r="1.25" />
+      </g>
+    </svg>
+  );
+});
+
+/**
+ * Carton « Déjà un compte Google Ads ? » (page /services/sea) :
+ * une loupe — l'idée d'un audit du compte existant. Deux éléments
+ * séparés (cercle + manche) : le tracé d'origine n'a pas besoin d'être
+ * scindé plus finement, l'animation ne bouge que le manche.
+ *
+ * Au déclenchement (figement, comme IconSparkle) : le manche de la
+ * loupe fait un petit balayage (translation courte, aller-retour),
+ * comme un passage rapide sur le compte.
+ */
+export const IconSearch = forwardRef<RailIconHandle, IconProps>(function IconSearch(
+  { className },
+  ref,
+) {
+  const handleRef = useRef<SVGLineElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+
+  useEffect(() => {
+    ctxRef.current = gsap.context(() => {});
+    return () => ctxRef.current?.revert();
+  }, []);
+
+  useImperativeHandle(ref, () => ({
+    play: () => {
+      const el = handleRef.current;
+      if (!el) return;
+      ctxRef.current?.add(() => {
+        gsap
+          .timeline()
+          .to(el, { x: 1.5, y: 1.5, duration: 0.2, ease: VENTURIA_EASE })
+          .to(el, { x: 0, y: 0, duration: 0.2, ease: VENTURIA_EASE });
+      });
+    },
+  }));
+
+  return (
+    <svg {...SHARED_PROPS} className={className}>
+      <circle cx="8.5" cy="8.5" r="5" />
+      <line ref={handleRef} x1="12.5" y1="12.5" x2="16.5" y2="16.5" />
+    </svg>
+  );
+});
+
+/**
  * Carton « Déjà sur Make ou Zapier ? » (page /services/automations) : deux
  * flèches courbes en sens opposés, l'idée d'un échange/bascule d'un outil
  * vers un autre — aucune des 5 icônes existantes ne porte cette idée de

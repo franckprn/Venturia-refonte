@@ -56,7 +56,7 @@ export const services: [Service, Service, Service, Service] = [
       "Résultat : plus de visites utiles, et plus de commandes.",
     ],
     ctaLabel: "Découvrir le référencement",
-    href: "/services/referencement",
+    href: "/services/seo",
     isLink: false,
   },
   {
@@ -70,7 +70,7 @@ export const services: [Service, Service, Service, Service] = [
         "ce qui vend, pour que chaque euro investi rapporte le plus possible.",
     ],
     ctaLabel: "Découvrir la publicité",
-    href: "/services/publicite",
+    href: "/services/sea",
     isLink: false,
   },
   {

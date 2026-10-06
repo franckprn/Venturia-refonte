@@ -309,6 +309,12 @@ html[data-tone-transition="on"] {
   #autres-activites {
     scroll-margin-top: var(--nav-h);
   }
+
+  /* Page Publicité, lien du carton 1 du rail (#campagnes) : même motif
+     que #autres-activites ci-dessus. */
+  #campagnes {
+    scroll-margin-top: var(--nav-h);
+  }
 }
 
 /* Champs de formulaire >= 16px sur mobile, sinon Safari iOS zoome au focus */

@@ -1,0 +1,13 @@
+/* Même style que .text de ServiceStarting, sans son max-width 68ch (ici
+   le texte vit déjà dans `.right` de ServiceSplitIntro, 6/12). */
+.text {
+  margin: 0;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+.cta {
+  margin-top: 24px;
+}

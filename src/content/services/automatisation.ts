@@ -288,13 +288,13 @@ export const automatisation: ServicePageContent = {
         name: "Référencement",
         phrase: "Être trouvé sur Google, et cité par les IA.",
         ctaLabel: "En savoir plus",
-        href: "/services/referencement",
+        href: "/services/seo",
       },
       {
         name: "Publicité",
         phrase: "Plus de commandes, sans attendre.",
         ctaLabel: "En savoir plus",
-        href: "/services/publicite",
+        href: "/services/sea",
       },
       {
         name: "Site internet",

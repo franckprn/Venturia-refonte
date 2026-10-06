@@ -29,18 +29,42 @@ import styles from "./ServiceHero.module.css";
  * `#service-hero-title` (haut du h1), pas une cible à l'intérieur de ce
  * composant — rien à changer ici pour ça.
  */
+type ServiceHeroProps = ServiceHeroContent & {
+  /** Constante --service-hero-title-cqi propre à cette page (mesurée
+   *  Playwright sur `titleLine1`, voir ServiceHero.module.css) — posée
+   *  en style inline sur `.titleWrap`, où elle écrase la valeur par
+   *  défaut du CSS (9.1116, celle d'Automatisation). Omis : la page
+   *  garde cette valeur par défaut inchangée. */
+  titleCqi?: number;
+};
+
 export function ServiceHero({
   titleLine1,
   titleLine2,
   subtitle,
   cta,
   chain,
-}: ServiceHeroContent) {
+  titleCqi,
+}: ServiceHeroProps) {
   return (
     <>
-      <div className={styles.titleWrap}>
+      <div
+        className={styles.titleWrap}
+        style={
+          titleCqi !== undefined
+            ? ({ "--service-hero-title-cqi": titleCqi } as React.CSSProperties)
+            : undefined
+        }
+      >
         <h1 id="service-hero-title" className={styles.title}>
-          {titleLine1}
+          {/* Espace EXPLICITE (texte, pas nbsp) entre les deux lignes :
+              un <br/> seul n'insère aucun espace dans le textContent du
+              DOM ("Agence Google Adsà Toulouse", lu d'un bloc par un
+              lecteur d'écran) — un espace normal est collapsible en
+              `white-space: nowrap`, donc invisible en fin de ligne 1
+              (aucun écart mesuré sur le calibrage cqi), tout en rendant
+              le textContent correct. */}
+          {titleLine1}{" "}
           <br />
           {titleLine2}
         </h1>
