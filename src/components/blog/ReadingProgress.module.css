@@ -1,0 +1,51 @@
+/* ------------------------------------------------------------------ *
+ * Même largeur que le trait sous la nav / le panneau du méga-menu
+ * (nav.module.css .ruleWrap/.ruleInner) : .barInner reprend les mêmes
+ * variables de shell (--shell-max, --shell-gutter-left, --shell-rail),
+ * aucun calcul indépendant.
+ *
+ * z-index 54 : sous le méga-menu (55, megamenu.module.css) — si le
+ * méga-menu s'ouvre pendant la lecture, son panneau (même position,
+ * top: var(--nav-h)) doit le recouvrir, pas l'inverse. Au-dessus de la
+ * pile mobile (53) et de son calque déplié (52) : la barre reste
+ * visible par-dessus le contenu normal de la page.
+ * ------------------------------------------------------------------ */
+
+.bar {
+  position: fixed;
+  top: var(--nav-h);
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 54;
+}
+
+.barInner {
+  width: 100%;
+  max-width: var(--shell-max);
+  padding-left: var(--shell-gutter-left);
+  padding-right: var(--shell-rail);
+}
+
+.barLine {
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+@media (max-width: 1023px) {
+  .barInner {
+    padding-left: var(--shell-gutter);
+    padding-right: var(--shell-gutter);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    display: none;
+  }
+}

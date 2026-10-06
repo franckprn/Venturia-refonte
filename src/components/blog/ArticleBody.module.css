@@ -1,0 +1,109 @@
+/* ------------------------------------------------------------------ *
+ * Corps de l'article — une seule colonne, démarrée sur l'axe gauche
+ * (colonne 1, « Règle des deux axes »), 66ch de large au maximum :
+ * mesuré Playwright (build de prod, 1440 ET 2560px — valeur identique
+ * aux deux largeurs, le plafond ch est bien atteint dès 1440px) sur
+ * les 10 paragraphes de l'article 1 : 74,2 caractères/ligne en
+ * moyenne (53 à 89 selon le paragraphe, écart attendu — un paragraphe
+ * de 2-3 lignes n'a pas la régularité d'un texte long), dans la cible
+ * 65-75 — à recalibrer si le texte, la police ou la graisse changent.
+ *
+ * Pas de sous-grille ici (contrairement à `.split`/ServiceSplitIntro) :
+ * un seul axe, les blocs s'empilent en flux normal (margin-top), pas
+ * besoin de lignes de grille nommées.
+ * ------------------------------------------------------------------ */
+
+.column {
+  grid-column: 1 / -1;
+  margin-top: 32px;
+}
+
+.column > :first-child {
+  margin-top: 0;
+}
+
+/* id d'ancre : scroll-margin-top var(--nav-h) DÉDIÉ (classe, pas le id
+   lui-même) — plus court que la règle générique `[id] { scroll-margin-top:
+   var(--scroll-offset) }` (globals.css) : une classe l'emporte sur un
+   sélecteur :where() de spécificité nulle, quel que soit l'ordre des
+   feuilles de style. */
+.h2 {
+  grid-column: 1 / -1;
+  margin: 0;
+  margin-top: 48px;
+  max-width: 66ch;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-title);
+  line-height: var(--t-title-lh);
+  letter-spacing: var(--t-title-ls);
+  color: var(--ink);
+  text-wrap: balance;
+  scroll-margin-top: var(--nav-h);
+}
+
+.paragraphBlock {
+  margin-top: 20px;
+}
+
+.h2 + .paragraphBlock,
+.h2 + .list {
+  margin-top: 16px;
+}
+
+.paragraph {
+  margin: 0;
+  max-width: 66ch;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+.link {
+  margin-top: 12px;
+}
+
+.list {
+  margin: 0;
+  margin-top: 20px;
+  max-width: 66ch;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.listItem {
+  position: relative;
+  padding-left: 16px;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+.listItem::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 6px;
+  height: 1.5px;
+  background: var(--accent);
+}
+
+@media (min-width: 1024px) {
+  .column {
+    margin-top: 48px;
+  }
+
+  .h2 {
+    margin-top: 64px;
+  }
+
+  .h2 + .paragraphBlock,
+  .h2 + .list {
+    margin-top: 24px;
+  }
+}

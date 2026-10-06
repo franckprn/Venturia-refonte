@@ -44,6 +44,7 @@ export const footer = {
       title: "VENTURIA",
       entries: [
         { label: "Réalisations", href: "/realisations", isLink: true },
+        { label: "Blog", href: "/blog", isLink: true },
         { label: "À propos", href: "/a-propos", isLink: true },
         { label: "Contact", href: "/contact", isLink: true },
       ],

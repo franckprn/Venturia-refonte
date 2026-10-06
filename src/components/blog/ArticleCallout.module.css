@@ -1,0 +1,52 @@
+.box {
+  grid-column: 1 / -1;
+  margin-top: 24px;
+  max-width: 66ch;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.label {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--ink);
+}
+
+.list {
+  margin: 0;
+  margin-top: 12px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.item {
+  position: relative;
+  padding-left: 16px;
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  color: var(--ink);
+}
+
+.item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 6px;
+  height: 1.5px;
+  background: var(--accent);
+}
+
+@media (min-width: 1024px) {
+  .box {
+    margin-top: 32px;
+    padding: 24px;
+  }
+}

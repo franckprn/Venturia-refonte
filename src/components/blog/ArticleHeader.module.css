@@ -1,0 +1,76 @@
+.category {
+  grid-column: 1 / -1;
+  margin: 0;
+  margin-top: 20px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: var(--t-mono-lh);
+  letter-spacing: var(--t-mono-ls);
+  color: var(--accent);
+}
+
+/* H1 « simple » (CLAUDE.md, « Pages services — gabarit » § H1 de page) :
+   --t-title-lg, grid-column: 1 / 10 — pas de calibrage cqi, ce titre n'a
+   pas besoin d'occuper exactement cette largeur. */
+.title {
+  grid-column: 1 / 10;
+  margin: 0;
+  margin-top: 12px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-title-lg);
+  line-height: var(--t-title-lg-lh);
+  letter-spacing: var(--t-title-lg-ls);
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.meta {
+  grid-column: 1 / -1;
+  margin: 0;
+  margin-top: 16px;
+  font-size: var(--t-small);
+  line-height: var(--t-small-lh);
+  letter-spacing: var(--t-small-ls);
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+}
+
+.author {
+  grid-column: 1 / -1;
+  margin: 0;
+  margin-top: 4px;
+  font-size: var(--t-small);
+  line-height: var(--t-small-lh);
+  letter-spacing: var(--t-small-ls);
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+}
+
+/* Même largeur de colonne que le corps de l'article (ArticleBody.module.css
+   .paragraph, 66ch) — voir ce fichier pour la mesure (74,2 caractères/
+   ligne en moyenne, Playwright, 1440/2560px). */
+.intro {
+  grid-column: 1 / -1;
+  margin: 0;
+  margin-top: 24px;
+  max-width: 66ch;
+  font-size: var(--t-lead);
+  line-height: var(--t-lead-lh);
+  letter-spacing: var(--t-lead-ls);
+  font-weight: var(--t-lead-weight);
+  color: var(--ink);
+}
+
+@media (min-width: 1024px) {
+  .meta,
+  .author {
+    margin-top: 20px;
+  }
+
+  .author {
+    margin-top: 4px;
+  }
+
+  .intro {
+    margin-top: 32px;
+  }
+}
