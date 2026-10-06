@@ -531,6 +531,7 @@ export function MobileRailStack({ anchors, config }: MobileRailStackProps) {
                 <MobileCard
                   key={index}
                   card={cards[index]}
+                  cardIndex={index}
                   Icon={icons[index]}
                   role={role}
                   open={open}
@@ -580,6 +581,7 @@ type CardRole = "front" | "peek" | "exiting";
 
 function MobileCard({
   card,
+  cardIndex,
   Icon,
   role,
   open,
@@ -588,6 +590,7 @@ function MobileCard({
   setRef,
 }: {
   card: RailCardContent;
+  cardIndex: number;
   Icon: RailIconComponent;
   role: CardRole;
   open: boolean;
@@ -595,7 +598,10 @@ function MobileCard({
   onClose: () => void;
   setRef: (el: HTMLAnchorElement | HTMLDivElement | null) => void;
 }) {
-  const className = [styles.card, card.href ? styles.cardAction : ""].filter(Boolean).join(" ");
+  // cardAction réservé au 3ᵉ carton, comme le rail desktop
+  // (Rail.tsx, `action={cardIndex === 2}`) — un carton 1/2 cliquable
+  // (`card.href`) garde le style ordinaire, pas le filet --accent.
+  const className = [styles.card, cardIndex === 2 ? styles.cardAction : ""].filter(Boolean).join(" ");
 
   const content = (
     <>
