@@ -338,3 +338,22 @@ export type PubliciteServiceContent = ServicePageContentBase & {
    *  bloc-ci vit à part. */
   appartient: ServiceOtherActivitiesBlock;
 };
+
+/** Contenu de la page Référencement (/services/seo) — gabarit de base +
+ *  cas Inoko (moment fort), renvoi vers Google Ads. Pas de
+ *  `calculator`/`tool`/`integrations`/`roasCalculator` : cette page ne
+ *  les utilise pas. `otherActivities` (champ de base) porte le bloc
+ *  GEO (section 5) ; `priceFactors` est une SECONDE instance de
+ *  ServiceOtherActivities (même composant, réutilisé tel quel — comme
+ *  `appartient` sur Publicité) pour le bloc « Ce qui fait varier le
+ *  prix » (section 7), avec son propre headingId pour éviter le
+ *  doublon avec celui de `otherActivities`. */
+export type SeoServiceContent = ServicePageContentBase & {
+  /** Mesurée Playwright, propre au texte de `hero.titleLine1` de CETTE
+   *  page (voir ServiceHero.tsx `titleCqi`) — omis : la page garde la
+   *  valeur par défaut du CSS (celle d'Automatisation, 9.1116). */
+  heroTitleCqi?: number;
+  inokoCase: ServiceInokoCaseBlock;
+  priceFactors: ServiceOtherActivitiesBlock;
+  crossLink: ServiceCrossLinkBlock;
+};

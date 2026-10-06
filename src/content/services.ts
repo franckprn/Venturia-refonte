@@ -57,7 +57,7 @@ export const services: [Service, Service, Service, Service] = [
     ],
     ctaLabel: "Découvrir le référencement",
     href: "/services/seo",
-    isLink: false,
+    isLink: true,
   },
   {
     name: "Publicité",

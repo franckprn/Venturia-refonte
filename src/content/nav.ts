@@ -37,7 +37,7 @@ export type NavCaseStudy = {
 // ces deux pages, déjà indexées par Google, conservées telles quelles
 // — demande explicite de Franck.
 const SERVICES_ENTRIES: NavEntry[] = [
-  { label: "Référencement", href: "/services/seo", isLink: false },
+  { label: "Référencement", href: "/services/seo", isLink: true },
   { label: "Publicité", href: "/services/sea", isLink: true },
   { label: "Site internet", href: "/services/site-internet", isLink: false },
   { label: "Automatisation", href: "/services/automations", isLink: true },

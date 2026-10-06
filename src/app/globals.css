@@ -315,6 +315,12 @@ html[data-tone-transition="on"] {
   #campagnes {
     scroll-margin-top: var(--nav-h);
   }
+
+  /* Page Référencement, lien du carton 2 du rail (#geo) : même motif
+     que #autres-activites/#campagnes ci-dessus. */
+  #geo {
+    scroll-margin-top: var(--nav-h);
+  }
 }
 
 /* Champs de formulaire >= 16px sur mobile, sinon Safari iOS zoome au focus */
