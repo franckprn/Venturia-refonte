@@ -555,15 +555,15 @@ section.
     (`data-tone="light"`, --ground) : ni l'ancienne inversion ni ce
     nouveau lien ne la modifient.
 
-AVANT MISE EN LIGNE : les 4 pages `/services/referencement`,
-`/services/publicite`, `/services/site-internet` et l'Automatisation
+AVANT MISE EN LIGNE : les 4 pages `/services/seo`,
+`/services/sea`, `/services/creation-site` et l'Automatisation
 existent (« Pages services — gabarit »). L'adresse de
 l'Automatisation n'est PAS à choisir librement : son CHEMIN doit rester
 identique à celui que Google indexe aujourd'hui (`/services/automations`,
 SANS barre finale — écrit en relatif dans content/services.ts, pas en
 `https://venturia.fr/...` : ce site EST venturia.fr) — cette page a déjà
-du trafic Google, changer son adresse le perdrait. Les trois autres
-adresses sont provisoires. Ce sont des vrais `<a>` (via `<ArrowLink>`)
+du trafic Google, changer son adresse le perdrait. Ce sont des vrais
+`<a>` (via `<ArrowLink>`)
 vers ces 4 pages, toutes publiées — liens réels partout où elles sont
 citées (home, méga-menu, menu mobile, footer : `isLink: true` dans
 content/services.ts, content/nav.ts et content/footer.ts).
@@ -2186,7 +2186,8 @@ Lancer le dev server et capturer la page avec Playwright en 390px et en
 1440px, puis ouvrir les captures et les regarder. Ne pas déclarer une page
 correcte sans l'avoir vue.
 
-Cinq contrôles chiffrés, dans la console de la page :
+Six contrôles chiffrés — les cinq premiers dans la console de la page,
+le sixième en ligne de commande :
 1. pas de scroll horizontal
    document.documentElement.scrollWidth === document.documentElement.clientWidth
 2. méga-menu OUVERT en 1440, sa hauteur reste sous 55 % de la fenêtre
@@ -2217,7 +2218,6 @@ Cinq contrôles chiffrés, dans la console de la page :
    `load`. La lire trop tôt renvoie le repli statique de globals.css
    (20px/100vh), pas la valeur mesurée : un écart qui disparaît en
    patientant n'est pas une régression.
-
 6. `npm run lint` : 0 erreur ; `npm run build` : réussit.
 
 Puis navigation complète au clavier, du premier lien au dernier.
