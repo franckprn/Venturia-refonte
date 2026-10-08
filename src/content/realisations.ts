@@ -73,8 +73,8 @@ export const realisations: RealisationsContent = {
     },
     {
       value: 15,
-      suffix: " €",
-      caption: "DE CHIFFRE D'AFFAIRES POUR 1 € INVESTI EN GOOGLE ADS",
+      suffix: " €",
+      caption: "DE CHIFFRE D'AFFAIRES POUR 1 € INVESTI EN GOOGLE ADS",
     },
   ],
   linkLabel: "Voir comment",

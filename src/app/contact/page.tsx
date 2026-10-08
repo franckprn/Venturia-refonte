@@ -9,7 +9,7 @@ import { MailIcon, CalendarIcon } from "./icons";
 import styles from "./contact.module.css";
 
 export const metadata: Metadata = {
-  title: "Contact — Venturia",
+  title: contact.metaTitle,
   description: contact.metaDescription,
 };
 

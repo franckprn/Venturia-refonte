@@ -95,7 +95,10 @@ export function HeroReveal() {
       <div className={styles.titleWrap}>
         <h1 id="hero-title" ref={titleRef} className={styles.title}>
           <span className={styles.accent}>{hero.titleAccent}</span>{" "}
-          {hero.titleLine1Rest}
+          {/* Espace explicite avant le <br/> : sans lui, le textContent
+              du h1 vaut « Bien plus quedu référencement » (lu d'un bloc
+              par un lecteur d'écran) — même correctif que ServiceHero.tsx. */}
+          {hero.titleLine1Rest}{" "}
           <br />
           {hero.titleLine2}
         </h1>

@@ -20,7 +20,7 @@ export const automatisation: ServicePageContent = {
     titleLine2: "n8n à Toulouse",
     subtitle:
       "Fiches produits à jour et emails envoyés à chaque étape de la " +
-      "commande : on automatise votre boutique en ligne avec n8n, à " +
+      "commande : on automatise votre boutique en ligne avec n8n, à " +
       "partir de vos outils actuels.",
     cta: { label: "Réserver 20 minutes", href: "/contact" },
     chain: {
@@ -163,7 +163,7 @@ export const automatisation: ServicePageContent = {
     minutesDefault: 15,
     countLabel: "Nombre de fois par semaine",
     countDefault: 10,
-    hourlyCostLabel: "Votre coût horaire (en €)",
+    hourlyCostLabel: "Votre coût horaire (en €)",
     resultSuffix: "heures par an",
     euroPrefix: "soit",
     euroSuffix: "par an",

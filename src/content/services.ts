@@ -71,7 +71,7 @@ export const services: [Service, Service, Service, Service] = [
     ],
     ctaLabel: "Découvrir la publicité",
     href: "/services/sea",
-    isLink: false,
+    isLink: true,
   },
   {
     name: "Site internet",

@@ -3,7 +3,7 @@
 
 export const contact = {
   label: "CONTACT",
-  title: "On en parle ?",
+  title: "On en parle ?",
   intro:
     "Décrivez votre situation en deux lignes. On répond dans la journée, " +
     "et on vous oriente ailleurs quand un autre est mieux placé.",
@@ -27,6 +27,7 @@ export const contact = {
     "Du lundi au vendredi",
   ] as [string, string, string],
 
+  metaTitle: "Contact — Venturia",
   metaDescription:
-    "Contactez Venturia par email ou réservez 20 minutes : réponse dans la journée.",
+    "Contactez Venturia par email ou réservez 20 minutes : réponse dans la journée.",
 };

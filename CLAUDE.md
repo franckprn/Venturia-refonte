@@ -557,16 +557,16 @@ section.
 
 AVANT MISE EN LIGNE : les 4 pages `/services/referencement`,
 `/services/publicite`, `/services/site-internet` et l'Automatisation
-doivent exister — l'Automatisation existe déjà (« Pages services —
-gabarit »), les trois autres restent à créer. L'adresse de
+existent (« Pages services — gabarit »). L'adresse de
 l'Automatisation n'est PAS à choisir librement : son CHEMIN doit rester
 identique à celui que Google indexe aujourd'hui (`/services/automations`,
 SANS barre finale — écrit en relatif dans content/services.ts, pas en
 `https://venturia.fr/...` : ce site EST venturia.fr) — cette page a déjà
 du trafic Google, changer son adresse le perdrait. Les trois autres
 adresses sont provisoires. Ce sont des vrais `<a>` (via `<ArrowLink>`)
-vers ces 4 pages avant qu'elles n'existent toutes — exception assumée,
-comme pour les mêmes adresses citées par le mega-menu et le menu mobile.
+vers ces 4 pages, toutes publiées — liens réels partout où elles sont
+citées (home, méga-menu, menu mobile, footer : `isLink: true` dans
+content/services.ts, content/nav.ts et content/footer.ts).
 
 ## Pages services — gabarit
 
@@ -2217,6 +2217,8 @@ Cinq contrôles chiffrés, dans la console de la page :
    `load`. La lire trop tôt renvoie le repli statique de globals.css
    (20px/100vh), pas la valeur mesurée : un écart qui disparaît en
    patientant n'est pas une régression.
+
+6. `npm run lint` : 0 erreur ; `npm run build` : réussit.
 
 Puis navigation complète au clavier, du premier lien au dernier.
 Corriger avant de rendre la main.
