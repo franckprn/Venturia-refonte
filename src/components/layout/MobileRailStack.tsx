@@ -376,6 +376,9 @@ export function MobileRailStack({ anchors, config }: MobileRailStackProps) {
     if (!open) return;
     const stack = stackRef.current;
     if (!stack) return;
+    // Bouton toujours monté (seul `hidden` change) : copié ici, c'est le
+    // même élément que le nettoyage retrouvera.
+    const toggle = toggleRef.current;
 
     const first = cardRefs.current.find((el): el is HTMLElement => el !== null);
     first?.focus();
@@ -413,7 +416,7 @@ export function MobileRailStack({ anchors, config }: MobileRailStackProps) {
       // carton non-action) : ce nettoyage tourne après que le rendu
       // React a déjà retiré `hidden` du bouton (CLAUDE.md, « Pile
       // mobile » — dépliage).
-      toggleRef.current?.focus();
+      toggle?.focus();
     };
   }, [open, close]);
 

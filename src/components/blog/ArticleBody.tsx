@@ -25,7 +25,7 @@ type ArticleBodyProps = {
  */
 export function ArticleBody({ blocks }: ArticleBodyProps) {
   const seenIds = new Set<string>();
-  let firstH2Seen = false;
+  const firstH2Index = blocks.findIndex((block) => block.type === "h2");
 
   return (
     <div className={styles.column}>
@@ -40,8 +40,7 @@ export function ArticleBody({ blocks }: ArticleBodyProps) {
           }
           seenIds.add(id);
 
-          const isFirst = !firstH2Seen;
-          firstH2Seen = true;
+          const isFirst = index === firstH2Index;
 
           return (
             <h2

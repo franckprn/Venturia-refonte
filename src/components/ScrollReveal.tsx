@@ -84,7 +84,6 @@ export function useScrollReveal<T extends HTMLElement = HTMLElement>(
     }, container);
 
     return () => ctx.revert();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count, start, duration, y, stagger]);
 
   const setItemRef = (index: number) => (el: HTMLElement | null) => {
