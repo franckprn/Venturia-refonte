@@ -1,4 +1,5 @@
-import { processusLabel, processusTitle, processusSteps } from "@/content/processus";
+import { ArrowLink } from "@/components/ArrowLink";
+import { processusCta, processusLabel, processusTitle, processusSteps } from "@/content/processus";
 import { ProcessusSchemaReveal } from "./ProcessusSchemaReveal";
 import styles from "./processus.module.css";
 
@@ -16,7 +17,8 @@ import styles from "./processus.module.css";
 // qui bascule à 1024px : les deux points de rupture n'ont pas de
 // raison de coïncider ici.
 //
-// Contenu réel (provisoire) dans content/processus.ts.
+// Contenu réel dans content/processus.ts : 3 étapes (numéro, titre,
+// texte) puis un CTA « Réserver 20 minutes » vers /contact, axe gauche.
 export function Processus() {
   return (
     <>
@@ -30,12 +32,15 @@ export function Processus() {
       <div className={styles.steps}>
         {processusSteps.map((step) => (
           <div key={step.number} className={styles.step}>
-            <p className={styles.stepHeading}>
-              {step.number} — {step.label}
-            </p>
+            <p className={styles.stepHeading}>{step.number}</p>
+            <p className={styles.stepTitle}>{step.title}</p>
             <p className={styles.stepDescription}>{step.description}</p>
           </div>
         ))}
+      </div>
+
+      <div className={styles.cta}>
+        <ArrowLink href={processusCta.href} label={processusCta.label} direction="right" />
       </div>
     </>
   );

@@ -86,14 +86,35 @@
   color: var(--ink);
 }
 
-.stepDescription {
+/* Titre d'étape : Instrument Sans 600, --t-body, lh 1.3 — même
+   traitement que les noms des listes des pages services
+   (ServiceTimeline .taskName, ServiceOtherActivities .name). */
+.stepTitle {
   margin: 0;
   margin-top: 12px;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--t-body);
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+/* 6px titre → texte, comme nom → phrase dans ServiceTimeline. */
+.stepDescription {
+  margin: 0;
+  margin-top: 6px;
   max-width: 68ch;
   font-size: var(--t-body);
   line-height: var(--t-body-lh);
   letter-spacing: var(--t-body-ls);
   color: var(--ink);
+}
+
+/* CTA sous les étapes, axe gauche (colonne 1). Wrapper : ArrowLink
+   est en `width: fit-content`, il ne s'étire pas sur la ligne. */
+.cta {
+  grid-column: 1 / -1;
+  margin-top: 48px;
 }
 
 @media (min-width: 768px) {

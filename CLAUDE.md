@@ -30,7 +30,7 @@ jamais en rgba figé : une valeur en dur ne suit pas un changement de token.
 
 `--ink` et `--ground` sont déclarées avec `@property` (`syntax: '<color>'`,
 `inherits: true`) : elles échangent leurs valeurs au niveau racine pendant
-la Respiration (voir « Respiration (home) »), un changement qu'une
+la Respiration et Services (voir « Respiration (home) »), un changement qu'une
 custom property non enregistrée ne peut pas transitionner en douceur
 (elle saute d'une valeur à l'autre au lieu d'interpoler). `--color-charcoal`
 et `--color-cream` (globals.css) portent les deux valeurs LITTÉRALES de la
@@ -84,6 +84,19 @@ par `<Section tone="...">`. Obligatoire pour toute nouvelle section ou
 page — sans elle, la nav et les cartons du rail ne savent pas quelle
 couleur de texte prendre.
 
+EXCEPTION ASSUMÉE — Respiration ET Services (home) déclarent `"light"`
+et s'affichent pourtant crème sur charbon pendant qu'on les lit :
+c'est l'inversion de toute la page (`data-inverted` sur `<html>`, voir
+« Respiration (home) ») qui échange les VALEURS de `--ink`/`--ground`.
+`"light"` est ici la seule déclaration correcte : `--fg` y vaut
+`var(--ink)`, que l'inversion rend crème, donc nav, cartons et textes
+restent lisibles sans que le moteur de tonalité sache que l'inversion
+existe. Ne JAMAIS passer ces deux sections en `"dark"` : sous
+l'inversion, `--fg` (= `--ground`) deviendrait charbon sur fond charbon
+(nav et cartons illisibles — constaté lors de l'évaluation). Ne pas leur
+donner non plus de fond propre (`--ink` plein écran) : l'inversion le
+rendrait crème.
+
 Deux éléments adaptatifs lisent cette information et reçoivent eux-mêmes un
 `data-tone`, piloté en JS (jamais en CSS) :
   - la nav : tonalité de la section sous le centre vertical de la barre
@@ -118,8 +131,11 @@ Le filet des cartons 1 et 2 (le carton ET le carré de son icône) suit
 `--fg`, comme le texte — voir « Rail droit ». Le filet --line-accent du
 carré d'icône et la bordure --accent du carton 3 (l'action), eux, ne
 changent jamais avec la tonalité. Le trait à angles sous la nav non plus
-n'utilise plus --line fixe : `color-mix(in srgb, var(--fg) 16%,
-transparent)`, même opacité que --line aujourd'hui.
+n'utilise plus --line fixe : dès 1024px, `1px solid var(--fg)` — le
+MÊME token, plein, que la bordure des cartons 1 et 2 (couleur calculée
+identique mesurée : rgb(26,22,20) en light, rgb(222,220,211) en dark) ;
+sous 1024px, inchangé, `color-mix(in srgb, var(--fg) 16%, transparent)`
+(mobile traité séparément).
 
 ## Typographie
 
@@ -235,7 +251,7 @@ alignées au pixel avec la grille partagée).
 
 Hauteur minimale d'un écran : `min-height: 100svh` (jamais `100vh`, qui
 inclut la barre d'adresse mobile). `spacing="none"` (voir « Shell de
-page ») : le hero gère son propre padding-block (96/160, au moins le
+page ») : le hero gère son propre padding-block (96/120, au moins le
 token), en `display: flex; flex-direction: column` — le contenu
 (`.body`) est le seul enfant, l'espace en trop tombe donc SOUS lui,
 jamais au-dessus (pas de centrage vertical). Dès 1024px, le hero ne
@@ -281,8 +297,10 @@ gauche) ; sous-titre + CTA (`.bottom`) colonnes 7-12 (axe droit),
 INCHANGÉ — les deux partagent la MÊME ligne de grille (`.body` passe en
 `grid-template-rows: auto auto`, plus de ligne `1fr`/`flex:1`), ce qui
 aligne leur haut par construction (0px d'écart mesuré aux 4 largeurs de
-contrôle) plutôt que par une mesure JS. Écart avec le titre : 48px de
-`margin-top`, identique sur `.photo` et `.bottom`.
+contrôle) plutôt que par une mesure JS. Écart avec le titre : 120px de
+`margin-top` dès 1024px (la valeur de section desktop), identique sur
+`.photo` et `.bottom`. Écart nav → H1 : 120px (padding-top, le
+plancher du token), mesuré exact (offsetTop) de 1024 à 2560px.
 
 Contrainte principale : le hero ne dépasse jamais 100svh tant que la
 photo ne descend pas sous son plancher de 240px — c'est ELLE qui se
@@ -291,9 +309,9 @@ flex:1 (sa hauteur naturelle peut être inférieure à l'espace
 disponible ; l'excédent tombe alors SOUS lui, voir plus haut) ; la
 hauteur de `.photo` est un `clamp()` purement géométrique (même esprit
 que le calibrage du h1, AUCUNE mesure JS) :
-  `clamp(240px, 100svh − 368px − 18,2722cqi, 33,3333cqi − 6,6667px)`
-où `368px` = padding-block du hero (320px) + écart titre→contenu
-(48px), `18,2722cqi` = hauteur des 2 lignes du titre à son line-height
+  `clamp(240px, 100svh − 360px − 18,2722cqi, 33,3333cqi − 6,6667px)`
+où `360px` = padding-block du hero (240px) + écart titre→contenu
+(120px), `18,2722cqi` = hauteur des 2 lignes du titre à son line-height
 courant (2 × 1,04 × --hero-title-cqi), et `33,3333cqi − 6,6667px` = la
 hauteur au ratio 3/2 PAR DÉFAUT des colonnes 1-6 (le max du clamp, donc
 un plafond, pas une contrainte dure — voir le commentaire détaillé,
@@ -312,13 +330,18 @@ ailleurs assez de place réelle à cette hauteur de fenêtre pour que le
 hero reste pile à 100svh malgré ça (pas de croissance observée à aucune
 des 4 largeurs de contrôle).
 
-Mesures (Playwright, build de prod) — hauteur du hero / hauteur de la
-photo :
-  1024×768   768px / 240px (plancher, voir ci-dessus)
-  1280×800   800px / 253,7px
-  1440×900   900px / 324,4px
-  1728×1117  1117px / 468,0px
-Hauteur du hero = hauteur de la fenêtre dans les 4 cas (diff 0px).
+Mesures (Playwright, build de prod, relecture desktop) — hauteur du
+hero / hauteur de la photo / partie visible de la photo à scroll 0 :
+  1024×768   768px / 240px / 240px (plancher)
+  1280×720   778px / 240px / 237,7px (plancher, hero +58px)
+  1366×657   794px / 240px / 159px (plancher, hero +137px)
+  1440×900   900px / 332,4px / 332,4px
+  1728×1117  1117px / 468,0px / 468,0px
+  1920×1080  1080px / 424,7px / 424,7px
+  2560×1440  1440px / 532,0px / 532,0px
+Le haut de la photo reste visible sans scroll partout ; aux fenêtres
+courtes (720/657px de haut), le plancher de 240px l'emporte et le hero
+dépasse légèrement un écran, comme prévu.
 
 Sous 1024px : ordre du DOM = titre, sous-titre + CTA, puis la photo
 pleine largeur (`grid-column: 1 / -1`), ratio 3/2 fixe (`aspect-ratio`,
@@ -326,9 +349,9 @@ pas le clamp ci-dessus — spécifique à >= 1024px), margin-top 48px. Le
 hero peut s'allonger librement à cette largeur (pas de contrainte
 d'écran unique en mobile).
 
-Sous-titre + CTA (`.bottom`) : largeur de texte du sous-titre :
-`max-width: 42ch`, identique aux paragraphes des Services
-(services.module.css `.paragraphs`). Sous 1024px : pleine largeur, sous
+Sous-titre + CTA (`.bottom`) : dès 1024px, le sous-titre occupe TOUTE
+la largeur des colonnes 7-12 (`max-width: none` — aucun max-width sur
+l'axe droit, même règle qu'Inoko et Services). Sous 1024px : pleine largeur, sous
 le h1, empilement normal. Le CTA lui-même est `<ArrowLink>`
 (src/components/ArrowLink.tsx, `direction="down"`) : filet --ink sous
 le texte qui s'écarte de 4px au survol/focus, flèche « ↓ » avant le
@@ -352,122 +375,92 @@ l'élément qui porte ce rôle change selon la largeur d'écran.
 
 ## Respiration (home)
 
-Section normale : `<Section spacing="default">`, comme Services ou
-Processus — plus d'exception ici. Plus de `min-height: 100svh`, plus de
-padding en dur (128/200), plus de `box-sizing: content-box` : ces trois
-mécanismes n'existaient que pour garantir une fenêtre de scroll assez
-large autour de l'ancien seuil de bascule (posé sur la SECTION entière,
-« top top »/« bottom bottom ») — le nouveau seuil se mesure sur le bloc
-de texte lui-même (voir plus bas), indépendant de la hauteur de la
-section. `<section>` reste un bloc simple (pas de flex/grid) : son
-unique enfant (le texte) s'empile depuis le haut par défaut, donc le
-texte n'est jamais centré verticalement — il démarre en haut de la
-section, sur les 12 colonnes, aligné à gauche, sans JS ni flex
-nécessaires pour ça. Écart réel entre le bas du texte et le haut de
-Services, mesuré : 144px mobile / 240px desktop — le double de
-`--section-space` (padding-bottom de Respiration + padding-top de
-Services), comme entre deux sections normales n'importe où ailleurs sur
-le site.
+Section normale : `<Section tone="light" spacing="default">` (page.tsx),
+AUCUN fond propre, texte `color: var(--ink)` en CSS pur, comme n'importe
+quelle section claire. Une seule phrase (`content/respiration.ts`,
+champ `text`), --t-hero, 800, 12 colonnes, sans emphase (le
+soulignement de l'ancien texte, `.accent`, a été retiré). Jamais de
+--accent dans cette section. Révélation en ligne masquée
+(`useRespirationLineReveal`, `src/lib/respiration.ts`).
 
-Emphase sur les deux derniers mots avant le point (« passer commande ») :
-voir « Typographie » § emphase — le texte est déjà à 800 (graisse
-maximale de Bricolage Grotesque), donc soulignement, pas gras. Jamais de
---accent dans cette section.
+### Inversion de toute la page — Respiration + Services
 
-`data-tone="light"` (`<Section tone="light">`, page.tsx) : la section
-n'a plus de tonalité « dark » spéciale. Tout son texte (`.text`,
-`.accent`, y compris le soulignement de « passer commande ») pose
-`color: var(--ink)`/`text-decoration-color: var(--ink)` en CSS PUR,
-exactement comme n'importe quelle autre section claire du site — RIEN
-à animer ici. C'est l'inversion décrite ci-dessous qui rend ce texte
-crème sur fond charbon pendant qu'on la lit.
-
-### Inversion de toute la page
-
-Pendant la Respiration, `--ink` et `--ground` ÉCHANGENT LEURS VALEURS au
-niveau racine (`<html>`) : tout ce qui est construit sur ces deux
-tokens s'inverse donc automatiquement — fonds, textes, traits (`--line`),
-nav, cartons du rail, pile mobile, fin de Dernier accompagnement, début
-de Services — sans qu'aucun de ces composants n'ait besoin de savoir que
-l'inversion existe. `--accent` ne change jamais. Les photos ne changent
-jamais (voir plus bas les deux exceptions qui doivent rester fixes).
+Pendant la lecture de la Respiration ET de Services, `--ink` et
+`--ground` ÉCHANGENT LEURS VALEURS au niveau racine (`<html>`) : tout ce
+qui lit ces deux tokens s'inverse automatiquement — fonds, textes,
+traits, nav, cartons du rail, pile mobile, et ce qui est encore visible
+d'Inoko à l'entrée (comportement assumé) — sans qu'aucun composant ne le
+sache. `--accent` et les photos ne changent jamais. Les deux sections
+déclarent `tone="light"` : voir l'exception dans « Tonalités ».
 
 Mécanique (globals.css) : `--ink`/`--ground` déclarées avec `@property`
-(`syntax: '<color>'`, animable) ; `html[data-inverted="true"]` les
-réécrit à partir de `--color-charcoal`/`--color-cream` (les deux valeurs
-littérales fixes, voir « Couleurs ») ; une transition CSS
-(`--ink 400ms cubic-bezier(0,.55,.45,1)`, idem `--ground`) interpole la
-couleur elle-même — chaque élément qui lit `var(--ink)`/`var(--ground)`
-recalcule sa propre couleur à chaque frame de cette transition, sans
-qu'aucun `transition` propre à cet élément ne soit nécessaire.
+(animables) ; `html[data-inverted="true"]` les réécrit à partir de
+`--color-charcoal`/`--color-cream` ; transition `--ink`/`--ground`
+400ms, easing du site, armée seulement par `html[data-tone-
+transition="on"]`.
 
-Déclenchement (`RespirationReveal.tsx`) : sur le BLOC DE TEXTE lui-même
-(le `<p>`, le même élément que la révélation d'entrée), PAS sur la
-section — mesuré au pixel via un seul `ScrollTrigger` :
-  `start: "top 80%"`   le haut du texte passe au-dessus de 80 % de la
-                        hauteur de la fenêtre → `data-inverted="true"`
-  `end: "bottom 20%"`  le bas du texte passe au-dessus de 20 % de la
-                        hauteur de la fenêtre → `data-inverted="false"`
-`onEnter`/`onEnterBack` inversent, `onLeave`/`onLeaveBack` reviennent —
-comportement symétrique en remontant. Le seuil précoce (80 % plutôt que
-« top top » de l'ancienne mécanique) est voulu : la bascule doit être
-visible AVANT que le texte n'arrive en haut de l'écran, pas après qu'on
-l'a déjà lu sur fond crème.
+Déclenchement (`RespirationReveal.tsx` → `useRespirationInversion(ref,
+"ground", { endTrigger: "#services", end: "bottom 80%" })`), un seul
+ScrollTrigger :
+  début  haut du TEXTE de la Respiration à 80 % de la fenêtre (inchangé)
+  fin    bas de la SECTION Services à 80 % de la fenêtre — Processus
+         occupe alors 20 % de l'écran au moment de la rebascule.
+`onEnter`/`onEnterBack` inversent, `onLeave`/`onLeaveBack` reviennent,
+symétrique en remontant. Sans `options`, le hook garde sa fin d'origine
+(« bottom 20% » du texte) — la bande rouge des pages services
+(variante accent) est inchangée.
+Mesuré (Playwright, build de prod, pas de 8px, une frame d'attente par
+pas) — % de l'écran occupé à la bascule :
+  1440×900  entrée : Inoko 65,8 % · rebascule : Processus 20,5 %
+            (descente) / 19,5 % (remontée)
+  1366×657  entrée : Inoko 60,8 % · rebascule : Processus 20,9 % /
+            19,4 %
 
-Chargement en milieu de scroll (lien direct, restauration de scroll du
-navigateur) : `trigger.isActive` fixe l'état initial SANS transition
-(comme `gsap.set` ailleurs dans le projet) — la transition n'est armée
-qu'un frame plus tard (`html[data-tone-transition="on"]`, posé via
-`requestAnimationFrame`), pour que cet état initial ne s'anime jamais
-depuis la valeur par défaut. `prefers-reduced-motion` : couvert par la
-règle globale existante (`transition-duration: 0.01ms`), aucune branche
-séparée — cet effet ne fait plus que poser un attribut, la CSS gère le
-reste. Aucune différence de mise en page entre les deux modes (l'ancien
-mécanisme à base de min-height/padding est parti avec la bascule
-locale).
+Chargement en milieu de scroll : `trigger.isActive` fixe l'état SANS
+transition (armée une frame plus tard). Chargement sur une ancre DANS
+la zone inversée (`#respiration`, `#services` ou un id qu'elles
+contiennent) : le premier rendu précède le JS (~40ms de crème mesurés
+avant correction) — un second sélecteur CSS,
+`html:not([data-inverted]):has(#respiration:target, … #services
+:target)`, applique l'inversion dès ce premier rendu ; dès que le hook
+pose `data-inverted`, il cesse de s'appliquer. Vérifié Chromium ET
+WebKit : premier rendu déjà charbon, aucune frame crème à la position de
+l'ancre. La restauration de scroll d'un rechargement (sans ancre) n'est
+pas couverte : elle intervient après le premier rendu de toute façon.
+`prefers-reduced-motion` : règle globale (`transition-duration:
+0.01ms`), bascule instantanée — vérifié.
+
+Services sous inversion (services.module.css) : textes `var(--fg)`,
+traits `color-mix(in srgb, var(--fg) 16%, transparent)` ; paragraphes à
+80 % d'opacité et anticrénelage UNIQUEMENT sous
+`html[data-inverted="true"]` (règle des sections en négatif) — à 100 %
+sur crème avant l'entrée et après la rebascule (vérifié).
+
+Écartée lors de la relecture desktop : une bande charbon STATIQUE
+(Respiration + Services en `tone="dark"` avec fond `--ink` plein
+écran). Elle tenait techniquement, mais faisait perdre la bascule animée
+crème → charbon, qui est le propos de la section.
 
 ### Exceptions à l'inversion — surfaces qui doivent rester fixes
 
-L'inversion touche TOUT élément qui lit `var(--ink)`/`var(--ground)`,
-y compris hors de la Respiration elle-même : tout élément visible à
-l'écran EN MÊME TEMPS que l'inversion (pas seulement dans la section)
-est concerné. Deux surfaces, un seul motif dupliqué deux fois (carte
-« cas client » Inoko, substitut de photo tant qu'aucune photo n'est
-fournie) doivent rester d'une couleur FIXE — une vraie photo, elle, ne
-changerait pas non plus :
-  - Dernier accompagnement, section juste avant Respiration : son bas
-    (la carte, `.imageFallback`/`.imageGradient`/`.tags`/`.tag`,
-    dernier-accompagnement.module.css) peut rester à l'écran au moment
-    où l'inversion se déclenche (seuil précoce, voir plus haut).
+Tout élément visible EN MÊME TEMPS que l'inversion est concerné, pas
+seulement Respiration/Services. Deux surfaces doivent rester d'une
+couleur FIXE (carte « cas client » Inoko, substitut de photo) :
+  - Dernier accompagnement (`.imageFallback`/`.imageGradient`/`.tags`/
+    `.tag`, dernier-accompagnement.module.css) : encore à l'écran à
+    l'entrée (60-66 % de l'écran, voir plus haut).
   - Le méga-menu desktop, carte cas client (`.caseImageFallback`/
     `.caseGradient`/`.caseClient`/`.caseSubtitle`/`.caseTag`,
-    megamenu.module.css) : peut s'ouvrir à N'IMPORTE QUELLE position de
-    scroll, y compris pendant que la page est inversée — vérifié
-    (méga-menu ouvert en pleine Respiration inversée, carte case client
-    toujours lisible).
-Les deux utilisent `--color-charcoal`/`--color-cream` (globals.css) à la
-place de `--ink`/`--ground` — les décorations qui suivent le TEXTE de
-ces cartes (numéros de Dernier accompagnement, filets --ink des angles)
-restent, elles, sur `--ink`/`--ground` normaux : seule la carte photo
-elle-même doit rester fixe.
+    megamenu.module.css) : peut s'ouvrir pendant l'inversion.
+Les deux utilisent `--color-charcoal`/`--color-cream` à la place de
+`--ink`/`--ground` ; les décorations qui suivent le TEXTE (numéros,
+filets des angles) restent sur `--ink`/`--ground`.
 
-Le bloc de fin de page (footer, fond `--ink`/texte `--ground` en dur,
-tone="dark" permanent) porte le même motif en théorie, mais n'a jamais
-pu être visible en même temps que l'inversion sur le contenu actuel de
-la page (bien après Processus, géométriquement hors d'atteinte) —
-laissé sur `--ink`/`--ground`, signalé plutôt que retouché hors
-périmètre.
+Le footer (fond `--ink` en dur, `tone="dark"`) n'est jamais visible
+pendant l'inversion : Processus occupe plus de 20 % de l'écran.
 
-Le fond de `<html>` (zone de rebond du scroll, Mac ET iPhone) ne suit
-PLUS l'inversion depuis la session « finitions du footer » : il est fixé
-à `--color-charcoal` (jamais `--ink`, qui s'inverse), voir « Couleurs ».
-Tirer la page au-delà du haut ou du bas montre donc toujours du charbon,
-y compris en haut — accepté, pas un défaut. `<body>`, lui, continue de
-lire `var(--ground)` et s'inverse normalement avec le reste de la page
-(c'est LUI qui couvre la fenêtre visible en usage normal, jamais
-`<html>` sauf pendant le rebond) — vérifié à chaque étape de la
-Respiration (avant/pendant/après) : fond, textes, nav et cartons du
-rail inchangés par ce découplage.
+`<html>` reste sur `--color-charcoal` (zone de rebond), `<body>` lit
+`var(--ground)` et s'inverse avec la page (voir « Couleurs »).
 
 ## Dernier accompagnement — Inoko (home)
 
@@ -476,7 +469,8 @@ gauche (colonne 1), le paragraphe passe sur l'axe droit (colonnes
 7-12) — mais sur sa PROPRE ligne de grille, après celle du titre,
 jamais à côté de lui (comme `.heading`/`.paragraphs` dans Services :
 un bloc de l'axe droit ne partage jamais la ligne d'un bloc de l'axe
-gauche). `max-width: 42ch`, identique aux paragraphes des Services.
+gauche). Aucun max-width dès 1024px : le paragraphe occupe toute la
+largeur des colonnes 7-12 (mesuré exact, ±0,02px, de 1024 à 2560px).
 Lignes explicites sur la grille externe (`section.module.css .body`,
 row-gap:0) : 1 label, 2 titre, 3 paragraphe, 4 split (photo colonne
 1-5 / 3 chiffres colonnes 7-12, alignés en haut par construction —
@@ -489,7 +483,14 @@ colonne, ordre label → titre → paragraphe → photo → chiffres → lien.
 
 Quatre lignes, une par service (`content/services.ts` : `name`,
 `phrase`, `paragraphs`, `ctaLabel`, `href`), chacune sur les deux axes —
-voir « Règle des deux axes ». `.row` redéclare sa propre grille 12
+voir « Règle des deux axes ».
+
+`tone="light"`, aucun fond propre : couverte par l'inversion de toute
+la page lancée par la Respiration (voir « Respiration (home) » et
+l'exception dans « Tonalités »). Textes en `var(--fg)`, traits des
+lignes en `color-mix(in srgb, var(--fg) 16%, transparent)` ;
+paragraphes à 80 % d'opacité et anticrénelage uniquement pendant
+l'inversion. `.row` redéclare sa propre grille 12
 colonnes (comme `.split`), sans padding-inline (padding-block:32px,
 ça n'affecte pas les colonnes). Aucun trait séparateur sous le titre de
 section ; un trait 1px `--line` en haut de CHAQUE service en revanche
@@ -509,9 +510,10 @@ section.
 
   moitié droite (colonnes 7-12)
     les paragraphes (`.paragraphs`, un `<p>` par entrée de
-    `paragraphs: string[]`, --t-body, axe droit, `max-width: 42ch` —
-    cible 45-75 caractères/ligne, mesuré 50,8 en régime deux axes quelle
-    que soit la largeur), puis le lien « Découvrir… » (voir plus bas),
+    `paragraphs: string[]`, --t-body, axe droit, AUCUN max-width dès
+    1280px — toute la largeur des colonnes 7-12, mesuré exact de 1280 à
+    2560px ; `max-width: 42ch` reste en dessous de 1280px, où le bloc
+    est sur l'axe gauche, en une seule colonne), puis le lien « Découvrir… » (voir plus bas),
     empilés dans un même bloc `.right` (gap 24px). Commence sous le
     niveau de la phrase courte (effet d'escalier), jamais au niveau du
     nom : `.heading` et `.phrase` occupent les lignes de grille 1 et 2,
@@ -567,6 +569,18 @@ du trafic Google, changer son adresse le perdrait. Ce sont des vrais
 vers ces 4 pages, toutes publiées — liens réels partout où elles sont
 citées (home, méga-menu, menu mobile, footer : `isLink: true` dans
 content/services.ts, content/nav.ts et content/footer.ts).
+
+## Processus (home) — « Comment on démarre »
+
+Label « PROCESSUS », H2 « Comment on démarre », schéma SVG animé
+inchangé (ProcessusSchemaReveal.tsx, numéros seuls), puis 3 étapes
+(`content/processus.ts` : `number`, `title`, `description`) en colonnes
+1-3/5-7/9-11 dès 768px : numéro en --t-mono, titre en Instrument Sans
+600, --t-body, lh 1.3 (même traitement que les noms des listes des
+pages services — ServiceTimeline `.taskName`, ServiceOtherActivities
+`.name`), 6px puis la description en --t-body. Sous les étapes, 48px
+plus bas, un `<ArrowLink direction="right">` « Réserver 20 minutes » →
+`/contact` (`processusCta`), axe gauche.
 
 ## Pages services — gabarit
 
@@ -1435,7 +1449,9 @@ C'est un élément décoratif dédié, pas une border sur la barre :
   <div data-nav-rule aria-hidden="true">
   position fixed, top = hauteur de la nav, left = marge du conteneur
   width = largeur de la zone de contenu, height 12px
-  border-top, border-left, border-right : 1px solid var(--line)
+  border-top, border-left, border-right : 1px solid var(--fg) dès 1024px
+  (même token que la bordure des cartons du rail) ; color-mix(in srgb,
+  var(--fg) 16%, transparent) en dessous
   pas de border-bottom, radius 4px 4px 0 0, pointer-events none
 
 Fond flouté, en forme d'encoche inversée : sur toute la largeur de l'écran,
@@ -1460,6 +1476,49 @@ droite, logo VA à gauche, inchangés.
 3px   tags
 
 ## Rail droit
+
+### Rail DESKTOP de la home (relecture desktop — prime sur la suite)
+
+Le rail desktop de la home n'utilise plus `HOME_RAIL_CONFIG` mais
+`HOME_DESKTOP_RAIL_CONFIG` (Rail.tsx) ; la pile MOBILE garde
+`HOME_RAIL_CONFIG` (défaut de `<MobileRailStack>`), inchangée — tout ce
+qui est décrit plus bas pour la pile mobile reste vrai. Ordre desktop :
+  1. carton contact (`railContactCard`, content/rail.ts) — « Réserver
+     20 minutes » / « Sans engagement. On étudie votre boutique avant
+     l'appel, puis on vous dit ce qu'on ferait, et dans quel ordre. »
+     (propre à ce carton : « On discute ? » des pages services n'est pas
+     touché), lien `/contact`, style ACTION (filet --accent, flèche
+     rejouée au survol/focus), icône flèche. Ancré au Hero (`anchor=
+     "hero"`, aligné sur le haut du H1, `#hero-title`) : visible dès le
+     chargement, puis figé à 64px jusqu'au bas de la page.
+  2. « Combien de temps » (horloge) — Dernier accompagnement, haut du
+     titre Inoko.
+  3. « Le GEO, en une phrase » (étoile) — Services, trait du 1er service.
+« On discute ? » ne figure plus sur le rail desktop (doublon du carton
+contact). Icônes : la flèche (index 0) joue à la fin du h1 ; horloge et
+étoile (index 1 et 2) jouent au figement (useStickOnce).
+Deux options de `RailConfig`, défauts = comportement des pages
+services :
+  `actionIndex`  index du carton action (défaut 2) — home : 0.
+  `pinFirst`     (défaut false) — home : true. En mode RELAIS, le carton
+                 1 ne relaie jamais (`.slotPinned` : slot étiré jusqu'en
+                 bas), les cartons 2 et 3 se figent juste sous lui
+                 (`.stickyBelowPinned` : `--rail-stick + --rail-h1 +
+                 20px`) et relaient entre eux. Le carton 2, repoussé
+                 vers le haut par le 3, passerait sous le carton 1
+                 (transparent, flouté) : RailController le masque
+                 (`.stickyLeaving`, opacité 0, fondu 150ms) dès que son
+                 `top` passe sous son `top` sticky résolu — mesure
+                 directe, jamais ScrollTrigger. Sans effet en mode
+                 empilement.
+Mesuré (Playwright, build de prod, balayage par pas de 15px) : carton
+contact visible à 100 % du parcours de 1024 à 2560px, 0 chevauchement
+visible, 0 carton figé coupé — mode stack à 1440/1728/1920/2560, relay
+à 1024×768/1280×720/1366×657. Seule trace : la frame où le carton 2
+commence son fondu (150ms), au tout début de sa sortie.
+
+Description d'origine (pile mobile, pages services, et home avant la
+relecture desktop) :
 
 Trois cartons, chacun rattaché à une section de la page :
   1. au niveau de Dernier accompagnement (le cas client Inoko) — son
@@ -1921,8 +1980,9 @@ panneau      position fixed, top = hauteur de la nav, left 54px
              comme la nav — --ink sur light, --ground sur dark et
              accent, transition color 150ms, cubic-bezier(0,.55,.45,1).
              contour RACCORDÉ au trait sous la nav : même couleur
-             (color-mix(in srgb, var(--fg) 16%, transparent), tirée du
-             MÊME --fg que le trait), même épaisseur 1px. Le trait
+             (`1px solid var(--fg)`, plein, depuis la relecture desktop
+             — le trait desktop a pris le token des cartons du rail),
+             tirée du MÊME --fg que le trait, même épaisseur 1px. Le trait
              dessine le haut du contour (bord supérieur, congé 4px des
              deux coins hauts, deux branches de 12px) : le panneau ne
              porte donc PAS de bord supérieur — une seule ligne continue,

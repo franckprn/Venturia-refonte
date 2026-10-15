@@ -102,7 +102,15 @@ const INVERT_ATTRIBUTE: Record<RespirationInvertTo, string> = {
 export function useRespirationInversion(
   rootRef: RefObject<HTMLElement | null>,
   invertTo: RespirationInvertTo = "ground",
+  /** Fin de l'inversion sur un AUTRE élément que le texte déclencheur
+   *  (sélecteur CSS + position ScrollTrigger) — home : bas de Services,
+   *  `{ endTrigger: "#services", end: "bottom 80%" }`. Absent : fin
+   *  d'origine, « bottom 20% » du texte lui-même (bande rouge des pages
+   *  services, inchangée). */
+  options?: { endTrigger: string; end: string },
 ) {
+  const endTrigger = options?.endTrigger;
+  const end = options?.end ?? "bottom 20%";
   useEffect(() => {
     const text = rootRef.current;
     if (!text) return;
@@ -118,7 +126,8 @@ export function useRespirationInversion(
       const trigger = ScrollTrigger.create({
         trigger: text,
         start: "top 80%",
-        end: "bottom 20%",
+        ...(endTrigger ? { endTrigger } : {}),
+        end,
         onEnter: () => setInverted(true),
         onEnterBack: () => setInverted(true),
         onLeave: () => setInverted(false),
@@ -137,5 +146,5 @@ export function useRespirationInversion(
       html.removeAttribute("data-tone-transition");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [invertTo]);
+  }, [invertTo, endTrigger, end]);
 }

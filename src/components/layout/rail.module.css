@@ -113,6 +113,35 @@
   top: var(--rail-stick);
 }
 
+/* `pinFirst` (RailConfig, Rail.tsx — home desktop) : en mode relais, le
+   carton 1 (contact) ne relaie jamais — son slot reste étiré jusqu'au
+   bas de la grille, comme en mode empilement — et les cartons 2 et 3
+   relaient entre eux JUSTE SOUS LUI, 20px sous son bas. La hauteur de
+   relais du carton 2 (--rail-card2-relay-height) reste valable telle
+   quelle : elle ne dépend que des positions de repos, pas du point de
+   figement. Spécificité (0,3,0) > règles de relais ci-dessus (0,2,0). */
+[data-rail-mode="relay"] .slot1.slotPinned {
+  align-self: stretch;
+  height: auto;
+}
+
+[data-rail-mode="relay"] .stickyWrap.stickyBelowPinned {
+  top: calc(var(--rail-stick) + var(--rail-h1) + 20px);
+}
+
+/* Carton 2 repoussé vers le haut par le 3 (pinFirst, mode relais) :
+   masqué pour ne jamais passer sous le carton 1 figé — classe posée en
+   JS par RailController (Rail.tsx). Fondu 150ms, instantané en
+   reduced-motion (règle globale). */
+.stickyWrap {
+  transition: opacity 150ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.stickyLeaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .card {
   display: grid;
   gap: 10px;

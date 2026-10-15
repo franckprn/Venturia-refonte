@@ -1,41 +1,15 @@
 /* ------------------------------------------------------------------ *
- * Section Respiration (home, section 3) — l'opposé du Dernier
- * accompagnement qui précède.
+ * Section Respiration (home) — `tone="light"` (page.tsx), AUCUN fond
+ * propre : c'est l'INVERSION DE TOUTE LA PAGE (RespirationReveal.tsx,
+ * `data-inverted` sur <html>, globals.css) qui la rend crème sur
+ * charbon pendant qu'on la lit, jusqu'au bas de Services. Le texte pose
+ * `color: var(--ink)` comme n'importe quelle section claire.
  *
- * Le <section> lui-même (via <Section>) reste dans la zone de contenu
- * normale (grid-column: 1, pas sous le rail), SANS fond propre : plus
- * de bascule locale du tout — la Respiration ne fait qu'appliquer
- * `color: var(--ink)`, comme n'importe quelle autre section « light »
- * du site (data-tone="light" dans page.tsx). C'est l'INVERSION DE TOUTE
- * LA PAGE (CLAUDE.md, « Respiration ») qui rend ce texte crème sur fond
- * charbon pendant la Respiration : `--ink` et `--ground` échangent leurs
- * valeurs au niveau racine (globals.css, html[data-inverted]) — un
- * `<section>` qui pose `color: var(--ink)` n'a donc RIEN de spécial à
- * faire, contrairement à l'ancienne version qui bascule cette couleur
- * elle-même en JS (RespirationReveal.tsx portait un second effet dédié,
- * supprimé). Le déclenchement (RespirationReveal.tsx) se fait sur le
- * BLOC DE TEXTE lui-même, pas sur ce <section> — voir ce composant.
+ * spacing="default" (page.tsx), comme les autres sections.
  *
- * spacing="default" (page.tsx), comme les autres sections : plus
- * d'exception ici. Plus de min-height: 100svh, plus de padding-top/
- * bottom en dur (128/200), plus de box-sizing: content-box — ces trois
- * mécanismes existaient uniquement pour garantir une fenêtre de scroll
- * assez large entre « la section commence à occuper tout l'écran » et
- * « elle arrête de l'occuper » (l'ancien seuil de bascule, posé sur la
- * section entière). Le nouveau seuil se mesure sur le bloc de texte
- * lui-même (top 80% / bottom 20% de la fenêtre), indépendant de la
- * hauteur de la section : plus besoin de forcer cette hauteur.
- * Conséquence mesurée et voulue (CLAUDE.md) : l'écart réel entre le bas
- * du texte et le haut de Services redevient le même que partout
- * ailleurs sur le site — padding-bottom de Respiration +
- * padding-top de Services, soit --section-space × 2 (144px mobile,
- * 240px desktop).
- *
- * Une seule phrase, pleine largeur (mise en page A, CLAUDE.md § 3) :
- * .text occupe TOUTE la grille de contenu (grid-column: 1 / -1),
- * contrairement à l'ancienne version à trois blocs qui répartissait
- * ses colonnes (1-10, 1-7…). Plus de point de coupe mobile dédié : le
- * texte, plus long qu'avant, s'enveloppe naturellement.
+ * Une seule phrase, pleine largeur (mise en page A) : .text occupe
+ * TOUTE la grille de contenu (grid-column: 1 / -1). Plus d'emphase
+ * soulignée (retirée avec le nouveau texte).
  * ------------------------------------------------------------------ */
 
 .section {
@@ -54,25 +28,6 @@
   letter-spacing: var(--t-hero-ls);
   /* Pas de text-wrap: balance : à réserver aux titres, coûteux sur un
      texte de cette longueur (CLAUDE.md, « Détails faciles à oublier »). */
-}
-
-/* Emphase sur « passer commande » : PAS en gras. .text est déjà à
-   font-weight: 800, le poids maximal disponible de la variable
-   Bricolage Grotesque (200-800, voir document.fonts) — écart de graisse
-   nul avec le corps du texte (lui-même à 800), largement sous les 200
-   de seuil fixé par CLAUDE.md pour qu'un gras se voie. Soulignement à
-   la place, jamais du rouge dans cette section — de la même couleur que
-   le reste du texte (--ink, sans bascule JS : l'inversion de toute la
-   page suffit à le rendre crème sur charbon, voir le commentaire
-   d'en-tête) : épaisseur et décalage en em, proportionnels à --t-hero
-   (donc à --font-display, 800), pas des px fixes — ils suivent la
-   bascule mobile/desktop de --t-hero sans règle séparée. */
-.accent {
-  color: var(--ink);
-  text-decoration: underline;
-  text-decoration-color: var(--ink);
-  text-decoration-thickness: 0.05em;
-  text-underline-offset: 0.14em;
 }
 
 /* Cache immobile (overflow hidden) : la ligne, elle, translate de

@@ -1,6 +1,6 @@
 import { Shell } from "@/components/Shell";
 import { Section } from "@/components/Section";
-import { RailController, RailSlot } from "@/components/layout/Rail";
+import { HOME_DESKTOP_RAIL_CONFIG, RailController, RailSlot } from "@/components/layout/Rail";
 import { MobileRailStack } from "@/components/layout/MobileRailStack";
 import { Hero } from "@/components/sections/Hero";
 import heroStyles from "@/components/sections/hero.module.css";
@@ -23,29 +23,19 @@ import footerStyles from "@/components/layout/footer.module.css";
 // dans layout.tsx, à côté de Nav), la zone de figement des cartons
 // s'arrêterait à la fin de Processus au lieu du vrai bas de page.
 //
-// Chaque <RailSlot> ancre son `grid-row` à la section qui porte sa
-// CIBLE d'alignement (CLAUDE.md, « Rail droit »), pas forcément la
-// section la plus proche dans le DOM ci-dessous : carton 1 → « dernier-
-// accompagnement » (haut du titre Inoko), cartons 2 ET 3 → « services »
-// (haut du 1ᵉʳ service pour le 2, bas du dernier pour le 3 — la cible du
-// 3 vit dans Services, pas dans Processus, malgré son <RailSlot> rendu
-// après elle ci-dessous : `anchor` fixe le `grid-row` en style inline,
-// indépendamment de la position DOM). Le carton 1 s'ancre à Dernier
-// accompagnement, pas au Hero : aucun carton visible pendant le Hero
-// est une pure conséquence de la grille (sa ligne ne démarre qu'à
-// « dernier-accompagnement-start »), pas d'une opacité pilotée en JS —
-// voir Rail.tsx et CLAUDE.md, « Rail droit ». Respiration et le footer
-// n'ont pas de carton. Les deux
-// restent dans la zone de contenu comme les autres sections (pas sous
-// le rail) ; seul le fond du footer (--ink) déborde jusqu'aux bords de
-// l'écran (voir footer.module.css). Respiration n'a plus AUCUN fond
-// propre, même pas un fond plein écran local : `tone="light"` (comme
-// les autres sections « claires »: l'inversion crème ↔ charbon pendant
-// qu'on la lit n'est plus une propriété de la section, mais un effet de
-// TOUTE LA PAGE, piloté par RespirationReveal.tsx — bascule
-// `data-inverted` sur <html>, voir globals.css et CLAUDE.md,
-// « Respiration ») et `spacing="default"` (plus d'exception 100svh/
-// padding en dur, comme n'importe quelle autre section).
+// Rail DESKTOP : HOME_DESKTOP_RAIL_CONFIG (Rail.tsx) — carton contact
+// (action, « Réserver 20 minutes ») ancré au Hero et figé en tête du
+// rail jusqu'au bas de la page (`pinFirst`), puis « Combien de temps »
+// (dernier-accompagnement, haut du titre Inoko) et « Le GEO » (services,
+// trait du 1ᵉʳ service). CLAUDE.md, « Rail droit » § « Rail DESKTOP de
+// la home ». La pile MOBILE garde HOME_RAIL_CONFIG (défaut de
+// <MobileRailStack>), inchangée.
+//
+// Respiration et Services : `tone="light"`, aucun fond propre — affichées
+// crème sur charbon par l'inversion de toute la page (RespirationReveal,
+// `data-inverted` sur <html>), du haut du texte de la Respiration à 80 %
+// de la fenêtre jusqu'au bas de Services à 80 % (CLAUDE.md, « Tonalités »
+// et « Respiration (home) »). Ne jamais les passer en "dark".
 // Sections suivantes (avis, ressources) et méga-menu : sessions
 // ultérieures.
 //
@@ -74,7 +64,7 @@ export default function Home() {
   return (
     <>
       <MobileRailStack anchors={["hero", "services", "processus"]} />
-      <RailController />
+      <RailController config={HOME_DESKTOP_RAIL_CONFIG} />
 
       <Shell>
         <Section
@@ -89,6 +79,8 @@ export default function Home() {
           <Hero />
         </Section>
 
+        <RailSlot cardIndex={0} anchor="hero" config={HOME_DESKTOP_RAIL_CONFIG} />
+
         <Section
           name="dernier-accompagnement"
           tone="light"
@@ -98,7 +90,7 @@ export default function Home() {
           <DernierAccompagnement />
         </Section>
 
-        <RailSlot cardIndex={0} anchor="dernier-accompagnement" />
+        <RailSlot cardIndex={1} anchor="dernier-accompagnement" config={HOME_DESKTOP_RAIL_CONFIG} />
 
         <Section
           name="respiration"
@@ -113,13 +105,11 @@ export default function Home() {
           <Services />
         </Section>
 
-        <RailSlot cardIndex={1} anchor="services" />
+        <RailSlot cardIndex={2} anchor="services" config={HOME_DESKTOP_RAIL_CONFIG} />
 
         <Section name="processus" tone="light" labelledBy="processus-title" bodyStyle={{ rowGap: 0 }}>
           <Processus />
         </Section>
-
-        <RailSlot cardIndex={2} anchor="services" />
 
         <Section name="footer" tone="dark" className={footerStyles.section} bodyStyle={{ rowGap: 0 }}>
           <Footer />

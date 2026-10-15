@@ -218,9 +218,18 @@
 }
 
 /* Piloté par RespirationReveal.tsx : bascule data-inverted="true"/"false"
-   sur <html> quand le BLOC DE TEXTE de la Respiration (pas la section)
-   franchit ses seuils — voir ce composant. */
-html[data-inverted="true"] {
+   sur <html> du haut du texte de la Respiration à 80 % de la fenêtre
+   jusqu'au bas de Services à 80 % — voir ce composant.
+
+   Second sélecteur : chargement sur une ancre DANS la zone inversée
+   (#respiration, #services ou un id qu'elles contiennent). Le premier
+   rendu a lieu avant que le JS ne pose l'attribut (mesuré : ~40ms de
+   crème avant l'inversion) ; `:target` est connu dès ce premier rendu,
+   sans JS — la page part donc directement inversée, sans flash. Dès que
+   le hook pose `data-inverted` ("true" ou "false"), ce sélecteur cesse
+   de s'appliquer et l'état mesuré par ScrollTrigger prend le relais. */
+html[data-inverted="true"],
+html:not([data-inverted]):has(#respiration:target, #respiration :target, #services:target, #services :target) {
   --ink: var(--color-cream);
   --ground: var(--color-charcoal);
 }

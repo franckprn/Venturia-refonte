@@ -1,7 +1,7 @@
 /* ------------------------------------------------------------------ *
  * Hero de la home. Titre, une photo et un sous-titre/CTA.
  *
- * .section porte le padding vertical propre au hero (96/160, EN PLUS
+ * .section porte le padding vertical propre au hero (96/120, EN PLUS
  * des 64px de nav déjà posés par <main>) — `<Section spacing="none">`
  * (page.tsx) l'exempte du padding partagé (section.module.css .spaced)
  * : le hero impose aussi une hauteur minimale d'écran (100svh, jamais
@@ -25,7 +25,8 @@
  *
  * row-gap à 0 sur la grille 12 colonnes (bodyStyle, page.tsx) : l'écart
  * vertical entre le titre et la ligne photo/bas est porté par un
- * margin-top identique sur `.photo` et `.bottom` (48px), jamais par le
+ * margin-top identique sur `.photo` et `.bottom` (48px mobile, 120px
+ * desktop), jamais par le
  * gap de la grille — c'est ce qui garantit qu'ils démarrent au même
  * niveau. Pas de badge : retiré (S9).
  * ------------------------------------------------------------------ */
@@ -39,7 +40,8 @@
 
 @media (min-width: 1024px) {
   .section {
-    padding-block: 160px;
+    /* --section-space desktop (120px), plancher imposé au Hero. */
+    padding-block: 120px;
   }
 
   .body {
@@ -189,8 +191,9 @@
     grid-column: 7 / -1;
     /* Écart titre → contenu, même valeur que .photo ci-dessous (leurs
        marges identiques sur la même ligne de grille sont ce qui les
-       aligne au pixel, pas un calcul séparé). */
-    margin-top: 48px;
+       aligne au pixel, pas un calcul séparé) — 120px, la valeur de
+       section desktop. */
+    margin-top: 120px;
   }
 }
 
@@ -264,7 +267,9 @@
      ces largeurs (colonne bien plus étroite). */
   .subtitle {
     margin-top: 0;
-    max-width: 42ch;
+    /* Axe droit : le texte occupe toute la largeur des colonnes 7-12,
+       aucun max-width (le 68ch de base ne vaut que sous 1024px). */
+    max-width: none;
   }
 
   .actions {
@@ -313,12 +318,12 @@
    - hauteur "par défaut" (ratio 3/2) à cette largeur :
      H_ratio = (2/3)×W6 = W/3 − 20/3 = 33,3333cqi − 6,6667px
    - hauteur DISPONIBLE réelle dans le Hero, sous le titre : la section
-     fait 100svh, padding-block 160px×2 (320px), le titre fait 2 lignes
+     fait 100svh, padding-block 120px×2 (240px), le titre fait 2 lignes
      à `line-height: var(--t-hero-lh)` (1,04) du font-size courant
-     (--hero-title-cqi × 1cqi), plus l'écart de 48px avant la ligne
+     (--hero-title-cqi × 1cqi), plus l'écart de 120px avant la ligne
      photo/bas (même valeur que le margin-top de .photo et .bottom) :
-       H_dispo = 100svh − 320px − 48px − 2×1,04×--hero-title-cqi×1cqi
-               = 100svh − 368px − 18,2722cqi
+       H_dispo = 100svh − 240px − 120px − 2×1,04×--hero-title-cqi×1cqi
+               = 100svh − 360px − 18,2722cqi
      (2×1,04×8,7847 = 18,2722)
    - `clamp(240px, H_dispo, H_ratio)` = max(240px, min(H_dispo,
      H_ratio)) : par défaut (H_dispo ≥ H_ratio, le cas courant), la
@@ -334,6 +339,7 @@
     grid-row: 2;
     grid-column: 1 / 7;
     aspect-ratio: auto;
-    height: clamp(240px, calc(100svh - 368px - 18.2722 * 1cqi), calc(33.3333 * 1cqi - 6.6667px));
+    margin-top: 120px;
+    height: clamp(240px, calc(100svh - 360px - 18.2722 * 1cqi), calc(33.3333 * 1cqi - 6.6667px));
   }
 }

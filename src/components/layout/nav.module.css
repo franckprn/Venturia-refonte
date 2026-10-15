@@ -198,6 +198,17 @@
   transition: border-color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
+/* >= 1024px : même token que la bordure des cartons du rail
+   (rail.module.css .card, `1px solid var(--fg)`), plein — plus le
+   color-mix à 16 %. Le contour du méga-menu desktop suit
+   (megamenu.module.css .desktopPanel) : une seule ligne continue.
+   Sous 1024px, inchangé (16 %), mobile traité dans une session à part. */
+@media (min-width: 1024px) {
+  .rule {
+    border-color: var(--fg);
+  }
+}
+
 /* --------------------------- Surface floutée unique -------------------- */
 
 /* .navBlur : SEUL élément de la nav à porter backdrop-filter. Un

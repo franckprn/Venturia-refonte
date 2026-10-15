@@ -271,7 +271,7 @@
     grid-column: 7 / 13;
     grid-row: 3;
     margin-top: 48px;
-    max-width: 42ch; /* identique aux paragraphes des Services */
+    /* Axe droit : toute la largeur des colonnes 7-12, aucun max-width. */
   }
 
   .split {

@@ -3,8 +3,12 @@
  * axes de la grille partagée (CLAUDE.md, « Règle des deux axes ») :
  * nom / phrase courte sur l'axe gauche (colonne 1), paragraphes + lien
  * sur l'axe droit (colonne 7), à partir de 1280px (voir plus bas pour
- * le choix de ce point de repli). Fond --ground, dans la zone de
- * contenu (jamais sous le rail).
+ * le choix de ce point de repli). `tone="light"` (page.tsx), AUCUN fond
+ * propre : l'inversion de toute la page lancée par la Respiration
+ * (RespirationReveal.tsx) couvre aussi Services — crème sur charbon
+ * pendant la lecture, jusqu'au bas de la section (CLAUDE.md,
+ * « Respiration (home) »). Textes et traits sur `var(--fg)` (= --ink
+ * en light, donc inversés avec lui).
  *
  * Aucune grille interne à padding : `.row` redéclare sa propre grille
  * 12 colonnes (comme `.split` dans dernier-accompagnement.module.css)
@@ -37,7 +41,7 @@
   font-size: var(--t-mono);
   line-height: var(--t-mono-lh);
   letter-spacing: var(--t-mono-ls);
-  color: var(--ink);
+  color: var(--fg);
 }
 
 .title {
@@ -49,7 +53,7 @@
   font-size: var(--t-title);
   line-height: var(--t-title-lh);
   letter-spacing: var(--t-title-ls);
-  color: var(--ink);
+  color: var(--fg);
   text-wrap: balance;
 }
 
@@ -68,7 +72,7 @@
   flex-direction: column;
   gap: 12px;
   padding-block: 32px;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
 }
 
 .heading {
@@ -79,7 +83,7 @@
   font-size: var(--t-title);
   line-height: var(--t-title-lh);
   letter-spacing: var(--t-title-ls);
-  color: var(--ink);
+  color: var(--fg);
 }
 
 .phrase {
@@ -87,7 +91,7 @@
   font-size: var(--t-body);
   line-height: var(--t-body-lh);
   letter-spacing: var(--t-body-ls);
-  color: var(--ink);
+  color: var(--fg);
 }
 
 /* Moitié droite : paragraphes + lien « Découvrir… », empilés (gap 24px
@@ -107,7 +111,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-width: 42ch; /* ~45-75 caractères/ligne visé, voir rapport de vérification */
+  max-width: 42ch; /* < 1280px, colonne unique sur l'axe gauche */
 }
 
 .paragraph {
@@ -115,7 +119,27 @@
   font-size: var(--t-body);
   line-height: var(--t-body-lh);
   letter-spacing: var(--t-body-ls);
-  color: var(--ink);
+  color: var(--fg);
+}
+
+/* Pendant l'inversion seulement (crème sur charbon) : paragraphe long à
+   80 % et anticrénelage, règle des sections en négatif (CLAUDE.md,
+   « Couleurs »). Hors inversion — avant l'entrée, après la rebascule —
+   100 % sur crème, comme toute section claire. La transition suit
+   celle de --ink/--ground (400ms, armée par data-tone-transition). */
+html[data-inverted="true"] .paragraph {
+  opacity: 0.8;
+}
+
+/* Anticrénelage sur TOUS les textes de la section pendant l'inversion
+   (texte clair sur fond sombre), pas seulement les paragraphes — sinon
+   nom et phrase courte paraissent plus gras que le texte voisin. */
+html[data-inverted="true"] :is(.label, .title, .heading, .phrase, .paragraph, .right) {
+  -webkit-font-smoothing: antialiased;
+}
+
+html[data-tone-transition="on"] .paragraph {
+  transition: opacity 400ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -158,5 +182,10 @@
     grid-column: 7 / 13;
     grid-row: 3;
     margin-top: 8px;
+  }
+
+  /* Axe droit : toute la largeur des colonnes 7-12, aucun max-width. */
+  .paragraphs {
+    max-width: none;
   }
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type RefObject } from "react";
 import Link from "next/link";
-import { railCards, type RailCardContent } from "@/content/rail";
+import { railCards, railContactCard, type RailCardContent } from "@/content/rail";
 import { onHeroTitleDone } from "@/lib/heroTitleSignal";
 import { useSectionTone, type Tone } from "@/lib/tone";
 import { useStickOnce } from "@/lib/useStickOnce";
@@ -33,6 +33,15 @@ export type RailConfig = {
    *  révèle (mobile) qu'à l'entrée de « processus », une section plus
    *  loin (CLAUDE.md, « Rail droit » § « Pile mobile »). */
   mobileReveal: readonly [string, string, string];
+  /** Index du carton « action » (filet --accent, flèche rejouée au
+   *  survol/focus). Défaut 2 — le comportement des pages services. */
+  actionIndex?: 0 | 1 | 2;
+  /** Desktop, mode relais uniquement : le carton 1 ne relaie jamais —
+   *  il reste figé à var(--rail-stick) jusqu'au bas de la page, et les
+   *  cartons 2 et 3 relaient entre eux JUSTE EN DESSOUS (top =
+   *  --rail-stick + --rail-h1 + 20px). Sans effet en mode empilement
+   *  (déjà figés tous les trois). Défaut false. */
+  pinFirst?: boolean;
 };
 
 // Classe de padding-top par carton (rail.module.css) : chacun lit sa
@@ -85,6 +94,25 @@ export const HOME_RAIL_CONFIG: RailConfig = {
   icons: RAIL_ICONS,
   offsetTargets: OFFSET_TARGETS,
   mobileReveal: ["dernier-accompagnement", "services", "processus"],
+};
+
+/** Rail DESKTOP de la home : carton contact (action) en tête, présent
+ *  dès le Hero et visible pendant tout le scroll (`pinFirst`), puis
+ *  « Combien de temps » (Inoko) et « Le GEO » (Services). « On
+ *  discute ? » n'y figure plus (doublon du carton contact). La pile
+ *  MOBILE, elle, garde HOME_RAIL_CONFIG (défaut de <MobileRailStack>),
+ *  inchangée. */
+export const HOME_DESKTOP_RAIL_CONFIG: RailConfig = {
+  cards: [railContactCard, railCards[0], railCards[1]],
+  icons: [IconArrowRight, IconClock, IconSparkle],
+  offsetTargets: [
+    { varName: "--rail-card1-offset", sectionId: "hero", selector: "#hero-title", edge: "top" },
+    { ...OFFSET_TARGETS[0], varName: "--rail-card2-offset" },
+    { ...OFFSET_TARGETS[1], varName: "--rail-card3-offset" },
+  ],
+  mobileReveal: HOME_RAIL_CONFIG.mobileReveal,
+  actionIndex: 0,
+  pinFirst: true,
 };
 
 /** Position document (cumulée le long de la chaîne `offsetParent`),
@@ -293,13 +321,21 @@ export function RailSlot({ cardIndex, anchor, config = HOME_RAIL_CONFIG }: RailS
     };
   }, [cardIndex, config]);
 
-  const slotClassName = [styles.slot, SLOT_OFFSET_CLASS[cardIndex]].join(" ");
+  // pinFirst (RailConfig) : en mode relais, le carton 1 garde son slot
+  // étiré jusqu'au bas de la grille (jamais repoussé), les cartons 2 et
+  // 3 se figent sous lui — classes scopées à [data-rail-mode="relay"]
+  // dans rail.module.css, sans effet en mode empilement.
+  const pinFirst = config.pinFirst === true;
+  const slotClassName = [styles.slot, SLOT_OFFSET_CLASS[cardIndex], pinFirst && cardIndex === 0 ? styles.slotPinned : ""]
+    .filter(Boolean)
+    .join(" ");
 
   const stickyClassName = [
     styles.stickyWrap,
     cardIndex === 0 ? styles.stickyWrap1 : "",
     cardIndex === 1 ? styles.stickyWrap2 : "",
     cardIndex === 2 ? styles.stickyWrap3 : "",
+    pinFirst && cardIndex !== 0 ? styles.stickyBelowPinned : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -309,7 +345,7 @@ export function RailSlot({ cardIndex, anchor, config = HOME_RAIL_CONFIG }: RailS
       <div ref={measureRef} className={stickyClassName}>
         <RailCardArticle
           card={card}
-          action={cardIndex === 2}
+          action={cardIndex === (config.actionIndex ?? 2)}
           Icon={config.icons[cardIndex]}
           iconRef={iconRef}
           tone={tone}
@@ -463,6 +499,39 @@ export function RailController({ config = HOME_RAIL_CONFIG }: { config?: RailCon
       cancelled = true;
       observer.disconnect();
       window.removeEventListener("resize", update);
+    };
+  }, [config]);
+
+  // pinFirst, mode relais : le carton 2, repoussé vers le haut par
+  // l'arrivée du 3, passerait SOUS le carton 1 figé (transparent,
+  // flouté — il resterait visible au travers). Il est donc masqué dès
+  // qu'il quitte sa position figée vers le haut (top < son `top`
+  // sticky résolu), fondu 150ms (rail.module.css .stickyLeaving) —
+  // même mesure directe que useStickOnce.ts, jamais ScrollTrigger. Sans
+  // effet en mode empilement (rien ne repart) ni sans pinFirst.
+  useEffect(() => {
+    if (!config.pinFirst) return;
+    let frame = 0;
+    const check = () => {
+      frame = 0;
+      const wraps = Array.from(document.querySelectorAll<HTMLElement>("[data-rail-slot] > *"));
+      const wrap = wraps[1];
+      if (!wrap) return;
+      const relay = document.documentElement.getAttribute("data-rail-mode") === "relay";
+      const stickTop = parseFloat(getComputedStyle(wrap).top) || 0;
+      const leaving = relay && wrap.getBoundingClientRect().top < stickTop - 0.5;
+      wrap.classList.toggle(styles.stickyLeaving, leaving);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(check);
+    };
+    check();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
     };
   }, [config]);
 

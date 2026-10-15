@@ -85,9 +85,11 @@
   background: transparent;
   -webkit-backdrop-filter: blur(24px); /* obligatoire, Safari, avant le standard */
   backdrop-filter: blur(24px);
-  border-left: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
-  border-right: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+  /* var(--fg) plein : même token que le trait de la nav dès 1024px
+     (nav.module.css .rule) — ce panneau n'existe qu'en desktop. */
+  border-left: 1px solid var(--fg);
+  border-right: 1px solid var(--fg);
+  border-bottom: 1px solid var(--fg);
   border-radius: 0 0 4px 4px;
   color: var(--fg);
   transition:

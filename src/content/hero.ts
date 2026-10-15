@@ -27,7 +27,9 @@ export const hero: HeroContent = {
   titleLine1Rest: "que",
   titleLine2: "du référencement",
   subtitle:
-    "On fait venir les bons visiteurs sur votre boutique en ligne, et on les accompagne jusqu'à la commande.",
+    "On aide les boutiques en ligne à vendre plus : visibles sur Google, " +
+    "présentes au bon moment en publicité, avec un site qui transforme " +
+    "les visites en commandes.",
   ctaSecondary: {
     label: "Ce que ça donne concrètement",
     href: "/realisations",

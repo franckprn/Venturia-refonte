@@ -39,6 +39,20 @@ export const railCards: [RailCardContent, RailCardContent, RailCardContent] = [
   },
 ];
 
+/** Carton « action » du rail DESKTOP de la home (Rail.tsx,
+ *  HOME_DESKTOP_RAIL_CONFIG) : présent dès le Hero, figé en tête du rail
+ *  jusqu'au bas de la page. Remplace « On discute ? » sur le rail
+ *  desktop uniquement — la pile mobile garde `railCards` tels quels.
+ */
+export const railContactCard: RailCardContent = {
+  title: "Réserver 20 minutes",
+  resume: "20 minutes, sans engagement",
+  text:
+    "Sans engagement. On étudie votre boutique avant l'appel, puis on " +
+    "vous dit ce qu'on ferait, et dans quel ordre.",
+  href: "/contact",
+};
+
 /** aria-label du bouton de dépliage et de la région dépliée de la pile
  *  mobile (MobileRailStack.tsx) — texte non affiché, lu seulement par
  *  les technologies d'assistance. */

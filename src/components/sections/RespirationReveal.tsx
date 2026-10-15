@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { useRespirationLineReveal, useRespirationInversion } from "@/lib/respiration";
+import { useRespirationInversion, useRespirationLineReveal } from "@/lib/respiration";
 import type { RespirationContent } from "@/content/respiration";
 import styles from "./respiration.module.css";
 
@@ -9,44 +9,37 @@ type RespirationRevealProps = {
   content: RespirationContent;
 };
 
+// Fin de l'inversion : bas de la section Services à 80 % de la hauteur
+// de la fenêtre — Processus occupe alors 20 % de l'écran au moment de
+// la rebascule (CLAUDE.md, « Respiration (home) »). Constante de module :
+// une référence stable, l'effet du hook ne se relance pas à chaque rendu.
+const INVERSION_END = { endTrigger: "#services", end: "bottom 80%" };
+
 /**
- * Révélation unique à l'entrée dans le viewport + inversion de toute la
- * page pendant la lecture — le mécanisme lui-même (seuils, durée,
- * easing, reduced-motion) vit dans `src/lib/respiration.ts`
- * (`useRespirationLineReveal`/`useRespirationInversion`), réutilisé SANS
- * duplication par la bande rouge de la page Automatisation
- * (ServiceRedBand.tsx, `invertTo="accent"`) — ce composant appelle les
- * deux hooks avec leurs valeurs par défaut (`invertTo="ground"`),
- * comportement BYTE-IDENTIQUE à avant cette extraction (CLAUDE.md,
- * « Pages services — gabarit »).
+ * Révélation unique à l'entrée dans le viewport (ligne masquée) +
+ * inversion de toute la page — mécanismes dans `src/lib/respiration.ts`
+ * (`useRespirationLineReveal`/`useRespirationInversion`), partagés avec
+ * la bande rouge des pages services (ServiceRedBand.tsx, variante
+ * accent).
  *
- * Simplifié depuis une ancienne version à trois blocs (trois phrases
- * distinctes, révélées ligne par ligne avec un stagger) : le contenu
- * réel de Franck est une seule phrase, donc une seule ligne masquée —
- * plus de stagger, plus de multi-refs, plus de <br /> de point de
- * coupe mobile dédié (le texte s'enveloppe naturellement).
- *
- * Couleur du texte (CLAUDE.md « Respiration ») : plus de second effet
- * dédié ici — .text/.accent posent `color: var(--ink)` en CSS pur
- * (respiration.module.css), comme n'importe quelle autre section
- * « light » du site. C'est l'INVERSION DE TOUTE LA PAGE (hook
- * `useRespirationInversion`) qui rend ce texte crème sur fond charbon
- * pendant la Respiration — rien à animer localement.
+ * L'inversion couvre Respiration ET Services : début au haut du texte à
+ * 80 % de la fenêtre (inchangé), fin au bas de Services à 80 %
+ * (INVERSION_END). Les deux sections déclarent `tone="light"` et n'ont
+ * aucun fond propre : c'est l'échange --ink/--ground au niveau racine
+ * qui les affiche crème sur charbon (CLAUDE.md, « Tonalités »).
  */
 export function RespirationReveal({ content }: RespirationRevealProps) {
   const triggerRef = useRef<HTMLParagraphElement>(null);
   const lineRef = useRef<HTMLSpanElement>(null);
 
   useRespirationLineReveal(triggerRef, lineRef);
-  useRespirationInversion(triggerRef);
+  useRespirationInversion(triggerRef, "ground", INVERSION_END);
 
   return (
     <p ref={triggerRef} className={styles.text}>
       <span className={styles.mask}>
         <span ref={lineRef} className={styles.line}>
-          {content.before}
-          <span className={styles.accent}>{content.accent}</span>
-          {content.after}
+          {content.text}
         </span>
       </span>
     </p>

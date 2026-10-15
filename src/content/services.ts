@@ -61,13 +61,14 @@ export const services: [Service, Service, Service, Service] = [
   },
   {
     name: "Publicité",
-    phrase: "Plus de commandes, sans attendre.",
+    phrase: "Plus de commandes, quand vous en avez besoin.",
     paragraphs: [
-      "On crée et on pilote vos campagnes pour vous montrer au bon " +
-        "moment : sur Google quand vos clients cherchent ce que vous " +
-        "vendez, sur Instagram et Facebook quand ils font défiler leur fil.",
-      "On ajuste vos annonces chaque jour et on concentre le budget sur " +
-        "ce qui vend, pour que chaque euro investi rapporte le plus possible.",
+      "On pilote vos campagnes Google Ads pour vous montrer au moment où " +
+        "vos clients cherchent ce que vous vendez : dans les résultats de " +
+        "recherche, dans Google Shopping, puis auprès de ceux qui ont déjà " +
+        "visité votre boutique. On ajuste vos annonces en continu et on " +
+        "investit le budget sur ce qui vend, pour maximiser votre retour " +
+        "sur investissement.",
     ],
     ctaLabel: "Découvrir la publicité",
     href: "/services/sea",
@@ -77,12 +78,11 @@ export const services: [Service, Service, Service, Service] = [
     name: "Site internet",
     phrase: "Un site à votre image, pensé pour convertir.",
     paragraphs: [
-      "On crée ou on reprend votre boutique, sur Shopify, WooCommerce, " +
-        "PrestaShop ou en sur-mesure. On soigne ce qui fait acheter : " +
-        "des fiches produits claires, des pages rapides sur mobile, un " +
-        "paiement simple.",
-      "Résultat : une plus grande part de vos visiteurs passe commande, " +
-        "sans dépenser un euro de plus pour les faire venir.",
+      "On crée ou on reprend votre boutique sur Shopify, WooCommerce, " +
+        "PrestaShop ou en sur-mesure : fiches produits claires, pages " +
+        "rapides sur mobile, paiement en quelques clics. Chaque visiteur a " +
+        "plus de chances de commander, et chaque euro dépensé pour le faire " +
+        "venir vous rapporte davantage.",
     ],
     ctaLabel: "Découvrir la création de site",
     href: "/services/creation-site",
