@@ -67,7 +67,6 @@ const config: Config = {
       ],
       title: ["var(--t-title)", { lineHeight: "var(--t-title-lh)", letterSpacing: "var(--t-title-ls)" }],
       hero: ["var(--t-hero)", { lineHeight: "var(--t-hero-lh)", letterSpacing: "var(--t-hero-ls)" }],
-      mass: ["var(--t-mass)", { lineHeight: "var(--t-mass-lh)", letterSpacing: "var(--t-mass-ls)" }],
     },
 
     fontWeight: {

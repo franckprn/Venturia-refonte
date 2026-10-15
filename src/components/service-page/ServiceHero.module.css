@@ -98,7 +98,7 @@
  * taille du texte.
  *
  * Calibrage géométrique — même TECHNIQUE que --hero-title-cqi (home,
- * hero.module.css) et --mass-title-cqi (footer, footer.module.css) :
+ * hero.module.css) et l'ancien --mass-title-cqi (footer, retiré) :
  * une constante cqi mesurée par Playwright sur le texte/police/graisse
  * réels, jamais un pourcentage codé à l'oeil. Mais contrairement au hero
  * de la home (qui cible 9 COLONNES sur 12, une largeur AFFINE à cause

@@ -34,11 +34,9 @@ export function Footer() {
         <Link href="/contact" className={styles.giantTitle}>
           {giantTitle.line1}
           {/* Retour à la ligne CONTRÔLÉ, jamais laissé au navigateur —
-              comme le h1 du Hero (CLAUDE.md, « Hero (home) ») : dès
-              1024px, une taille fluide (footer.module.css
-              --mass-title-cqi) garantit que `line1` tient sur cette
-              seule ligne à toute largeur, donc que ce <br/> tombe
-              exactement ici, jamais ailleurs. */}
+              comme le h1 du Hero (CLAUDE.md, « Hero (home) ») : à
+              --t-hero (footer.module.css), `line1` tient sur une seule
+              ligne à toute largeur, donc ce <br/> tombe exactement ici. */}
           <br />
           {giantTitle.line2}
           {/* Espace fine insécable (U+202F), pas une espace normale :

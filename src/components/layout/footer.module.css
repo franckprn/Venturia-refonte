@@ -28,10 +28,16 @@
      de la section (sans lui, le débordement vertical envahirait les
      sections voisines). Un box-shadow ne compte pas dans le scroll
      overflow, contrairement à 100vw : aucun risque de barre de défilement
-     horizontale, quelle que soit la largeur de la barre verticale. */
+     horizontale, quelle que soit la largeur de la barre verticale.
+     -1px en bas : le footer est le dernier élément de la page ; quand la
+     hauteur du document est fractionnaire (home : 6664,66px), le bord bas
+     découpé tombait au milieu d'un pixel et laissait transparaître le
+     crème de <body> — un liseré clair d'1px visible au rebond du scroll.
+     Le débord d'1px de l'ombre le couvre, sans changer la hauteur de
+     scroll (ni box-shadow ni clip-path ne comptent dans l'overflow). */
   background: var(--ink);
   box-shadow: 0 0 0 100vmax var(--ink);
-  clip-path: inset(0 -100vmax);
+  clip-path: inset(0 -100vmax -1px);
 }
 
 /* Sous 1024px, la pile mobile du rail est fixée par-dessus le bas de
@@ -155,46 +161,15 @@
   margin-top: 0;
 }
 
-/* >= 768px (le point de rupture PROPRE à ce composant — celui de
-   .linksGrid plus bas, indépendant des 1024px du Shell) : taille FLUIDE
-   en cqi, calée sur la largeur de .giant — sur le modèle de
-   --hero-title-cqi (hero.module.css), avec une différence qui simplifie
-   le calibrage : .giant fait TOUJOURS 100 % de la largeur de la colonne
-   de contenu (12 colonnes, jamais de rail sous cette ligne du Shell —
-   CLAUDE.md, « Bloc de fin »), donc AUCUNE gouttière fixe à soustraire
-   comme pour le h1 du Hero (colonnes 1-9 SUR 12, un sous-ensemble à
-   gouttières fixes). La relation entre la largeur du texte et celle du
-   conteneur est donc PUREMENT proportionnelle (une droite PAR
-   L'ORIGINE) à toute largeur — un seul calibrage suffit, exact PARTOUT
-   (pas une valeur qui minimise un écart résiduel aux bornes comme
-   --hero-title-cqi), y COMPRIS entre 768 et 1023px où .giant doit sa
-   largeur au Shell MOBILE (100 % moins les 40px de marges, pas la
-   formule desktop) : la proportion tient quelle que soit la formule qui
-   a produit cette largeur, seule la largeur RÉSULTANTE compte pour un
-   calibrage proportionnel. container-type posé ICI (jamais sur
-   .giantTitle, le lien lui-même, ni un ancêtre plus haut) : .giant vit
-   dans la colonne de contenu du footer, jamais un ancêtre des cartons
-   du rail (colonne séparée du Shell, DOM distinct — voir
-   Shell.tsx/Rail.tsx) — aucun élément sticky n'en descend.
-   --mass-title-cqi = 13.46 (mesuré Playwright, build de prod) fait tenir
-   `line1` (« ON PEUT VOUS », la ligne la plus longue — voir Footer.tsx/
-   content/footer.ts, jamais `line2` qui est plus courte) sur 97 % de la
-   largeur de .giant à CHAQUE largeur testée (768 à 2560px) — 3 % de
-   marge choisie pour absorber l'arrondi sous-pixel entre navigateurs,
-   jamais un ajustement à l'œil. En dessous de 768px (point de rupture
-   TYPOGRAPHIQUE, 767px, où --t-mass lui-même passe à 60px) :
-   --mass-title-cqi ne s'applique pas, `.giantTitle` garde --t-mass fixe
-   — le <br/> entre line1/line2 (Footer.tsx) reste posé, mais rien
-   n'absorbe la largeur qui manque : 3 lignes, « VOUS » orpheline,
-   ACCEPTÉ à cette largeur (voir CLAUDE.md, « Bloc de fin »). */
-@media (min-width: 768px) {
-  .giant {
-    container-type: inline-size;
-    --mass-title-cqi: 13.46;
-  }
-}
+/* Taille = --t-hero (72px desktop / 40px sous 768px — CLAUDE.md,
+   « Bloc de fin ») : plus de calibrage cqi, le titre ne couvre plus
+   toute la largeur du contenu. Graisse 800 et interligne 0.82 (celui de
+   l'ancien --t-mass, retiré) conservés tels quels, approche -0.01em
+   aussi — seule la taille a changé. Le <br/> entre line1/line2
+   (Footer.tsx) donne exactement 2 lignes à toute largeur : « ON PEUT
+   VOUS » tient sur une ligne même à 40px dans 350px de contenu (390px).
 
-/* display: inline (celui d'un <a> par défaut, redit ici pour ne rien
+   display: inline (celui d'un <a> par défaut, redit ici pour ne rien
    laisser au hasard) : le lien épouse exactement la forme du texte sur
    chacune des deux lignes, jamais un rectangle qui engloberait aussi
    l'espace vide à droite de la ligne la plus courte. */
@@ -203,16 +178,10 @@
   text-decoration: none;
   font-family: var(--font-display), system-ui, sans-serif;
   font-weight: 800;
-  font-size: var(--t-mass);
-  line-height: var(--t-mass-lh);
-  letter-spacing: var(--t-mass-ls);
+  font-size: var(--t-hero);
+  line-height: 0.82;
+  letter-spacing: -0.01em;
   color: var(--ground);
-}
-
-@media (min-width: 768px) {
-  .giantTitle {
-    font-size: calc(var(--mass-title-cqi) * 1cqi);
-  }
 }
 
 /* Titre entièrement --ground, « ? » compris : plus de --accent ici. */

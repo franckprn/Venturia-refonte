@@ -48,8 +48,9 @@ export const railContactCard: RailCardContent = {
   title: "Réserver 20 minutes",
   resume: "20 minutes, sans engagement",
   text:
-    "Sans engagement. On étudie votre boutique avant l'appel, puis on " +
-    "vous dit ce qu'on ferait, et dans quel ordre.",
+    "Sans engagement. On découvre votre boutique avant l'appel, puis on " +
+    "échange sur votre situation et sur la meilleure façon d'atteindre " +
+    "vos objectifs.",
   href: "/contact",
 };
 

@@ -150,13 +150,13 @@ Mono   : JetBrains Mono (400, 500)
 --t-body:  17px   sans 400,    lh 1.55, ls +.01em   corps
 --t-lead:  21px   sans 400,    lh 1.4,  ls +.01em   chapô
 --t-title: 40px   display 600, lh 1.1,  ls -.02em   titre de section
---t-hero:  72px   display 800, lh 1.04, ls -.03em   hero
---t-mass: 180px   display 800, lh 0.82, ls -.01em   CTA géant de pied de page
+--t-hero:  72px   display 800, lh 1.04, ls -.03em   hero (et titre du
+                                                   footer, voir « Bloc de fin »)
 
 @media (max-width: 767px)
 --t-mono:  15px      --t-title: 28px
 --t-small: 15px      --t-hero:  40px
---t-body:  16px      --t-mass:  60px
+--t-body:  16px
 --t-lead:  19px + poids 500
 
 Le letter-spacing positif sur --t-small, --t-body et --t-lead est mesuré et
@@ -171,7 +171,7 @@ maximale disponible de la police est d'au moins 200 ; sinon, un
 soulignement (`text-decoration`, couleur du texte, épaisseur et
 décalage en em — proportionnels à la taille du texte, jamais des px
 fixes). Bricolage Grotesque est une police variable, axe 200-800
-(`document.fonts`) : un texte déjà posé à 800 (--t-hero, --t-mass) n'a
+(`document.fonts`) : un texte déjà posé à 800 (--t-hero, titre du footer) n'a
 donc plus de graisse disponible au-dessus — jamais de gras dessus,
 toujours un soulignement (voir Respiration).
 
@@ -706,7 +706,8 @@ H1 de page — deux approches selon le besoin de la page :
               `line1`/`line2` du bloc de fin, content/footer.ts),
               `line1` (la plus longue) calibrée pour occuper EXACTEMENT
               100 % de la largeur du conteneur : même TECHNIQUE que
-              --hero-title-cqi (home) et --mass-title-cqi (footer), une
+              --hero-title-cqi (home) et l'ancien --mass-title-cqi (footer,
+              retiré), une
               constante cqi mesurée Playwright — mais ici la cible est
               12/12 colonnes (pas 9/12 comme le hero home), une relation
               PUREMENT PROPORTIONNELLE au conteneur (pas affine) : un
@@ -1299,56 +1300,16 @@ négative (-40px) qui l'en faisait sortir a été retirée (mesurée : 40px
 pile, une valeur fixe identique à 1024/1440/1728px, jamais documentée
 ici comme un choix voulu).
 
-Exactement 2 lignes dès 768px (le point de rupture PROPRE à ce
-composant — celui de `.linksGrid` plus bas, indépendant des 1024px du
-Shell), à toute largeur — « ON PEUT VOUS » / « AIDER ? » — un retour à
-la ligne EXPLICITE (`<br/>` entre `line1` et `line2`, `content/footer.ts`
-— jamais laissé au navigateur, comme le h1 du Hero) combiné à une taille
-FLUIDE en cqi, sur le modèle de `--hero-title-cqi` (hero.module.css)
-mais SANS sa correction affine : `.giant` (le bloc, jamais `.giantTitle`
-le lien lui-même — même principe que `.titleWrap`/`.title` au Hero) fait
-TOUJOURS 100 % de la largeur de la colonne de contenu (12 colonnes
-entières, jamais un sous-ensemble à gouttières fixes comme les colonnes
-1-9 du Hero, puisqu'aucun rail ne réduit cette ligne du Shell) — la
-relation entre la largeur du texte et celle du conteneur est donc
-PUREMENT proportionnelle (une droite PAR L'ORIGINE) à toute largeur, un
-seul calibrage suffit et reste EXACT partout (pas une valeur qui
-minimise un écart résiduel aux bornes comme au Hero) — y COMPRIS entre
-768 et 1023px, où `.giant` doit sa largeur au Shell MOBILE (100 % moins
-les 40px de marges, pas la formule desktop) : une relation proportionnelle
-tient quelle que soit la formule qui a produit la largeur, seule la
-largeur RÉSULTANTE compte. `container-type: inline-size` posé sur
-`.giant` : ce bloc vit dans la colonne de contenu du footer, jamais un
-ancêtre des cartons du rail (colonne séparée du Shell, DOM distinct) —
-vérifié, aucun élément sticky n'en descend.
-`--mass-title-cqi: 13.46` (footer.module.css, mesuré Playwright, build
-de prod) fait tenir `line1` (« ON PEUT VOUS », la ligne la plus longue)
-sur 97 % de la largeur de `.giant` — vérifié EXACT (aucune dérive, aucun
-débordement à droite de la colonne 12) de 768 à 2560px, 3 % de marge
-choisie pour absorber l'arrondi sous-pixel entre navigateurs, jamais un
-ajustement à l'œil.
-
-Discontinuité observée, PAS corrigée (inhérente au Shell, pas à ce
-calibrage) : à 1024px pile, la taille du titre RÉTRÉCIT visiblement par
-rapport à 1023px (mesuré : 132px à 1023px → 97px à 1024px) — la colonne
-de contenu elle-même se rétrécit à cet instant précis (le rail, 250px,
-apparaît et prend la place que les marges mobiles laissaient au
-contenu), donc la taille proportionnelle du titre suit. Ce n'est pas un
-défaut de calibrage (la relation reste exacte des deux côtés de ce
-seuil, prise séparément) mais une conséquence visible, à ce seul point
-de la bascule, de rendre le titre fluide plutôt que fixe.
-
-Sous 768px (point de rupture TYPOGRAPHIQUE, 767px, où `--t-mass`
-lui-même passe à 60px) : `--mass-title-cqi` ne s'applique pas
-(`.giantTitle` garde `--t-mass` fixe) — le `<br/>` explicite reste posé,
-mais rien n'absorbe la largeur qui manque : « ON PEUT VOUS » (line1) ne
-tient pas sur une seule ligne à cette taille fixe, et s'enroule tout
-seul en « ON PEUT » / « VOUS » avant le `<br/>` — « VOUS » se retrouve
-orphelin, seul sur sa ligne (3 lignes au total). ACCEPTÉ à cette largeur
-(décision explicite) : ce motif existait déjà, à l'identique, avant
-cette session (l'ancien texte continu, sans `<br/>`, s'enroulait déjà de
-la même façon) — ce n'est pas une régression, juste un état choisi tel
-quel sous 768px.
+Taille : `--t-hero` (72px desktop / 40px sous 768px), graisse 800,
+interligne 0.82 et approche -0.01em (valeurs de l'ancien `--t-mass`,
+retiré de l'échelle, conservées en dur dans footer.module.css). Plus de
+calibrage cqi (l'ancien `--mass-title-cqi`, qui faisait couvrir au titre
+toute la largeur du contenu, jugé trop gros) : le titre ne remplit plus
+la ligne. Exactement 2 lignes à toute largeur — « ON PEUT VOUS » /
+« AIDER ? » — par un retour à la ligne EXPLICITE (`<br/>` entre `line1`
+et `line2`, `content/footer.ts`, jamais laissé au navigateur, comme le
+h1 du Hero) : à 40px, `line1` tient sur une ligne même à 390px (plus de
+« VOUS » orphelin).
 
 Repères sur le trait au-dessus de la barre légale (`.legalBar`,
 border-top existant — jamais déplacé ni doublé) : deux angles qui
@@ -1484,8 +1445,9 @@ Le rail desktop de la home n'utilise plus `HOME_RAIL_CONFIG` mais
 `HOME_RAIL_CONFIG` (défaut de `<MobileRailStack>`), inchangée — tout ce
 qui est décrit plus bas pour la pile mobile reste vrai. Ordre desktop :
   1. carton contact (`railContactCard`, content/rail.ts) — « Réserver
-     20 minutes » / « Sans engagement. On étudie votre boutique avant
-     l'appel, puis on vous dit ce qu'on ferait, et dans quel ordre. »
+     20 minutes » / « Sans engagement. On découvre votre boutique avant
+     l'appel, puis on échange sur votre situation et sur la meilleure
+     façon d'atteindre vos objectifs. »
      (propre à ce carton : « On discute ? » des pages services n'est pas
      touché), lien `/contact`, style ACTION (filet --accent, flèche
      rejouée au survol/focus), icône flèche. Ancré au Hero (`anchor=
