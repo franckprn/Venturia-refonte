@@ -38,7 +38,7 @@ export const metadata: Metadata = {
 //   1. hero              haut du H1 (#service-hero-title) — carton
 //                        cliquable (href), même mécanisme que le carton 3
 //   2. tool              haut du H2 du bloc 5 (« L'outil »)
-//   3. other-expertises  bas du bloc 7 (« Autres expertises »)
+//   3. other-expertises  haut de la liste du bloc 7 (« Autres expertises »)
 // Mêmes sections pour l'ancrage desktop (RailSlot `anchor`) ET la
 // révélation mobile (`mobileReveal`).
 const AUTOMATISATION_RAIL_CONFIG: RailConfig = {
@@ -61,7 +61,7 @@ const AUTOMATISATION_RAIL_CONFIG: RailConfig = {
       varName: "--rail-card3-offset",
       sectionId: "other-expertises",
       selector: "[data-service-other-expertises-end]",
-      edge: "bottom",
+      edge: "top",
     },
   ],
   mobileReveal: ["hero", "tool", "other-expertises"],

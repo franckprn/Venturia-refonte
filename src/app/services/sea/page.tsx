@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 //   1. hero       haut du H1 (#service-hero-title) — carton cliquable
 //                 (href "#campagnes"), même mécanisme que le carton 3
 //   2. starting   haut du H2 du bloc 4 (« Par où commencer »)
-//   3. other-expertises  bas du bloc 11 (« Autres expertises »)
+//   3. other-expertises  haut de la liste du bloc 11 (« Autres expertises »)
 const PUBLICITE_RAIL_CONFIG: RailConfig = {
   cards: publicite.rail,
   icons: [IconTag, IconSearch, IconArrowRight],
@@ -55,7 +55,7 @@ const PUBLICITE_RAIL_CONFIG: RailConfig = {
       varName: "--rail-card3-offset",
       sectionId: "other-expertises",
       selector: "[data-service-other-expertises-end]",
-      edge: "bottom",
+      edge: "top",
     },
   ],
   mobileReveal: ["hero", "starting", "other-expertises"],

@@ -842,9 +842,21 @@ structure) : 1 « Vous vendez des services ? » → haut du H1 du Hero
 (`#service-hero-title`, `anchor="hero"`) — ancrage définitif (remplace
 l'ancrage provisoire sur la frise d'une session précédente) ; 2 « On
 reprend vos scénarios » → haut du H2 du bloc 5 (L'outil) ; 3
-« On discute ? » → bas du bloc 7 (Autres expertises,
-`[data-service-other-expertises-end]` posé sur `.grid`,
-ServiceOtherExpertises.tsx). Pile mobile : même ordre, mêmes sections de
+« On discute ? » → HAUT de la liste du bloc 7 (Autres expertises,
+`[data-service-other-expertises-end]` posé sur `.list`,
+ServiceOtherExpertises.tsx, `edge: "top"` — trait de la 1ʳᵉ ligne).
+Même ancrage pour le carton 3 des 4 pages services. Ancien ancrage
+(`edge: "bottom"`, bas de la liste) retiré : le carton (241-258px)
+dépassait le padding-bas de la section (120px) et partait à cheval sur
+le footer, centre côté footer → `data-tone="dark"`, titre et icône
+crème sur crème pendant toute sa montée (430-670px de scroll mesurés).
+Avec le haut de la liste (280px de haut), le carton tient entièrement
+au-dessus du footer à son départ : 0px de traversée en montée ; le footer
+ne le traverse plus qu'une fois figé (~sa hauteur de scroll, comme les
+cartons 1 et 2 — passage normal d'une limite sous un carton figé). Il
+se fige ~280px de scroll plus tôt qu'avant ; en mode relais, le carton
+2 cède sa place d'autant plus tôt (`--rail-card2-relay-height` suit
+l'ancrage, aucun code à part). Pile mobile : même ordre, mêmes sections de
 révélation (`mobileReveal: ["hero", "tool", "other-expertises"]`) — le
 carton 1 y entre donc dès le haut de page, comme sur le rail desktop
 (avant : entrée seulement à la frise, divergent du desktop).

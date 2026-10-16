@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 //                   (href "#timeline"), même mécanisme que le carton 3
 //   2. plateformes  haut du H2 du bloc 5 (Plateformes) — carton
 //                   cliquable (href "#plateformes")
-//   3. other-expertises  bas du bloc 10 (« Autres expertises »)
+//   3. other-expertises  haut de la liste du bloc 10 (« Autres expertises »)
 const CREATION_SITE_RAIL_CONFIG: RailConfig = {
   cards: creationSite.rail,
   icons: [IconClock, IconLayers, IconArrowRight],
@@ -56,7 +56,7 @@ const CREATION_SITE_RAIL_CONFIG: RailConfig = {
       varName: "--rail-card3-offset",
       sectionId: "other-expertises",
       selector: "[data-service-other-expertises-end]",
-      edge: "bottom",
+      edge: "top",
     },
   ],
   mobileReveal: ["hero", "plateformes", "other-expertises"],
