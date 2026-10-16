@@ -60,10 +60,12 @@ export const footer = {
 
   giantTitle: {
     /** Déjà en capitales : convention du projet, jamais de text-transform
-     *  CSS. Coupé en 2 lignes, un <br/> EXPLICITE entre les deux (Footer.tsx)
-     *  — jamais laissé au navigateur (comme le h1 du Hero, CLAUDE.md « Bloc
-     *  de fin ») : à toute largeur, `line1` tient sur une seule ligne à
-     *  --t-hero (footer.module.css) et `line2` (plus courte) aussi. */
+     *  CSS. Sous 1024px : 2 lignes, un <br/> EXPLICITE entre les deux
+     *  (Footer.tsx) — jamais laissé au navigateur (comme le h1 du Hero) :
+     *  `line1` tient sur une seule ligne à --t-hero. Dès 1024px : le <br/>
+     *  est masqué, `line1` et `line2` forment UNE ligne calibrée sur 98 %
+     *  des colonnes 1-12 (footer.module.css, CLAUDE.md « Bloc de fin ») —
+     *  à recalibrer si ce texte change. */
     line1: "ON PEUT VOUS",
     line2: "AIDER",
     /** Rendu séparément, en fin de line2 — voir Footer.tsx. */

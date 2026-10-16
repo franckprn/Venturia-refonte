@@ -33,11 +33,15 @@ export function Footer() {
       <div className={styles.giant}>
         <Link href="/contact" className={styles.giantTitle}>
           {giantTitle.line1}
-          {/* Retour à la ligne CONTRÔLÉ, jamais laissé au navigateur —
-              comme le h1 du Hero (CLAUDE.md, « Hero (home) ») : à
-              --t-hero (footer.module.css), `line1` tient sur une seule
-              ligne à toute largeur, donc ce <br/> tombe exactement ici. */}
-          <br />
+          {/* Espace AVANT le <br/> : le texte du lien reste « VOUS AIDER »
+              (jamais « VOUSAIDER ») pour les moteurs et les lecteurs
+              d'écran, quel que soit l'affichage. Sous 1024px, retour à la
+              ligne CONTRÔLÉ, jamais laissé au navigateur (comme le h1 du
+              Hero) — l'espace tombe en fin de ligne, invisible. Dès
+              1024px, le <br/> est masqué (.giantBreak, footer.module.css)
+              et le titre tient sur UNE ligne (CLAUDE.md, « Bloc de fin »). */}
+          {" "}
+          <br className={styles.giantBreak} />
           {giantTitle.line2}
           {/* Espace fine insécable (U+202F), pas une espace normale :
               c'est la ponctuation française correcte avant un « ? ». */}

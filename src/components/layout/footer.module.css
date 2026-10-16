@@ -161,13 +161,13 @@
   margin-top: 0;
 }
 
-/* Taille = --t-hero (72px desktop / 40px sous 768px — CLAUDE.md,
-   « Bloc de fin ») : plus de calibrage cqi, le titre ne couvre plus
-   toute la largeur du contenu. Graisse 800 et interligne 0.82 (celui de
-   l'ancien --t-mass, retiré) conservés tels quels, approche -0.01em
-   aussi — seule la taille a changé. Le <br/> entre line1/line2
-   (Footer.tsx) donne exactement 2 lignes à toute largeur : « ON PEUT
-   VOUS » tient sur une ligne même à 40px dans 350px de contenu (390px).
+/* Sous 1024px : taille = --t-hero (40px sous 768px, 72px de 768 à
+   1023px), 2 lignes — le <br/> entre line1/line2 (Footer.tsx) coupe
+   exactement après « ON PEUT VOUS », qui tient sur une ligne même à 40px
+   dans 350px de contenu (390px). Dès 1024px : UNE seule ligne qui remplit
+   98 % des colonnes 1-12 (CLAUDE.md, « Bloc de fin »), voir le bloc
+   @media plus bas. Graisse 800, interligne 0.82 et approche -0.01em
+   (valeurs de l'ancien --t-mass, retiré) identiques aux deux largeurs.
 
    display: inline (celui d'un <a> par défaut, redit ici pour ne rien
    laisser au hasard) : le lien épouse exactement la forme du texte sur
@@ -182,6 +182,44 @@
   line-height: 0.82;
   letter-spacing: -0.01em;
   color: var(--ground);
+}
+
+/* Dès 1024px : une seule ligne, calibrée pour occuper 98 % des colonnes
+   1-12 (CLAUDE.md, « Bloc de fin »). Même technique que
+   --service-hero-title-cqi : la cible étant les 12 colonnes ENTIÈRES, la
+   largeur du texte est PUREMENT PROPORTIONNELLE à celle du conteneur
+   (letter-spacing en em) — une seule constante reste exacte à toute
+   largeur, jusqu'au plafond du shell (1616px de contenu à 1920px et
+   au-delà). Aucun plafond en px : la taille suit la largeur.
+
+   Calibrage (Playwright, build de prod) : « ON PEUT VOUS AIDER ? » mesuré
+   sur un <span> ISOLÉ (hors grille, même police/graisse/approche, 100px,
+   white-space: nowrap — CLAUDE.md, « Pages services — gabarit » : jamais
+   in situ, la piste 1fr du shell pourrait grandir avec le texte) :
+   Chromium 1092,36px, WebKit 1092,20px. 98 / 10,9236 = 8,9714 (Chromium)
+   contre 8,9727 (WebKit) : on retient la plus PRUDENTE, celle de la ligne
+   la plus large. À recalibrer si le texte, la police, la graisse ou
+   l'approche changent.
+
+   container-type sur .giant (jamais sur un ancêtre des cartons du rail :
+   contain/container casserait leur sticky) — sa largeur est exactement
+   celle des colonnes 1-12. white-space: nowrap obligatoire : à une
+   taille calibrée près du bord, un retour à la ligne par mot pourrait se
+   déclencher à la moindre fraction de pixel. */
+@media (min-width: 1024px) {
+  .giant {
+    --footer-title-cqi: 8.9714;
+    container-type: inline-size;
+  }
+
+  .giantTitle {
+    font-size: calc(var(--footer-title-cqi) * 1cqi);
+    white-space: nowrap;
+  }
+
+  .giantBreak {
+    display: none;
+  }
 }
 
 /* Titre entièrement --ground, « ? » compris : plus de --accent ici. */

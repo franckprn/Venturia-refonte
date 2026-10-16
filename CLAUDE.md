@@ -151,7 +151,9 @@ Mono   : JetBrains Mono (400, 500)
 --t-lead:  21px   sans 400,    lh 1.4,  ls +.01em   chapô
 --t-title: 40px   display 600, lh 1.1,  ls -.02em   titre de section
 --t-hero:  72px   display 800, lh 1.04, ls -.03em   hero (et titre du
-                                                   footer, voir « Bloc de fin »)
+                                                   footer sous 1024px ; dès
+                                                   1024px, taille calibrée en
+                                                   cqi, voir « Bloc de fin »)
 
 @media (max-width: 767px)
 --t-mono:  15px      --t-title: 28px
@@ -171,7 +173,8 @@ maximale disponible de la police est d'au moins 200 ; sinon, un
 soulignement (`text-decoration`, couleur du texte, épaisseur et
 décalage en em — proportionnels à la taille du texte, jamais des px
 fixes). Bricolage Grotesque est une police variable, axe 200-800
-(`document.fonts`) : un texte déjà posé à 800 (--t-hero, titre du footer) n'a
+(`document.fonts`) : un texte déjà posé à 800 (--t-hero, titre du footer à toute
+taille) n'a
 donc plus de graisse disponible au-dessus — jamais de gras dessus,
 toujours un soulignement (voir Respiration).
 
@@ -706,8 +709,8 @@ H1 de page — deux approches selon le besoin de la page :
               `line1`/`line2` du bloc de fin, content/footer.ts),
               `line1` (la plus longue) calibrée pour occuper EXACTEMENT
               100 % de la largeur du conteneur : même TECHNIQUE que
-              --hero-title-cqi (home) et l'ancien --mass-title-cqi (footer,
-              retiré), une
+              --hero-title-cqi (home) et --footer-title-cqi (footer, dès
+              1024px), une
               constante cqi mesurée Playwright — mais ici la cible est
               12/12 colonnes (pas 9/12 comme le hero home), une relation
               PUREMENT PROPORTIONNELLE au conteneur (pas affine) : un
@@ -1312,16 +1315,52 @@ négative (-40px) qui l'en faisait sortir a été retirée (mesurée : 40px
 pile, une valeur fixe identique à 1024/1440/1728px, jamais documentée
 ici comme un choix voulu).
 
-Taille : `--t-hero` (72px desktop / 40px sous 768px), graisse 800,
-interligne 0.82 et approche -0.01em (valeurs de l'ancien `--t-mass`,
-retiré de l'échelle, conservées en dur dans footer.module.css). Plus de
-calibrage cqi (l'ancien `--mass-title-cqi`, qui faisait couvrir au titre
-toute la largeur du contenu, jugé trop gros) : le titre ne remplit plus
-la ligne. Exactement 2 lignes à toute largeur — « ON PEUT VOUS » /
-« AIDER ? » — par un retour à la ligne EXPLICITE (`<br/>` entre `line1`
-et `line2`, `content/footer.ts`, jamais laissé au navigateur, comme le
-h1 du Hero) : à 40px, `line1` tient sur une ligne même à 390px (plus de
-« VOUS » orphelin).
+Graisse 800, interligne 0.82 et approche -0.01em (valeurs de l'ancien
+`--t-mass`, retiré de l'échelle, conservées en dur dans
+footer.module.css), à toute largeur. Taille et nombre de lignes selon
+la largeur :
+
+  sous 1024px   `--t-hero` (40px sous 768px, 72px de 768 à 1023px),
+                exactement 2 lignes — « ON PEUT VOUS » / « AIDER ? » —
+                par un retour à la ligne EXPLICITE (`<br/>` entre `line1`
+                et `line2`, `content/footer.ts`, jamais laissé au
+                navigateur, comme le h1 du Hero) : à 40px, `line1` tient
+                sur une ligne même à 390px (plus de « VOUS » orphelin).
+                Inchangé.
+  dès 1024px    UNE seule ligne qui occupe 98 % des colonnes 1-12 :
+                `font-size: calc(var(--footer-title-cqi) * 1cqi)`,
+                `container-type: inline-size` sur `.giant` (largeur =
+                colonnes 1-12 exactement, jamais un ancêtre des cartons
+                du rail), `white-space: nowrap`, le `<br/>` masqué
+                (`.giantBreak { display: none }`). Aucun plafond en px :
+                la taille suit la largeur jusqu'au plafond du shell
+                (1616px de contenu, ≥ 1920px). Cible 12/12 colonnes ⇒
+                relation PUREMENT PROPORTIONNELLE (comme
+                --service-hero-title-cqi) : une seule constante reste
+                exacte à toute largeur.
+                `--footer-title-cqi: 8.9714`, calibrée sur la largeur
+                MESURÉE (`Range.getBoundingClientRect`) d'un `<span>`
+                isolé à 100px : Chromium 1092,36px → 8,9714, WebKit
+                1092,20px → 8,9727 — la valeur la plus prudente
+                (Chromium, la ligne la plus large) est retenue. À
+                recalibrer si le texte, la police, la graisse ou
+                l'approche changent.
+
+Un `{" "}` précède le `<br/>` (Footer.tsx) : le texte du lien se lit
+« VOUS AIDER » (jamais « VOUSAIDER ») pour Google et les lecteurs
+d'écran, à toute largeur ; sous 1024px, cette espace tombe en fin de
+ligne et ne se voit pas.
+
+Mesuré (Playwright, build de prod, Chromium / WebKit) — taille calculée,
+largeur de la ligne (Range), part des colonnes 1-12 :
+  1024   64,59px   705,58 / 705,48px   98,00 / 97,99 %
+  1280   87,56px   956,50 / 956,34px   98,00 / 97,99 %
+  1440  101,92px  1113,27 / 1113,10px  98,00 / 97,99 %
+  1728  127,75px  1395,52 / 1395,30px  98,00 / 97,99 %
+  1920  144,98px  1583,61 / 1583,43px  98,00 / 97,99 %
+  2560  144,98px  idem 1920 (shell plafonné à 1616px)
+Bord gauche = colonne 1 (0px), aucun débordement à droite (14 à 33px
+de marge), une seule ligne partout ; 390px inchangé (40px, 2 lignes).
 
 Repères sur le trait au-dessus de la barre légale (`.legalBar`,
 border-top existant — jamais déplacé ni doublé) : deux angles qui
