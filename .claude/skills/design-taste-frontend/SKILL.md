@@ -45,10 +45,10 @@ Do not default to: AI-purple gradients, centered hero over dark mesh, three equa
 After the design read, set three dials. Every layout, motion, and density decision below is gated by these.
 
 * **`DESIGN_VARIANCE: 8`** - 1 = Perfect Symmetry, 10 = Artsy Chaos
-* **`MOTION_INTENSITY: 6`** - 1 = Static, 10 = Cinematic / Physics
-* **`VISUAL_DENSITY: 4`** - 1 = Art Gallery / Airy, 10 = Cockpit / Packed Data
+* **`MOTION_INTENSITY: 4`** - 1 = Static, 10 = Cinematic / Physics
+* **`VISUAL_DENSITY: 3`** - 1 = Art Gallery / Airy, 10 = Cockpit / Packed Data
 
-**Baseline:** `8 / 6 / 4`. Use these unless the design read overrides them. Do not ask the user to edit this file - overrides happen conversationally.
+**Baseline:** `8 / 4 / 3`. Use these unless the design read overrides them. Do not ask the user to edit this file - overrides happen conversationally.
 
 ### 1.A Dial Inference (design read → dial values)
 | Signal | VARIANCE | MOTION | DENSITY |

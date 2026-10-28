@@ -10,7 +10,6 @@ import { nav, type NavCaseStudy, type NavEntry } from "@/content/nav";
 import { realisations } from "@/content/realisations";
 import { services } from "@/content/services";
 import { toVeilTone, type Tone } from "@/lib/tone";
-import { LocalTime } from "./LocalTime";
 import styles from "./megamenu.module.css";
 
 type MegaMenuProps = {
@@ -374,7 +373,7 @@ export function MegaMenu({
           flex column). */}
       <div ref={contentRef} className={styles.mobileContent}>
       {/* Zone défilante : seule elle scrolle si l'accordéon ouvert
-          déborde — .mobileBottom (ligne heure/ville + trait) reste à sa
+          déborde — .mobileBottom (ligne email + trait) reste à sa
           position fixe en bas, CLAUDE.md « Menu mobile » § 5. */}
       <div className={styles.mobileScroll}>
         <ul className={styles.mobileList}>
@@ -445,8 +444,11 @@ export function MegaMenu({
 
       <div className={styles.mobileBottom}>
         <div className={styles.mobileBottomRow}>
-          <LocalTime className={styles.mobileTime} />
-          <span className={styles.mobileCity}>{nav.mobile.city}</span>
+          {/* Heure locale et ville retirées : aucun lieu sur le site. */}
+          <span>{nav.mobile.emailLabel}</span>
+          <a href={`mailto:${nav.mobile.email}`} className={styles.mobileCity} onClick={onNavigate}>
+            {nav.mobile.email}
+          </a>
         </div>
         {/* Même filet que nav.module.css .rule, retourné (branches vers
             le haut) — voir megamenu.module.css .mobileBottomRule. */}

@@ -354,3 +354,14 @@ html[data-tone-transition="on"] {
     scroll-behavior: auto !important;
   }
 }
+
+/* ------------------------------------------------------------------ *
+ * Pages de la nouvelle direction ([data-v2] : home, /services/seo,
+ * /blog) : pas de rail. Le filet de la nav et le méga-menu desktop
+ * s'alignent sur les marges de ces pages (20px mobile, 40px desktop).
+ * ------------------------------------------------------------------ */
+html:has([data-v2]) {
+  --shell-gutter: 20px;
+  --shell-gutter-left: 40px;
+  --shell-rail: 40px;
+}

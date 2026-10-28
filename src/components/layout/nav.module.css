@@ -344,3 +344,17 @@
     backdrop-filter: none;
   }
 }
+
+/* Typographie de la direction actuelle : entrées en Geist 15px, « Menu »
+   en mono capitales comme les labels d'interface des pages. */
+.link {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.menu {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

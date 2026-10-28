@@ -1,0 +1,1067 @@
+/* Pages /services/seo et /blog : mêmes jetons que la home (posés par
+   .page, home.module.css), mêmes composants. Ce fichier ne porte que
+   leurs mises en page propres. */
+
+/* ---------- Référencement : hero ---------- */
+
+/* H1 plus long que celui de la home : une taille en dessous. */
+.seoH1 {
+  font-size: clamp(44px, 9.6vw, 150px);
+}
+
+.seoPanel {
+  width: min(calc(100% - 32px), 280px);
+}
+
+.queryLabel {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.query {
+  margin: 4px 0 16px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-ink);
+  background: var(--paper);
+  font-size: 15px;
+}
+
+/* ---------- Référencement : ce qu'on fait ---------- */
+
+.work {
+  padding: var(--section) var(--g);
+  display: grid;
+  gap: 40px;
+}
+
+.workBlock {
+  display: grid;
+  gap: 24px;
+  padding-top: 32px;
+  border-top: 2px solid var(--ink);
+}
+
+.workName {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-variation-settings: "wdth" 84;
+  font-weight: 600;
+  font-size: clamp(96px, 22vw, 300px);
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  color: var(--red);
+}
+
+.workBody {
+  display: grid;
+  gap: 32px;
+  align-content: start;
+}
+
+.workTitle {
+  font-size: clamp(28px, 3.2vw, 44px);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  max-width: 20ch;
+}
+
+.workList {
+  display: grid;
+}
+
+.workItem {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 4px 12px;
+  padding: 18px 0;
+  border-top: 1px solid var(--line-ink);
+}
+
+.workItem > :global(*):first-child {
+  grid-row: span 2;
+  padding-top: 5px;
+}
+
+.workItemName {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-variation-settings: normal;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.workItemText {
+  color: var(--ink-soft);
+  max-width: 52ch;
+}
+
+.aiPanel {
+  width: min(100%, 440px);
+}
+
+.aiQuestion {
+  justify-self: end;
+  margin-left: auto;
+  width: fit-content;
+  max-width: 85%;
+  padding: 8px 12px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 14px;
+}
+
+.aiAnswer {
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.aiSource {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.aiSource span {
+  padding: 2px 6px;
+  background: var(--red);
+  color: var(--ink);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 900px) {
+  .work {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+    row-gap: 64px;
+  }
+
+  .work > :global(*) {
+    grid-column: 1 / -1;
+  }
+
+  .work > h2 {
+    grid-column: 1 / 9;
+  }
+
+  .workBlock {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+    padding-top: 40px;
+  }
+
+  .workName {
+    grid-column: 1 / 6;
+  }
+
+  .workBody {
+    grid-column: 6 / -1;
+  }
+}
+
+/* ---------- Référencement : par où commencer ---------- */
+
+.starting {
+  padding: 0 var(--g) var(--section);
+  display: grid;
+  gap: 40px;
+}
+
+.startingList {
+  display: grid;
+  gap: 32px;
+}
+
+.startingItem {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-ink);
+}
+
+.startingTitle {
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+}
+
+@media (min-width: 900px) {
+  .startingList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+
+/* ---------- Référencement : SEO et Google Ads ---------- */
+
+.cross {
+  padding: var(--section) var(--g);
+  display: grid;
+  gap: 40px;
+  border-top: 1px solid var(--line-ink);
+}
+
+.crossArt {
+  width: min(72%, 320px);
+}
+
+.crossText {
+  display: grid;
+  gap: 24px;
+  justify-items: start;
+  align-content: center;
+}
+
+.crossText > :global(*):first-child {
+  justify-self: stretch;
+}
+
+@media (min-width: 900px) {
+  .cross {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+  }
+
+  .crossArt {
+    grid-column: 2 / 5;
+    width: auto;
+  }
+
+  .crossText {
+    grid-column: 6 / -1;
+  }
+}
+
+/* ---------- Référencement : FAQ ---------- */
+
+.faq {
+  padding: var(--section) var(--g);
+  display: grid;
+  gap: 40px;
+  border-top: 1px solid var(--line-ink);
+}
+
+.faqHead {
+  display: grid;
+  gap: 24px;
+  align-content: start;
+}
+
+.faqItem {
+  display: grid;
+  gap: 10px;
+  padding: 24px 0 28px;
+  border-top: 1px solid var(--line-ink);
+}
+
+.faqItem:last-child {
+  border-bottom: 1px solid var(--line-ink);
+}
+
+.faqQ {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-variation-settings: "wdth" 84;
+  font-weight: 600;
+  font-size: clamp(22px, 2vw, 28px);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  margin-bottom: 4px;
+}
+
+.faqLead {
+  font-size: 18px;
+  line-height: 1.5;
+  max-width: 60ch;
+}
+
+.faqMore {
+  color: var(--ink-soft);
+  max-width: 60ch;
+}
+
+@media (min-width: 900px) {
+  .faq {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+  }
+
+  .faqHead {
+    grid-column: 1 / 5;
+    position: sticky;
+    top: calc(var(--nav-h) + 40px);
+    align-self: start;
+  }
+
+  .faqList {
+    grid-column: 6 / -1;
+  }
+}
+
+/* ---------- Blog : liste ---------- */
+
+.blogHero {
+  padding: 32px var(--g) 64px;
+  display: grid;
+  gap: 32px;
+}
+
+.blogHeroText {
+  display: grid;
+  gap: 20px;
+  align-content: start;
+}
+
+.blogTitle {
+  font-size: clamp(44px, 8.4vw, 132px);
+  line-height: 0.94;
+  letter-spacing: -0.04em;
+  max-width: 13ch;
+}
+
+@media (min-width: 900px) {
+  .blogHero {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+    padding-top: 40px;
+    padding-bottom: 96px;
+    align-items: end;
+  }
+
+  .blogHeroText {
+    grid-column: 1 / 8;
+  }
+
+  .blogHeroArt {
+    grid-column: 8 / -1;
+  }
+}
+
+.blogList {
+  padding: 0 var(--g) var(--section);
+  display: grid;
+  gap: 8px;
+}
+
+.entry {
+  position: relative;
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 12px 16px;
+  padding: 24px 0 32px;
+  border-bottom: 1px solid var(--line-ink);
+}
+
+.entryThumb {
+  position: relative;
+  grid-row: span 3;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--ink);
+}
+
+.entryMeta,
+.articleMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-soft);
+}
+
+.entryMeta > :global(*):first-child,
+.articleMeta > :global(*):first-child {
+  color: var(--fg);
+}
+
+.entryMeta > :global(*):first-child::before,
+.articleMeta > :global(*):first-child::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  background: var(--red);
+}
+
+.entryTitle {
+  font-size: clamp(28px, 4.4vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+/* Toute la ligne est cliquable : le lien du titre s'étend sur l'entrée. */
+.entryLink {
+  transition: color 0.4s var(--ease);
+}
+
+.entryLink svg {
+  display: inline-block;
+  vertical-align: top;
+  margin: 0.06em 0 0 0.12em;
+}
+
+.entryLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.entry:hover .entryLink {
+  color: var(--red);
+}
+
+.entryExcerpt {
+  color: var(--ink-soft);
+  max-width: 52ch;
+}
+
+@media (min-width: 900px) {
+  .entry {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+    padding: 40px 0 48px;
+  }
+
+  .entryThumb {
+    grid-column: 1 / 3;
+  }
+
+  .entryMeta,
+  .entryTitle,
+  .entryExcerpt {
+    grid-column: 4 / -1;
+  }
+}
+
+.blogCta {
+  padding: 0 var(--g) var(--section);
+  display: grid;
+  gap: 32px;
+  justify-items: start;
+}
+
+/* ---------- Blog : article ---------- */
+
+.articleHead {
+  padding: 24px var(--g) 56px;
+  display: grid;
+  gap: 32px;
+}
+
+.crumbs {
+  display: flex;
+  gap: 10px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.crumbs a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.crumbs a:hover {
+  color: var(--ink);
+}
+
+.articleHeadText {
+  display: grid;
+  gap: 24px;
+  align-content: start;
+}
+
+.articleTitle {
+  font-size: clamp(42px, 7.4vw, 116px);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  max-width: 14ch;
+}
+
+.articleIntro {
+  font-size: 20px;
+  line-height: 1.45;
+  max-width: 40ch;
+}
+
+.articleArt {
+  width: min(72%, 300px);
+}
+
+@media (min-width: 900px) {
+  .articleHead {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+    padding-top: 32px;
+    padding-bottom: 96px;
+  }
+
+  .crumbs {
+    grid-column: 1 / -1;
+  }
+
+  .articleHeadText {
+    grid-column: 1 / 9;
+    align-self: end;
+  }
+
+  .articleIntro {
+    font-size: 22px;
+  }
+
+  .articleArt {
+    grid-column: 10 / -1;
+    width: auto;
+  }
+}
+
+.articleGrid {
+  padding: 0 var(--g) var(--section);
+  display: grid;
+  gap: 40px;
+}
+
+.toc {
+  display: grid;
+  gap: 12px;
+  padding: 16px 0 20px;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--line-ink);
+}
+
+.tocTitle {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.tocList {
+  display: grid;
+  gap: 4px;
+}
+
+.tocList a {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 15px;
+  line-height: 1.35;
+  transition: color 0.3s var(--ease);
+}
+
+.tocList a span {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  padding-top: 2px;
+  color: var(--ink-soft);
+}
+
+.tocList a:hover {
+  color: var(--red);
+}
+
+/* Colonne de lecture : 34em de Geist à 18px, soit 65 à 75 signes. */
+.prose {
+  display: grid;
+  gap: 20px;
+  max-width: 34em;
+  font-size: 18px;
+  line-height: 1.65;
+}
+
+.prose a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.enBref {
+  margin-bottom: 20px;
+  padding: 20px 22px 22px;
+  background: var(--panel);
+  border: 1px solid var(--line-ink);
+  border-left: 4px solid var(--red);
+}
+
+.enBrefTitle,
+.sourcesTitle {
+  margin-bottom: 10px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.enBref ul,
+.proseList {
+  display: grid;
+  gap: 8px;
+}
+
+.enBref li,
+.proseList li {
+  position: relative;
+  padding-left: 20px;
+}
+
+.enBref li::before,
+.proseList li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.68em;
+  width: 8px;
+  height: 2px;
+  background: var(--red);
+}
+
+.proseH2 {
+  margin-top: 28px;
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.proseBlock {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+
+.prose .proseLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  text-decoration-color: var(--red);
+  text-decoration-thickness: 2px;
+}
+
+.sources {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-ink);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.sources ol {
+  display: grid;
+  gap: 8px;
+  list-style: decimal;
+  padding-left: 20px;
+}
+
+@media (min-width: 900px) {
+  .articleGrid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+  }
+
+  .articleAside {
+    grid-column: 1 / 4;
+  }
+
+  .toc {
+    position: sticky;
+    top: calc(var(--nav-h) + 40px);
+  }
+
+  .prose {
+    grid-column: 5 / -1;
+  }
+}
+
+.articleCta {
+  padding: var(--section) var(--g);
+  display: grid;
+  gap: 40px;
+  background: var(--red);
+  --fg-soft: var(--ink);
+  --rule: color-mix(in srgb, #1a1614 35%, transparent);
+}
+
+.articleCta > * {
+  grid-column: 1 / -1;
+}
+
+.articleCtaRow {
+  display: grid;
+  gap: 24px;
+  justify-items: start;
+}
+
+@media (min-width: 900px) {
+  .articleCtaRow {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+}
+
+/* ---------- Contact : titre, adresse en très grand ---------- */
+
+.contactHero {
+  display: grid;
+  gap: 40px;
+  padding: 32px var(--g) 72px;
+}
+
+.contactH1 {
+  font-size: clamp(56px, 12.6vw, 196px);
+}
+
+.contactLead {
+  display: grid;
+  gap: 24px;
+  justify-items: start;
+}
+
+.write {
+  display: grid;
+  gap: 16px;
+  padding-top: 32px;
+  border-top: 1px solid var(--line-ink);
+}
+
+/* L'adresse prend la largeur de la page : 15 signes en Archivo étroit. */
+.writeEmail {
+  font-size: clamp(40px, 10.6vw, 168px);
+  font-weight: 600;
+}
+
+.writeRow {
+  display: grid;
+  gap: 20px;
+  justify-items: start;
+}
+
+.copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 0.35s var(--ease),
+    color 0.35s var(--ease);
+}
+
+.copy:hover,
+.copy[data-copied] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.copy:active {
+  transform: translateY(1px);
+}
+
+@media (min-width: 900px) {
+  .contactHero {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+    row-gap: 56px;
+    padding-top: 40px;
+    padding-bottom: 120px;
+  }
+
+  .contactHero > * {
+    grid-column: 1 / -1;
+  }
+
+  .contactLead {
+    grid-column: 8 / -1;
+  }
+}
+
+/* Large écran : la phrase et le bouton à droite du titre, l'adresse
+   remonte au-dessus de la ligne de flottaison. */
+@media (min-width: 1200px) {
+  .contactH1 {
+    font-size: clamp(100px, 11.4vw, 168px);
+  }
+
+  .contactHero > h1 {
+    grid-column: 1 / 10;
+    grid-row: 1;
+  }
+
+  .contactLead {
+    grid-column: 10 / -1;
+    grid-row: 1;
+    align-self: end;
+  }
+
+  .writeRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+}
+
+/* ---------- Contact : l'appel et l'agenda ---------- */
+
+.booking {
+  display: grid;
+  gap: 56px;
+  padding: var(--section) var(--g);
+  background: color-mix(in srgb, #1a1614 6%, #dedcd3);
+  scroll-margin-top: var(--nav-h);
+}
+
+.call {
+  display: grid;
+  gap: 32px;
+  align-content: start;
+}
+
+.callList {
+  display: grid;
+}
+
+.callItem {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 6px 12px;
+  padding: 20px 0;
+  border-top: 1px solid var(--line-ink);
+}
+
+.callItem > .callName,
+.callItem > p {
+  grid-column: 2;
+}
+
+.callItem > span {
+  grid-row: 1;
+  padding-top: 6px;
+}
+
+.callName {
+  font-size: 24px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.after {
+  display: grid;
+  gap: 10px;
+  padding: 24px;
+  background: var(--ink);
+  --fg: var(--paper);
+  --fg-soft: var(--paper-soft);
+  color: var(--fg);
+}
+
+.afterTitle {
+  font-size: clamp(36px, 4vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--red);
+}
+
+.agenda {
+  width: 100%;
+}
+
+.agendaHead {
+  align-items: center;
+}
+
+.agendaMeta {
+  display: none;
+}
+
+.agendaOpen {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.agendaOpen:hover {
+  color: var(--red);
+}
+
+/* Sur mobile, cal.com empile infos, calendrier et créneaux. */
+.agendaFrame {
+  position: relative;
+  height: 1180px;
+  background: var(--paper);
+}
+
+.agendaWaiting {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 20px;
+  padding: 24px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+/* Iframe transparente tant qu'elle est vide : le message d'attente,
+   dessous, reste lisible jusqu'à ce que cal.com peigne son fond. */
+.agendaIframe {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
+@media (min-width: 640px) {
+  .agendaMeta {
+    display: inline;
+  }
+}
+
+@media (min-width: 900px) {
+  .agendaFrame {
+    height: 720px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .booking {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+  }
+
+  .call {
+    grid-column: 1 / 5;
+    position: sticky;
+    top: calc(var(--nav-h) + 32px);
+    align-self: start;
+  }
+
+  .agenda {
+    grid-column: 5 / -1;
+    max-width: none;
+  }
+}
+
+/* ---------- 404 ---------- */
+
+.lost {
+  display: grid;
+  gap: 40px;
+  padding: 32px var(--g) var(--section);
+  min-height: calc(100svh - var(--nav-h));
+  align-content: start;
+}
+
+.lostHead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+
+/* .h2Giant porte grid-column: 1 / 10, qui créerait des colonnes
+   implicites dans cette grille à une colonne. */
+.lostTitle {
+  grid-column: 1 / -1;
+  max-width: 12ch;
+}
+
+.lostNav ul {
+  display: grid;
+}
+
+.lostNav li {
+  border-top: 1px solid var(--line-ink);
+}
+
+.lostNav li:last-child {
+  border-bottom: 1px solid var(--line-ink);
+}
+
+.lostLink {
+  display: grid;
+  gap: 4px;
+  padding: 16px 0 18px;
+}
+
+.lostLabel {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.12em;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-variation-settings: "wdth" 84;
+  font-weight: 500;
+  font-size: clamp(32px, 4.4vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  transition: color 0.4s var(--ease);
+}
+
+.lostLink:hover .lostLabel {
+  color: var(--red);
+}
+
+.lostLink:hover .lostLabel svg {
+  transform: translate(0.06em, -0.06em);
+}
+
+@media (min-width: 900px) {
+  .lost {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+    row-gap: 56px;
+    padding-top: 40px;
+  }
+
+  .lostHead {
+    grid-column: 1 / 8;
+  }
+
+  .lostArt {
+    grid-column: 9 / -1;
+    grid-row: 1 / 3;
+    align-self: start;
+  }
+
+  .lostNav {
+    grid-column: 1 / 8;
+  }
+
+  .lostLink {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+  }
+}

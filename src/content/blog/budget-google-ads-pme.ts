@@ -138,8 +138,8 @@ export const budgetGoogleAdsPme: ArticleContent = {
     {
       type: "paragraph",
       text:
-        "Chez Inoko, fabricant de mobilier modulable pour van à " +
-        "Toulouse, les campagnes ont été rentables dès la deuxième " +
+        "Chez Inoko, fabricant de mobilier modulable pour van, " +
+        "les campagnes ont été rentables dès la deuxième " +
         "semaine, avec un ROAS de 15.",
     },
   ],

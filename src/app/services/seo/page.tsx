@@ -1,145 +1,218 @@
 import type { Metadata } from "next";
-import { Shell } from "@/components/Shell";
-import { Section } from "@/components/Section";
-import { RailController, RailSlot, type RailConfig } from "@/components/layout/Rail";
-import { MobileRailStack } from "@/components/layout/MobileRailStack";
-import { IconClock, IconSparkle, IconArrowRight } from "@/components/layout/RailIcons";
-import { ServiceHero } from "@/components/service-page/ServiceHero";
-import heroStyles from "@/components/service-page/ServiceHero.module.css";
-import { ServiceInokoCase } from "@/components/service-page/ServiceInokoCase";
-import { ServiceTimeline } from "@/components/service-page/ServiceTimeline";
-import { ServiceStarting } from "@/components/service-page/ServiceStarting";
-import { ServiceOtherActivities } from "@/components/service-page/ServiceOtherActivities";
-import { ServiceRedBand } from "@/components/service-page/ServiceRedBand";
-import { ServiceCrossLink } from "@/components/service-page/ServiceCrossLink";
-import { ServiceFaq } from "@/components/service-page/ServiceFaq";
-import { ServiceOtherExpertises } from "@/components/service-page/ServiceOtherExpertises";
-import { Footer } from "@/components/layout/Footer";
-import footerStyles from "@/components/layout/footer.module.css";
-import { seo } from "@/content/services/seo";
+import { CONTACT_HREF, EMAIL } from "@/content/home";
+import { seoFaq, seoHero, seoMeta, seoMethod, seoStarting, seoWork } from "@/content/referencement";
+import { Contact, Footer, Inoko } from "@/components/home/Sections";
+import { Art, Cta, Panel, Rule, keepWords } from "@/components/home/Ui";
+import { Motion } from "@/components/home/Motion";
+import { PAINTINGS } from "@/components/home/photos";
+import s from "@/components/home/home.module.css";
+import p from "@/components/home/pages.module.css";
 
 export const metadata: Metadata = {
-  title: { absolute: seo.meta.title },
-  description: seo.meta.description,
-  // Chemin SANS barre finale, aligné sur le canonical — même convention
-  // que /services/automations et /services/sea (CLAUDE.md, « Pages
-  // services — gabarit »). /services/seo : l'ancienne adresse de cette
-  // page, déjà indexée par Google, conservée telle quelle.
+  title: { absolute: seoMeta.title },
+  description: seoMeta.description,
   alternates: { canonical: "/services/seo" },
 };
 
-// Rail de cette page — 3 cartons, moteur INCHANGÉ (CLAUDE.md, « Pages
-// services — gabarit », « RAIL ») :
-//   1. hero   haut du H1 (#service-hero-title) — carton cliquable
-//             (href "#faq"), même mécanisme que le carton 3
-//   2. geo    haut du H2 du bloc 5 (GEO) — carton cliquable (href "#geo")
-//   3. other-expertises  haut de la liste du bloc 10 (« Autres expertises »)
-const SEO_RAIL_CONFIG: RailConfig = {
-  cards: seo.rail,
-  icons: [IconClock, IconSparkle, IconArrowRight],
-  offsetTargets: [
-    {
-      varName: "--rail-card1-offset",
-      sectionId: "hero",
-      selector: "#service-hero-title",
-      edge: "top",
-    },
-    {
-      varName: "--rail-card2-offset",
-      sectionId: "geo",
-      selector: "#service-other-activities-title",
-      edge: "top",
-    },
-    {
-      varName: "--rail-card3-offset",
-      sectionId: "other-expertises",
-      selector: "[data-service-other-expertises-end]",
-      edge: "top",
-    },
-  ],
-  mobileReveal: ["hero", "geo", "other-expertises"],
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: seoFaq.map((f) => ({
+    "@type": "Question",
+    name: f.question,
+    acceptedAnswer: { "@type": "Answer", text: f.answer.join(" ") },
+  })),
 };
 
-// Page /services/seo (Référencement naturel + GEO, son adresse déjà
-// indexée par Google, conservée) — gabarit des pages services
-// (CLAUDE.md, « Pages services — gabarit »). Ordre : 1 Hero, 2 Cas
-// Inoko, 3 Frise, 4 Par où commencer, 5 GEO, 6 Respiration rouge,
-// 7 Ce qui fait varier le prix, 8 Référencement + Google Ads, 9 FAQ,
-// 10 Autres expertises.
 export default function SeoPage() {
   return (
-    <>
-      <MobileRailStack config={SEO_RAIL_CONFIG} />
-      <RailController config={SEO_RAIL_CONFIG} />
+    <div className={s.page} data-v2>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
-      <Shell>
-        <Section
-          name="hero"
-          tone="light"
-          spacing="none"
-          labelledBy="service-hero-title"
-          className={heroStyles.section}
-          bodyClassName={heroStyles.body}
-          bodyStyle={{ rowGap: 0 }}
-        >
-          <ServiceHero {...seo.hero} titleCqi={seo.heroTitleCqi} />
-        </Section>
+      {/* 1. Hero : la rue et ses passants, être trouvé */}
+      <section className={s.hero} aria-labelledby="seo-title" data-tone="light">
+        <div className={s.heroText}>
+          <h1 id="seo-title" className={s.h1}>
+            <span className={s.h1Kicker} data-hero-fade>
+              {seoHero.kicker}
+            </span>
+            <span className={`${s.h1Big} ${p.seoH1}`}>
+              <span className={s.lineMask}>
+                <span data-hero-line>Trouvé sur Google,</span>
+              </span>{" "}
+              <span className={s.lineMask}>
+                <span data-hero-line style={{ animationDelay: "0.1s" }}>
+                  cité par les IA.
+                </span>
+              </span>
+            </span>
+          </h1>
+          <div className={s.heroAside}>
+            <p className={s.heroSub} data-hero-fade style={{ animationDelay: "0.3s" }}>
+              {keepWords(seoHero.sub)}
+            </p>
+            <div className={s.heroCtas} data-hero-fade style={{ animationDelay: "0.4s" }}>
+              <Cta href={CONTACT_HREF}>Réserver 20 minutes</Cta>
+              <a href={`mailto:${EMAIL}`} className={s.textLink}>
+                ou écrire à {EMAIL}
+              </a>
+            </div>
+          </div>
+        </div>
 
-        <RailSlot cardIndex={0} anchor="hero" config={SEO_RAIL_CONFIG} />
+        <div className={s.heroVisual}>
+          <div data-hero-photo>
+            <Art painting={PAINTINGS.rue} sizes="(max-width: 899px) 100vw, 50vw" priority ratio="4 / 3" />
+          </div>
+          <Panel label="Inoko" meta="Search Console" className={`${s.heroPanel} ${p.seoPanel}`}>
+            <p className={p.queryLabel}>Requête</p>
+            <p className={p.query}>lit peigne 140x190</p>
+            <p className={s.panelBig}>
+              1,6 <span>position moyenne sur Google</span>
+            </p>
+          </Panel>
+        </div>
+      </section>
 
-        <Section name="inoko-case" tone="light" labelledBy="service-inoko-title" bodyStyle={{ rowGap: 0 }}>
-          <ServiceInokoCase {...seo.inokoCase} />
-        </Section>
+      {/* 2. Ce qu'on fait, concrètement : SEO puis GEO */}
+      <section className={p.work} aria-labelledby="work-title" data-tone="light">
+        <Rule label="Ce qu'on fait" />
+        <h2 id="work-title" className={s.h2} data-reveal>
+          Deux chantiers, menés ensemble sur vos pages.
+        </h2>
+        {seoWork.map((block) => (
+          <div key={block.id} id={block.id} className={p.workBlock}>
+            <p className={p.workName} aria-hidden="true" data-reveal>
+              {block.name}
+            </p>
+            <div className={p.workBody}>
+              <h3 className={p.workTitle} data-reveal>
+                <span className={s.srOnly}>{block.name} : </span>
+                {keepWords(block.title)}
+              </h3>
+              <ol className={p.workList}>
+                {block.items.map((item, i) => (
+                  <li key={item.name} className={p.workItem} data-reveal>
+                    <span className={s.mono}>{String(i + 1).padStart(2, "0")}</span>
+                    <h4 className={p.workItemName}>{item.name}</h4>
+                    <p className={p.workItemText}>{keepWords(item.text)}</p>
+                  </li>
+                ))}
+              </ol>
+              {block.id === "geo" ? (
+                <Panel label="Réponse d'une IA" meta="Assistant" demo className={p.aiPanel}>
+                  <p className={p.aiQuestion}>{keepWords("Quelle nappe en lin choisir pour une table de six ?")}</p>
+                  <p className={p.aiAnswer}>
+                    {keepWords(
+                      "Comptez une nappe de 160 × 250 cm pour laisser 25 cm de retombée. Le guide de Maison Calade détaille les tailles par forme de table.",
+                    )}
+                  </p>
+                  <p className={p.aiSource}>
+                    <span>Source</span> maison-calade.fr › guide-des-tailles
+                  </p>
+                </Panel>
+              ) : null}
+            </div>
+          </div>
+        ))}
+      </section>
 
-        <Section name="timeline" tone="light" labelledBy="service-timeline-title" bodyStyle={{ rowGap: 0 }}>
-          <ServiceTimeline {...seo.timeline} headingId="service-timeline-title" />
-        </Section>
+      {/* 3. La preuve */}
+      <Inoko
+        id="inoko"
+        label="Cas client, Inoko"
+        title="Inoko : 86 clics en décembre 2025, 1 736 en mai 2026."
+        intro={
+          "En janvier 2026, Inoko réalisait une vente par mois, via Leboncoin, son seul canal. On a retravaillé " +
+          "ses pages produits et écrit une page guide pour fabriquer un lit peigne. Sur la requête « lit peigne " +
+          "140x190 », la boutique s'est installée en tête de Google."
+        }
+        question="Et vos fiches produits, que valent-elles sur Google ?"
+        ctaLabel="Faire le point sur votre référencement"
+      />
 
-        <Section name="starting" tone="light" labelledBy="service-starting-title" bodyStyle={{ rowGap: 0 }}>
-          <ServiceStarting {...seo.starting} />
-        </Section>
+      {/* 4. La méthode */}
+      <section className={s.start} aria-labelledby="method-title" data-tone="light">
+        <h2 id="method-title" className={s.h2Giant} data-reveal>
+          Trois temps, dans cet ordre.
+        </h2>
+        <ol className={s.steps}>
+          {seoMethod.map((st) => (
+            <li key={st.verb} className={s.step} data-reveal>
+              <h3 className={s.stepVerb}>{st.verb}</h3>
+              <p className={s.body}>{keepWords(st.text)}</p>
+            </li>
+          ))}
+        </ol>
+        <div className={s.startCta}>
+          <Cta href={CONTACT_HREF}>Réserver mon créneau</Cta>
+        </div>
+      </section>
 
-        <Section name="geo" tone="light" labelledBy="service-other-activities-title" bodyStyle={{ rowGap: 0 }}>
-          <ServiceOtherActivities {...seo.otherActivities} />
-        </Section>
+      {/* 5. Par où commencer */}
+      <section className={p.starting} aria-labelledby="starting-title" data-tone="light">
+        <Rule label="Par où commencer" />
+        <h2 id="starting-title" className={s.h2} data-reveal>
+          Le premier chantier dépend de votre boutique.
+        </h2>
+        <ul className={p.startingList}>
+          {seoStarting.map((c) => (
+            <li key={c.title} className={p.startingItem} data-reveal>
+              <h3 className={p.startingTitle}>{c.title}</h3>
+              <p className={s.body}>{keepWords(c.text)}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-        <RailSlot cardIndex={1} anchor="geo" config={SEO_RAIL_CONFIG} />
+      {/* 6. Référencement et Google Ads : l'affiche */}
+      <section className={p.cross} aria-labelledby="cross-title" data-tone="light">
+        <Art painting={PAINTINGS.affiche} sizes="(max-width: 899px) 60vw, 25vw" className={p.crossArt} ratio="native" />
+        <div className={p.crossText}>
+          <Rule label="Référencement et Google Ads" />
+          <h2 id="cross-title" className={s.h2} data-reveal>
+            Le référencement pour durer, Google Ads pour accélérer.
+          </h2>
+          <p className={s.body} data-reveal>
+            {keepWords(
+              "Le référencement installe un trafic qui revient chaque mois. Google Ads apporte des visites dès son lancement. Chez Inoko, les campagnes ont été lancées en avril 2026, après le SEO : rentables dès la deuxième semaine, avec un ROAS de 15.",
+            )}
+          </p>
+          <Cta href="/services/sea" variant="line">
+            Découvrir la publicité Google Ads
+          </Cta>
+        </div>
+      </section>
 
-        {/* tone="light" (pas "accent") : comme la Respiration de la home
-            et des pages Automatisation/SEA, c'est l'inversion
-            scroll-triggered (invertTo="accent") qui fait apparaître le
-            rouge, jamais un fond statique. */}
-        <Section name="redband" tone="light" labelledBy="service-redband-title" bodyStyle={{ rowGap: 0 }}>
-          <ServiceRedBand {...seo.redBand} />
-        </Section>
+      {/* 7. FAQ */}
+      <section id="faq" className={p.faq} aria-labelledby="faq-title" data-tone="light">
+        <div className={p.faqHead}>
+          <Rule label="Questions fréquentes" />
+          <h2 id="faq-title" className={s.h2}>
+            Vos questions sur le référencement.
+          </h2>
+        </div>
+        <dl className={p.faqList}>
+          {seoFaq.map((f) => (
+            <div key={f.question} className={p.faqItem}>
+              <dt className={p.faqQ}>{keepWords(f.question)}</dt>
+              {f.answer.map((a, i) => (
+                <dd key={i} className={i === 0 ? p.faqLead : p.faqMore}>
+                  {keepWords(a)}
+                </dd>
+              ))}
+            </div>
+          ))}
+        </dl>
+      </section>
 
-        <Section
-          name="price-factors"
-          tone="light"
-          labelledBy="service-price-factors-title"
-          bodyStyle={{ rowGap: 0 }}
-        >
-          <ServiceOtherActivities {...seo.priceFactors} headingId="service-price-factors-title" />
-        </Section>
-
-        <Section name="crosslink" tone="light" labelledBy="service-crosslink-title" bodyStyle={{ rowGap: 0 }}>
-          <ServiceCrossLink {...seo.crossLink} />
-        </Section>
-
-        <Section name="faq" tone="light" labelledBy="service-faq-title" bodyStyle={{ rowGap: 0 }}>
-          <ServiceFaq {...seo.faq} />
-        </Section>
-
-        <Section name="other-expertises" tone="light" bodyStyle={{ rowGap: 0 }}>
-          <ServiceOtherExpertises {...seo.otherExpertises} />
-        </Section>
-
-        <RailSlot cardIndex={2} anchor="other-expertises" config={SEO_RAIL_CONFIG} />
-
-        <Section name="footer" tone="dark" className={footerStyles.section} bodyStyle={{ rowGap: 0 }}>
-          <Footer />
-        </Section>
-      </Shell>
-    </>
+      <Contact
+        title="Parlons de votre référencement."
+        text="En 20 minutes, on regarde ensemble vos requêtes, vos positions et les pages à travailler en premier. Le devis suit l'appel."
+        ctaLabel="Planifier l'appel"
+      />
+      <Footer pitch="Vos clients cherchent déjà vos produits sur Google." />
+      <Motion />
+    </div>
   );
 }

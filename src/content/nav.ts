@@ -80,7 +80,7 @@ export const nav = {
   caseStudyTitle: "CAS CLIENT",
   caseStudy: {
     clientName: "Inoko",
-    subtitle: "Mobilier de van, Toulouse",
+    subtitle: "Mobilier modulable pour van",
     tags: ["SEO", "GOOGLE ADS"],
     href: "/realisations/inoko",
     isLink: false,
@@ -95,6 +95,7 @@ export const nav = {
      *  (contrairement à Réalisations/Contact, repris de `topLinks` plus
      *  bas pour ne pas dupliquer leur libellé). */
     aboutLabel: "À propos",
-    city: "Toulouse",
+    emailLabel: "Nous écrire",
+    email: "hey@venturia.fr",
   },
 };

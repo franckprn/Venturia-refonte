@@ -1,93 +1,83 @@
 import type { Metadata } from "next";
-import { Shell } from "@/components/Shell";
-import { Section } from "@/components/Section";
-import { Footer } from "@/components/layout/Footer";
-import footerStyles from "@/components/layout/footer.module.css";
-import { contact } from "@/content/contact";
-import { CopyButton } from "./CopyButton";
-import { MailIcon, CalendarIcon } from "./icons";
-import styles from "./contact.module.css";
+import { EMAIL } from "@/content/home";
+import { contactCall, contactHero, contactMeta } from "@/content/rendezvous";
+import { Footer } from "@/components/home/Sections";
+import { Cta, Rule, keepWords } from "@/components/home/Ui";
+import { Agenda } from "@/components/home/Agenda";
+import { CopyEmail } from "@/components/home/CopyEmail";
+import { Motion } from "@/components/home/Motion";
+import s from "@/components/home/home.module.css";
+import p from "@/components/home/pages.module.css";
 
 export const metadata: Metadata = {
-  title: contact.metaTitle,
-  description: contact.metaDescription,
+  title: { absolute: contactMeta.title },
+  description: contactMeta.description,
+  alternates: { canonical: "/contact" },
 };
 
-// Page /contact — parti pris : pas de formulaire, deux actions et
-// rien d'autre. Sobre, dense en haut, beaucoup de vide en bas. Aucune
-// animation : la page est courte, une révélation au scroll n'a rien à
-// révéler.
-//
-// Reprend le shell du site (Shell/Section, comme la home) mais sans
-// aucun carton de rail sur cette page — seulement pour profiter de la
-// même grille de contenu et du même bloc de fin de page, pas pour la
-// mécanique de figement.
-//
-// Contenu réel dans content/contact.ts, non complété ici.
+// Deux actions et rien d'autre : réserver dans l'agenda intégré, ou
+// écrire. Le titre et l'adresse en très grand, l'agenda dans la page.
 export default function ContactPage() {
   return (
-    <Shell>
-      <Section
-        name="contact"
-        tone="light"
-        labelledBy="contact-title"
-        className={styles.section}
-        bodyStyle={{ rowGap: 0 }}
-      >
-        <div className={styles.content}>
-          <p className={styles.label}>{contact.label}</p>
-          <h1 id="contact-title" className={styles.title}>
-            {contact.title}
-          </h1>
-          <p className={styles.intro}>{contact.intro}</p>
-
-          <div className={styles.actions}>
-            <div className={styles.action}>
-              <span className={styles.iconBox} aria-hidden="true">
-                <MailIcon />
+    <div className={s.page} data-v2>
+      <section className={p.contactHero} aria-labelledby="contact-title" data-tone="light">
+        <h1 id="contact-title" className={s.h1}>
+          <span className={s.h1Kicker} data-hero-fade>
+            {contactHero.kicker}
+          </span>
+          <span className={`${s.h1Big} ${p.contactH1}`}>
+            {contactHero.title.map((line, i) => (
+              <span key={line} className={s.lineMask}>
+                <span data-hero-line style={{ animationDelay: `${i * 0.1}s` }}>
+                  {line}
+                </span>
               </span>
-              <div className={styles.actionBody}>
-                <a href={`mailto:${contact.email.address}`} className={styles.actionLink}>
-                  {contact.email.address}
-                </a>
-                <p className={styles.actionSubline}>{contact.email.subline}</p>
-              </div>
-              <CopyButton
-                value={contact.email.address}
-                label={contact.email.copyLabel}
-                copiedLabel={contact.email.copiedLabel}
-              />
-            </div>
-
-            <div className={styles.action}>
-              <span className={styles.iconBox} aria-hidden="true">
-                <CalendarIcon />
-              </span>
-              <div className={styles.actionBody}>
-                <a
-                  href={contact.booking.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.actionLink}
-                >
-                  {contact.booking.label}
-                </a>
-                <p className={styles.actionSubline}>{contact.booking.subline}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.info}>
-            {contact.info.map((line) => (
-              <p key={line}>{line}</p>
             ))}
+          </span>
+        </h1>
+        <div className={p.contactLead} data-hero-fade style={{ animationDelay: "0.3s" }}>
+          <p className={s.heroSub}>{keepWords(contactHero.sub)}</p>
+          <Cta href="#agenda">{contactHero.cta}</Cta>
+        </div>
+
+        <div className={p.write} data-hero-fade style={{ animationDelay: "0.45s" }}>
+          <p className={s.mono}>{keepWords(contactHero.writeLabel)}</p>
+          <a href={`mailto:${EMAIL}`} className={`${s.contactEmail} ${p.writeEmail}`}>
+            {EMAIL}
+          </a>
+          <div className={p.writeRow}>
+            <p className={s.body}>{keepWords(contactHero.writeText)}</p>
+            <CopyEmail email={EMAIL} />
           </div>
         </div>
-      </Section>
+      </section>
 
-      <Section name="footer" tone="dark" className={footerStyles.section} bodyStyle={{ rowGap: 0 }}>
-        <Footer />
-      </Section>
-    </Shell>
+      <section id="agenda" className={p.booking} aria-labelledby="call-title" data-tone="light">
+        <div className={p.call}>
+          <Rule label={contactCall.label} />
+          <h2 id="call-title" className={s.h2} data-reveal>
+            {keepWords(contactCall.title)}
+          </h2>
+          <ol className={p.callList}>
+            {contactCall.points.map((pt, i) => (
+              <li key={pt.name} className={p.callItem} data-reveal>
+                <span className={s.mono}>{String(i + 1).padStart(2, "0")}</span>
+                <h3 className={p.callName}>{pt.name}</h3>
+                <p className={s.body}>{keepWords(pt.text)}</p>
+              </li>
+            ))}
+          </ol>
+          <div className={p.after} data-reveal>
+            <p className={s.mono}>{contactCall.afterLabel}</p>
+            <h3 className={p.afterTitle}>{contactCall.afterTitle}</h3>
+            <p className={s.body}>{keepWords(contactCall.afterText)}</p>
+          </div>
+        </div>
+        <Agenda />
+      </section>
+
+      <Footer pitch="Vingt minutes pour voir ce qu'on peut faire pour votre boutique." />
+      <Motion />
+    </div>
   );
 }

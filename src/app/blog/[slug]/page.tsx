@@ -1,39 +1,28 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Shell } from "@/components/Shell";
-import { Section } from "@/components/Section";
-import { RailController, RailSlot, type RailConfig } from "@/components/layout/Rail";
-import { MobileRailStack } from "@/components/layout/MobileRailStack";
-import { IconSparkle, IconTag, IconArrowRight } from "@/components/layout/RailIcons";
-import { BlogBreadcrumb } from "@/components/blog/BlogBreadcrumb";
-import { ArticleHeader } from "@/components/blog/ArticleHeader";
-import { ArticleCallout } from "@/components/blog/ArticleCallout";
-import { ArticleBody } from "@/components/blog/ArticleBody";
-import { ArticleSources } from "@/components/blog/ArticleSources";
-import { ReadingProgress } from "@/components/blog/ReadingProgress";
-import { ServiceRedBand } from "@/components/service-page/ServiceRedBand";
-import { Footer } from "@/components/layout/Footer";
-import footerStyles from "@/components/layout/footer.module.css";
 import { getAllSlugs, getArticle } from "@/content/blog";
+import { EMAIL } from "@/content/home";
 import { estimateReadingMinutes, formatFrenchDate } from "@/lib/blog";
+import { Footer } from "@/components/home/Sections";
+import { Art, Cta, Rule, keepWords } from "@/components/home/Ui";
+import { Motion } from "@/components/home/Motion";
+import { ArticleProse, Toc, headingsOf, paintingFor } from "@/components/home/Article";
+import s from "@/components/home/home.module.css";
+import p from "@/components/home/pages.module.css";
 
 const SITE_URL = "https://venturia.fr";
 
-type ArticlePageParams = { slug: string };
+type Params = { slug: string };
 
 export function generateStaticParams() {
   return getAllSlugs().map((slug) => ({ slug }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<ArticlePageParams>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params;
   const article = getArticle(slug);
   if (!article) return {};
-
   return {
     title: { absolute: article.meta.title },
     description: article.meta.description,
@@ -41,120 +30,121 @@ export async function generateMetadata({
   };
 }
 
-// Gabarit article du blog — réutilise le moteur du rail (RailController/
-// RailSlot/MobileRailStack, CLAUDE.md « Pages services — gabarit » §
-// RAIL), inchangé, avec un RailConfig propre à cette page : 3 ancrages
-// (intro / body / body), cartons 2 et 3 partageant la même section de
-// rattachement, comme la home (card2/card3 → « services »).
-export default async function ArticlePage({ params }: { params: Promise<ArticlePageParams> }) {
+export default async function ArticlePage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
   const article = getArticle(slug);
   if (!article) notFound();
 
   const minutes = estimateReadingMinutes(article);
   const date = formatFrenchDate(article.datePublished);
+  const headings = headingsOf(article.body);
+  const art = paintingFor(article.category);
+  const url = `${SITE_URL}/blog/${slug}`;
 
-  const railConfig: RailConfig = {
-    cards: article.rail,
-    icons: [IconSparkle, IconTag, IconArrowRight],
-    offsetTargets: [
-      { varName: "--rail-card1-offset", sectionId: "intro", selector: "#en-bref", edge: "top" },
-      {
-        varName: "--rail-card2-offset",
-        sectionId: "body",
-        selector: "[data-article-first-h2]",
-        edge: "top",
-      },
-      {
-        varName: "--rail-card3-offset",
-        sectionId: "body",
-        selector: "[data-article-body-end]",
-        edge: "bottom",
-      },
-    ],
-    mobileReveal: ["intro", "body", "redband"],
-  };
-
-  const articleUrl = `${SITE_URL}/blog/${slug}`;
-
-  const articleJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: article.title,
-    datePublished: article.datePublished,
-    dateModified: article.dateModified,
-    author: {
-      "@type": article.author.type,
-      name: article.author.name,
-      ...(article.author.url ? { url: article.author.url } : {}),
-      ...(article.author.jobTitle ? { jobTitle: article.author.jobTitle } : {}),
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: article.title,
+      datePublished: article.datePublished,
+      dateModified: article.dateModified,
+      author: { "@type": article.author.type, name: article.author.name, url: article.author.url },
+      publisher: { "@type": "Organization", name: "Venturia", url: SITE_URL },
+      mainEntityOfPage: url,
     },
-    publisher: {
-      "@type": "Organization",
-      name: "Venturia",
-      url: SITE_URL,
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Accueil", item: SITE_URL },
+        { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}/blog` },
+        { "@type": "ListItem", position: 3, name: article.title, item: url },
+      ],
     },
-    mainEntityOfPage: articleUrl,
-  };
-
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Accueil", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}/blog` },
-      { "@type": "ListItem", position: 3, name: article.title, item: articleUrl },
-    ],
-  };
+  ];
 
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
+    <div className={s.page} data-v2>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <ReadingProgress />
-      <MobileRailStack config={railConfig} />
-      <RailController config={railConfig} />
+      <article aria-labelledby="article-title">
+        <section className={p.articleHead} data-tone="light">
+          <nav aria-label="Fil d'Ariane" className={p.crumbs}>
+            <Link href="/">Accueil</Link>
+            <span aria-hidden="true">/</span>
+            <Link href="/blog">Blog</Link>
+          </nav>
+          <div className={p.articleHeadText}>
+            <p className={p.articleMeta} data-hero-fade>
+              <span>{article.category}</span>
+              <time dateTime={article.datePublished}>{date}</time>
+              <span>{minutes} min de lecture</span>
+            </p>
+            <h1 id="article-title" className={p.articleTitle}>
+              <span className={s.lineMask}>
+                <span data-hero-line>{keepWords(article.title)}</span>
+              </span>
+            </h1>
+            <p className={p.articleIntro} data-hero-fade style={{ animationDelay: "0.3s" }}>
+              {keepWords(article.intro)}
+            </p>
+          </div>
+          <div data-hero-photo className={p.articleArt}>
+            <Art painting={art} sizes="(max-width: 899px) 70vw, 28vw" priority ratio="native" />
+          </div>
+        </section>
 
-      <Shell>
-        <Section name="intro" tone="light" labelledBy="article-title" bodyStyle={{ rowGap: 0 }}>
-          <BlogBreadcrumb title={article.title} />
-          <ArticleHeader
-            category={article.category}
-            title={article.title}
-            date={date}
-            minutes={minutes}
-            author={article.author}
-            intro={article.intro}
-          />
-          <ArticleCallout items={article.enBref} />
-        </Section>
+        <section className={p.articleGrid} data-tone="light" aria-label="Contenu de l'article">
+          <aside className={p.articleAside}>
+            <Toc headings={headings} />
+          </aside>
 
-        <RailSlot cardIndex={0} anchor="intro" config={railConfig} />
+          <div className={p.prose}>
+            <div id="en-bref" className={p.enBref}>
+              <p className={p.enBrefTitle}>En bref</p>
+              <ul>
+                {article.enBref.map((line) => (
+                  <li key={line}>{keepWords(line)}</li>
+                ))}
+              </ul>
+            </div>
 
-        <Section name="body" tone="light" bodyStyle={{ rowGap: 0 }}>
-          <ArticleBody blocks={article.body} />
-          <ArticleSources items={article.sources} />
-        </Section>
+            <ArticleProse blocks={article.body} />
 
-        <RailSlot cardIndex={1} anchor="body" config={railConfig} />
+            <div className={p.sources}>
+              <p className={p.sourcesTitle}>Sources</p>
+              <ol>
+                {article.sources.map((src) => (
+                  <li key={src.href}>
+                    <a href={src.href} target="_blank" rel="noopener noreferrer">
+                      {src.label}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </section>
+      </article>
 
-        <Section name="redband" tone="light" labelledBy="service-redband-title" bodyStyle={{ rowGap: 0 }}>
-          <ServiceRedBand {...article.redBand} />
-        </Section>
+      <section className={`${p.articleCta} ${s.onRed}`} aria-labelledby="article-cta-title" data-tone="light">
+        <Rule label="Passer à la pratique" />
+        <h2 id="article-cta-title" className={s.h2Giant} data-reveal>
+          {keepWords(article.redBand.title)}
+        </h2>
+        <div className={p.articleCtaRow} data-reveal>
+          <p className={s.body}>{keepWords(article.redBand.text)}</p>
+          <div className={s.heroCtas}>
+            <Cta href={article.redBand.cta.href}>{article.redBand.cta.label}</Cta>
+            <a href={`mailto:${EMAIL}`} className={s.textLink}>
+              ou écrire à {EMAIL}
+            </a>
+          </div>
+        </div>
+      </section>
 
-        <RailSlot cardIndex={2} anchor="body" config={railConfig} />
-
-        <Section name="footer" tone="dark" className={footerStyles.section} bodyStyle={{ rowGap: 0 }}>
-          <Footer />
-        </Section>
-      </Shell>
-    </>
+      <Footer />
+      <Motion />
+    </div>
   );
 }

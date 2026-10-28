@@ -51,7 +51,7 @@ export type RealisationsContent = {
 
 export const realisations: RealisationsContent = {
   label: "ACCOMPAGNEMENT",
-  title: "Inoko — Mobilier pour van à Toulouse",
+  title: "Inoko — Mobilier modulable pour van",
   paragraph:
     "En janvier, Inoko faisait une vente par mois via Leboncoin, son seul " +
     "canal de vente. On a retravaillé ses pages produits les plus " +
@@ -80,8 +80,8 @@ export const realisations: RealisationsContent = {
   linkLabel: "Voir comment",
   linkHref: "/realisations/inoko",
   linkIsLink: false,
-  image: "/images/realisations/inoko-mobilier-van-toulouse.jpg",
-  imageAlt: "Mobilier modulable Inoko installé dans un van, à Toulouse",
+  image: "/images/realisations/inoko-mobilier-van.jpg",
+  imageAlt: "Mobilier modulable Inoko installé dans un van",
 };
 
 /** Formate un chiffre exactement comme il doit apparaître à l'écran. */
