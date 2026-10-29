@@ -1,9 +1,10 @@
 // Contenu de la nav, du méga-menu et du menu mobile. Les services
 // (nom, phrase, tags, tableau) sont repris de content/home.ts.
-import { CONTACT_HREF, EMAIL, services } from "./home";
+import { BOOKING_URL, CONTACT_HREF, EMAIL, services } from "./home";
+import { INOKO_HREF } from "./inoko";
 
-// Réservation : la section agenda de /contact, en un clic.
-export const BOOKING_HREF = `${CONTACT_HREF}#agenda`;
+// Réservation : la constante unique de content/home.ts.
+export const BOOKING_HREF = BOOKING_URL;
 
 export const menu = {
   ariaLabel: "Navigation principale",
@@ -13,7 +14,7 @@ export const menu = {
   services,
   trigger: "Services",
   links: [
-    { label: "Cas Inoko", href: "/#inoko" },
+    { label: "Cas Inoko", href: INOKO_HREF },
     { label: "Blog", href: "/blog" },
     { label: "Contact", href: CONTACT_HREF },
   ],

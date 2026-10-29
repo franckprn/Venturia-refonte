@@ -4,13 +4,13 @@ import Image from "next/image";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import { getAllSlugs, getArticle } from "@/content/blog";
 import { blogList } from "@/content/blog/list";
-import { CONTACT_HREF, EMAIL } from "@/content/home";
+import { BOOKING_URL, EMAIL } from "@/content/home";
 import { estimateReadingMinutes, formatFrenchDate } from "@/lib/blog";
 import { Footer } from "@/components/home/Sections";
 import { Art, Cta, Rule, keepWords } from "@/components/home/Ui";
 import { Motion } from "@/components/home/Motion";
 import { paintingFor } from "@/components/home/Article";
-import { PAINTINGS } from "@/components/home/photos";
+import { ART } from "@/content/paintings";
 import s from "@/components/home/home.module.css";
 import p from "@/components/home/pages.module.css";
 
@@ -43,7 +43,7 @@ export default function BlogPage() {
           </p>
         </div>
         <div data-hero-photo className={p.blogHeroArt}>
-          <Art painting={PAINTINGS.marche} sizes="(max-width: 899px) 100vw, 40vw" priority ratio="native" />
+          <Art painting={ART.blog} sizes="(max-width: 899px) 100vw, 40vw" priority ratio="native" />
         </div>
       </section>
 
@@ -83,7 +83,7 @@ export default function BlogPage() {
           {keepWords("Une question sur votre boutique ? On y répond de vive voix.")}
         </h2>
         <div className={s.heroCtas} data-reveal>
-          <Cta href={CONTACT_HREF}>Poser la question en 20 minutes</Cta>
+          <Cta href={BOOKING_URL}>Poser la question en 20 minutes</Cta>
           <a href={`mailto:${EMAIL}`} className={s.textLink}>
             ou par écrit, à {EMAIL}
           </a>

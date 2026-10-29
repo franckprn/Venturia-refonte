@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
-import type { Painting } from "./photos";
+import type { Painting } from "@/content/paintings";
 import s from "./home.module.css";
 
 // Les composants de la direction, répétés partout : le filet titré
@@ -32,7 +32,7 @@ export function Cta({
       <ArrowUpRight aria-hidden="true" size={18} weight="bold" className={s.ctaIcon} />
     </>
   );
-  if (href.startsWith("mailto:")) {
+  if (href.startsWith("mailto:") || href.startsWith("http")) {
     return (
       <a href={href} className={className}>
         {content}
@@ -103,8 +103,19 @@ export function Art({
           data-parallax={parallax ? "" : undefined}
         />
       </div>
-      <figcaption className={s.artCaption}>{keepWords(painting.caption)}</figcaption>
+      <figcaption className={s.artCaption}>
+        <Caption painting={painting} />
+      </figcaption>
     </figure>
+  );
+}
+
+// Légende d'un tableau : titre, auteur, année.
+export function Caption({ painting }: { painting: Painting }) {
+  return (
+    <>
+      <cite>{fr(painting.title)}</cite>, {painting.author}, {painting.year}
+    </>
   );
 }
 

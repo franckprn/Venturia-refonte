@@ -152,7 +152,7 @@
      carton, cartons 1 et 2 (CLAUDE.md, « Rail droit ») — le carton 3
      (action) reste sur --accent, voir .cardAction plus bas. */
   border: 1px solid var(--fg);
-  border-radius: 4px;
+  border-radius: var(--radius);
   text-decoration: none;
   /* Transparent et flouté, AUCUNE teinte, desktop uniquement (CLAUDE.md,
      « Rail droit ») : exception explicite à l'interdiction générale du
@@ -243,7 +243,7 @@
      carton 3 (action) garde --line-accent, voir .card.cardAction
      .cardIcon plus haut. */
   border: 1px solid var(--fg);
-  border-radius: 4px;
+  border-radius: var(--radius);
   /* Le DESSIN de l'icône (currentColor du SVG, .cardIconSvg) : --accent,
      PAS --fg — distinct du filet du carré ci-dessus, qui lui suit le
      texte. Exception plus bas quand le carton est sur une section

@@ -2,19 +2,18 @@ import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { slugifyHeading } from "@/lib/blog";
 import type { ArticleBlock } from "@/content/blog/types";
-import { PAINTINGS, type Painting } from "./photos";
+import { ART, type Painting } from "@/content/paintings";
 import { keepWords } from "./Ui";
 import p from "./pages.module.css";
 
-// Rubrique → tableau : l'affiche pour la publicité, la rue pour le
-// référencement, la vitrine pour le site, l'atelier pour l'automatisation.
+// Rubrique → tableau du service correspondant (content/paintings.ts).
 export function paintingFor(category: string): Painting {
   const c = category.toLowerCase();
-  if (c.includes("ads") || c.includes("publicit")) return PAINTINGS.affiche;
-  if (c.includes("seo") || c.includes("référencement") || c.includes("geo")) return PAINTINGS.rue;
-  if (c.includes("site")) return PAINTINGS.vitrine;
-  if (c.includes("automat")) return PAINTINGS.atelier;
-  return PAINTINGS.marche;
+  if (c.includes("ads") || c.includes("publicit")) return ART.publicite;
+  if (c.includes("seo") || c.includes("référencement") || c.includes("geo")) return ART.referencement;
+  if (c.includes("site")) return ART.site;
+  if (c.includes("automat")) return ART.automatisation;
+  return ART.blog;
 }
 
 // Ids d'ancre des H2, calculés une fois : le sommaire et le corps lisent

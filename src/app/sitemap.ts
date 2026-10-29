@@ -11,7 +11,7 @@ import { getAllSlugs, getArticle } from "@/content/blog";
 const BASE_URL = "https://venturia.fr";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticRoutes = ["", "/services/seo", "/services/sea", "/services/creation-site", "/services/automations", "/contact", "/blog"];
+  const staticRoutes = ["", "/services/seo", "/services/sea", "/services/creation-site", "/services/automations", "/cas-inoko", "/contact", "/blog"];
 
   const articleRoutes = getAllSlugs().map((slug) => {
     const article = getArticle(slug);

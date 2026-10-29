@@ -1,10 +1,10 @@
-// Contenu de /contact et de la page 404. Lien de réservation repris de
-// content/contact.ts (page contact d'origine). Retirés, faute de figurer
+// Contenu de /contact et de la page 404. Lien de réservation : la
+// constante unique de content/home.ts. Retirés, faute de figurer
 // dans le brief : la ville, la couverture géographique, le délai de
 // réponse et la promesse de repartir avec un plan.
-import { contact } from "./contact";
+import { BOOKING_URL } from "./home";
 
-export const BOOKING_URL = contact.booking.href;
+export { BOOKING_URL };
 // Vue intégrée de cal.com : la page de réservation, sans son habillage.
 export const BOOKING_EMBED_URL = `${BOOKING_URL}?embed=true&theme=light&layout=month_view`;
 

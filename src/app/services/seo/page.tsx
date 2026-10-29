@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { CONTACT_HREF, EMAIL } from "@/content/home";
+import { BOOKING_URL, EMAIL } from "@/content/home";
 import { seoFaq, seoHero, seoMeta, seoMethod, seoStarting, seoWork } from "@/content/referencement";
 import { Contact, Footer, Inoko } from "@/components/home/Sections";
 import { Art, Cta, Panel, Rule, keepWords } from "@/components/home/Ui";
 import { Motion } from "@/components/home/Motion";
-import { PAINTINGS } from "@/components/home/photos";
+import { ART } from "@/content/paintings";
 import s from "@/components/home/home.module.css";
 import p from "@/components/home/pages.module.css";
 
@@ -52,7 +52,7 @@ export default function SeoPage() {
               {keepWords(seoHero.sub)}
             </p>
             <div className={s.heroCtas} data-hero-fade style={{ animationDelay: "0.4s" }}>
-              <Cta href={CONTACT_HREF}>Réserver 20 minutes</Cta>
+              <Cta href={BOOKING_URL}>Réserver 20 minutes</Cta>
               <a href={`mailto:${EMAIL}`} className={s.textLink}>
                 ou écrire à {EMAIL}
               </a>
@@ -62,13 +62,12 @@ export default function SeoPage() {
 
         <div className={s.heroVisual}>
           <div data-hero-photo>
-            <Art painting={PAINTINGS.rue} sizes="(max-width: 899px) 100vw, 50vw" priority ratio="4 / 3" />
+            <Art painting={ART.referencement} sizes="(max-width: 899px) 100vw, 50vw" priority ratio="4 / 3" />
           </div>
           <Panel label="Inoko" meta="Search Console" className={`${s.heroPanel} ${p.seoPanel}`}>
-            <p className={p.queryLabel}>Requête</p>
-            <p className={p.query}>lit peigne 140x190</p>
+            <p className={p.queryLabel}>Position moyenne du site</p>
             <p className={s.panelBig}>
-              1,6 <span>position moyenne sur Google</span>
+              7,6 <span>en mai 2026, contre 23,5 en décembre 2025</span>
             </p>
           </Panel>
         </div>
@@ -124,8 +123,8 @@ export default function SeoPage() {
         title="Inoko : 86 clics en décembre 2025, 1 736 en mai 2026."
         intro={
           "En janvier 2026, Inoko réalisait une vente par mois, via Leboncoin, son seul canal. On a retravaillé " +
-          "ses pages produits et écrit une page guide pour fabriquer un lit peigne. Sur la requête « lit peigne " +
-          "140x190 », la boutique s'est installée en tête de Google."
+          "ses fiches produits et créé une page pilier « lit peigne », arrivée en 1re page de Google sur un mot-clé " +
+          "d'environ 5 000 recherches par mois. Trois fiches produits se sont placées en 1re position."
         }
         question="Et vos fiches produits, que valent-elles sur Google ?"
         ctaLabel="Faire le point sur votre référencement"
@@ -145,7 +144,7 @@ export default function SeoPage() {
           ))}
         </ol>
         <div className={s.startCta}>
-          <Cta href={CONTACT_HREF}>Réserver mon créneau</Cta>
+          <Cta href={BOOKING_URL}>Réserver mon créneau</Cta>
         </div>
       </section>
 
@@ -167,7 +166,7 @@ export default function SeoPage() {
 
       {/* 6. Référencement et Google Ads : l'affiche */}
       <section className={p.cross} aria-labelledby="cross-title" data-tone="light">
-        <Art painting={PAINTINGS.affiche} sizes="(max-width: 899px) 60vw, 25vw" className={p.crossArt} ratio="native" />
+        <Art painting={ART.publicite} sizes="(max-width: 899px) 60vw, 25vw" className={p.crossArt} ratio="native" />
         <div className={p.crossText}>
           <Rule label="Référencement et Google Ads" />
           <h2 id="cross-title" className={s.h2} data-reveal>

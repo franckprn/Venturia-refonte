@@ -94,7 +94,7 @@
   position: absolute;
   inset: 0;
   display: block;
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: transparent;
   -webkit-backdrop-filter: blur(24px); /* obligatoire, Safari */
   backdrop-filter: blur(24px);
@@ -141,7 +141,7 @@
      (--fg résolu différemment selon data-tone porté par .wrap, voir
      MobileRailStack.tsx — même mécanisme, rien à faire ici). */
   border: 1px solid var(--fg);
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: transparent;
   color: var(--fg);
   text-decoration: none;
@@ -179,7 +179,7 @@
   /* var(--fg), pas --line-accent : filet du carré à la couleur du
      texte du carton, cartons 1 et 2. */
   border: 1px solid var(--fg);
-  border-radius: 4px;
+  border-radius: var(--radius);
   /* Le DESSIN de l'icône (currentColor du SVG, .cardIconSvg) : --accent,
      PAS --fg — distinct du filet du carré ci-dessus. Exception plus
      bas quand le carton est sur une section (ou un voile) de tonalité
@@ -355,7 +355,7 @@ html[data-inverted-accent="true"] .cardIcon {
   gap: 0;
   overflow: hidden;
   border-bottom: none;
-  border-radius: 4px 4px 0 0;
+  border-radius: var(--radius) var(--radius) 0 0;
 }
 
 .wrap[data-open="false"] .card[data-role="peek"] .cardIcon,

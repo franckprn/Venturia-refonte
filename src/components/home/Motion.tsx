@@ -39,6 +39,15 @@ export function Motion() {
           .from(svg.querySelectorAll("[data-point]"), { autoAlpha: 0, duration: 0.3, stagger: 0.22 }, 0.1);
       });
 
+      // FAQ : la réponse se déplie en douceur à l'ouverture.
+      const faqs = gsap.utils.toArray<HTMLDetailsElement>("[data-faq]");
+      const onToggle = (e: Event) => {
+        const d = e.currentTarget as HTMLDetailsElement;
+        if (!d.open) return;
+        gsap.from(d.querySelector("[data-faq-answer]"), { autoAlpha: 0, y: -10, duration: 0.5, ease });
+      };
+      faqs.forEach((d) => d.addEventListener("toggle", onToggle));
+
       gsap.utils.toArray<HTMLElement>("[data-parallax]").forEach((el) => {
         gsap.fromTo(
           el,
@@ -50,6 +59,8 @@ export function Motion() {
           },
         );
       });
+
+      return () => faqs.forEach((d) => d.removeEventListener("toggle", onToggle));
     });
 
     return () => mm.revert();

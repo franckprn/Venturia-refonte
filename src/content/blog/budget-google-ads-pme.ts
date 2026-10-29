@@ -12,6 +12,7 @@
 // à valider/ajuster par Franck.
 
 import type { ArticleContent } from "./types";
+import { BOOKING_URL } from "@/content/home";
 
 export const budgetGoogleAdsPme: ArticleContent = {
   meta: {
@@ -166,7 +167,7 @@ export const budgetGoogleAdsPme: ArticleContent = {
   redBand: {
     title: "Combien vous rapporte 1 € de publicité ?",
     text: "Lors du premier appel, on calcule ensemble votre budget de départ.",
-    cta: { label: "Réserver 20 minutes", href: "/contact" },
+    cta: { label: "Réserver 20 minutes", href: BOOKING_URL },
   },
 
   rail: [

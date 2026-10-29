@@ -7,9 +7,10 @@ import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import { ArrowRight, ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/layout/Logo";
-import { PAINTINGS } from "@/components/home/photos";
-import { fr } from "@/components/home/Ui";
+import { ART } from "@/content/paintings";
+import { Caption, fr } from "@/components/home/Ui";
 import { BOOKING_HREF, menu } from "@/content/menu";
+import { INOKO_HREF } from "@/content/inoko";
 import s from "./siteNav.module.css";
 
 // Barre fixe crème, un seul déclencheur par largeur :
@@ -35,7 +36,7 @@ const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matc
 function revealBar(header: HTMLElement | null, hidden: { current: boolean }) {
   if (!hidden.current || !header) return;
   hidden.current = false;
-  gsap.to(header, { yPercent: 0, duration: reduced() ? 0 : 0.5, ease: "expo.out" });
+  gsap.to(header, { y: 0, duration: reduced() ? 0 : 0.5, ease: "expo.out" });
 }
 
 const isVisible = (el: HTMLElement) =>
@@ -180,7 +181,7 @@ export function SiteNav() {
       if (openRef.current) return;
       if (y > HIDE_AFTER && dy > 2 && !barHidden.current) {
         barHidden.current = true;
-        gsap.to(header, { yPercent: -101, duration: 0.45, ease: "power3.out" });
+        gsap.to(header, { y: -(header.offsetHeight + 16), duration: 0.45, ease: "power3.out" });
       } else if (dy < -2 || y <= HIDE_AFTER) {
         revealBar(header, barHidden);
       }
@@ -340,11 +341,13 @@ export function SiteNav() {
                       <div ref={previewRef} className={s.previewFrame}>
                         {menu.services.map((sv, i) => (
                           <div key={sv.id} data-frame className={s.frame} style={i === 0 ? { zIndex: 1 } : undefined}>
-                            <Image src={PAINTINGS[sv.painting].src} alt="" fill sizes="30vw" className={s.cover} />
+                            <Image src={ART[sv.art].src} alt="" fill sizes="30vw" className={s.cover} />
                           </div>
                         ))}
                       </div>
-                      <p className={s.caption}>{PAINTINGS[current.painting].caption}</p>
+                      <p className={s.caption}>
+                        <Caption painting={ART[current.art]} />
+                      </p>
                       <p className={s.previewTags}>
                         {current.tags.map((t) => (
                           <span key={t}>{t}</span>
@@ -353,7 +356,7 @@ export function SiteNav() {
                     </div>
 
                     <div className={s.strip} data-row>
-                      <Link href="/#inoko" className={s.proof} onClick={closeOnNavigate}>
+                      <Link href={INOKO_HREF} className={s.proof} onClick={closeOnNavigate}>
                         <span className={s.label}>{menu.panel.proofLabel}</span>
                         <span className={s.proofText}>
                           {fr(menu.panel.proofText)}{" "}
@@ -436,7 +439,7 @@ export function SiteNav() {
                     onClick={closeOnNavigate}
                   >
                     <span className={s.thumb} aria-hidden="true">
-                      <Image src={PAINTINGS[sv.painting].src} alt="" fill sizes="64px" className={s.cover} />
+                      <Image src={ART[sv.art].src} alt="" fill sizes="64px" className={s.cover} />
                     </span>
                     <span>
                       <span className={s.sheetName}>{sv.name}</span>

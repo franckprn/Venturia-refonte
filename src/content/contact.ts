@@ -1,5 +1,6 @@
 // Contenu de la page /contact, fourni par Franck. À reprendre au
 // caractère près : ne rien reformuler, ne rien ajouter.
+import { BOOKING_URL } from "./home";
 
 export const contact = {
   label: "CONTACT",
@@ -18,7 +19,7 @@ export const contact = {
   booking: {
     label: "Réserver 20 minutes",
     subline: "Sans engagement, et vous repartez avec un plan.",
-    href: "https://cal.com/venturia/premier-echange",
+    href: BOOKING_URL,
   },
 
   info: [

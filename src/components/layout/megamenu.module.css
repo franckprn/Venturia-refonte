@@ -90,7 +90,7 @@
   border-left: 1px solid var(--fg);
   border-right: 1px solid var(--fg);
   border-bottom: 1px solid var(--fg);
-  border-radius: 0 0 4px 4px;
+  border-radius: 0 0 var(--radius) var(--radius);
   color: var(--fg);
   transition:
     border-color 150ms cubic-bezier(0, 0.55, 0.45, 1),
@@ -232,7 +232,7 @@
   position: relative;
   display: block;
   aspect-ratio: 1 / 1.25;
-  border-radius: 4px;
+  border-radius: var(--radius);
   overflow: hidden;
   text-decoration: none;
 }
@@ -297,7 +297,7 @@
      .tag). --color-cream, pas --ground : fixe comme la carte, voir
      .caseImageFallback plus haut. */
   border: 1px solid var(--color-cream);
-  border-radius: 3px;
+  border-radius: var(--radius-tag);
   padding: 8px 13px;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: var(--t-mono);
@@ -545,7 +545,7 @@
   border-left: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
   border-right: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
   border-top: none;
-  border-radius: 0 0 4px 4px;
+  border-radius: 0 0 var(--radius) var(--radius);
   transition: border-color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 
@@ -588,7 +588,7 @@
 
 .caseCard,
 .caseTag {
-  border-radius: 0;
+  border-radius: var(--radius-tag);
 }
 
 .caseClient,

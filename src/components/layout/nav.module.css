@@ -194,7 +194,7 @@
   border-left: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
   border-right: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
   border-bottom: none;
-  border-radius: 4px 4px 0 0;
+  border-radius: var(--radius) var(--radius) 0 0;
   transition: border-color 150ms cubic-bezier(0, 0.55, 0.45, 1);
 }
 

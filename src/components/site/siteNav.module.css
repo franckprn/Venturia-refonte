@@ -12,13 +12,17 @@
   --line: color-mix(in srgb, #1a1614 18%, transparent);
   --g: 20px;
 
+  /* Barre flottante, arrondie : 8 px du haut, alignée sur la marge de la page. */
   position: fixed;
-  inset: 0 0 auto;
+  top: 8px;
+  left: 8px;
+  right: 8px;
   z-index: 60;
-  height: var(--nav-h);
+  height: calc(var(--nav-h) - 12px);
   background: var(--paper);
   color: var(--ink);
-  border-bottom: 1px solid var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   font-family: var(--font-sans), system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.4;
@@ -27,6 +31,8 @@
 @media (min-width: 1024px) {
   .bar {
     --g: 40px;
+    left: 24px;
+    right: 24px;
   }
 }
 
@@ -96,13 +102,21 @@
   left: var(--g);
   z-index: 2;
   padding: 10px 14px;
+  border-radius: var(--radius);
   background: var(--ink);
   color: var(--paper) !important;
-  transform: translateY(-200%);
+}
+
+.skip:not(:focus-visible) {
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .skip:focus-visible {
-  transform: none;
   outline-color: var(--red);
 }
 
@@ -114,7 +128,13 @@
   justify-content: space-between;
   gap: 16px;
   height: 100%;
-  padding: 0 var(--g);
+  padding: 0 11px;
+}
+
+@media (min-width: 1024px) {
+  .inner {
+    padding: 0 15px;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -256,6 +276,7 @@
   gap: 10px;
   min-height: 44px;
   padding: 0 14px 0 16px;
+  border-radius: var(--radius);
   background: var(--red);
   color: var(--ink) !important;
   font-weight: 500;
@@ -347,14 +368,14 @@
   .panel {
     display: block;
     position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    margin-top: 1px;
-    max-height: calc(100dvh - var(--nav-h));
+    top: calc(100% + 8px);
+    left: -1px;
+    right: -1px;
+    max-height: calc(100dvh - var(--nav-h) - 16px);
     overflow-y: auto;
     background: var(--paper);
-    border-bottom: 1px solid var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
     visibility: hidden;
     clip-path: inset(0 0 100% 0);
   }
@@ -364,7 +385,7 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: 20px;
-  padding: 36px var(--g) 0;
+  padding: 32px 15px 0;
 }
 
 .panelList {
@@ -445,6 +466,7 @@
   position: relative;
   aspect-ratio: 3 / 2;
   overflow: hidden;
+  border-radius: var(--radius);
   background: var(--ink);
 }
 
@@ -473,6 +495,7 @@
 .previewTags span {
   padding: 5px 8px 4px;
   border: 1px solid var(--line);
+  border-radius: var(--radius-tag);
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 11px;
   letter-spacing: 0.04em;
@@ -514,14 +537,15 @@
 
 .sheet {
   position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin-top: 1px;
-  height: calc(100dvh - var(--nav-h));
+  top: calc(100% + 8px);
+  left: -1px;
+  right: -1px;
+  height: calc(100dvh - var(--nav-h) - 12px);
   overflow-y: auto;
   overscroll-behavior: contain;
   background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   visibility: hidden;
   clip-path: inset(0 0 100% 0);
 }
@@ -536,7 +560,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100%;
-  padding: 24px var(--g) calc(20px + env(safe-area-inset-bottom));
+  padding: 20px 15px calc(16px + env(safe-area-inset-bottom));
 }
 
 .sheetRows {
@@ -559,6 +583,7 @@
   width: 56px;
   height: 56px;
   overflow: hidden;
+  border-radius: var(--radius);
   background: var(--ink);
 }
 

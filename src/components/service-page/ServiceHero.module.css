@@ -258,7 +258,7 @@
   align-items: flex-start;
   gap: 10px;
   padding: 14px 16px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: var(--ink);
   color: var(--ground);
 }
@@ -314,7 +314,7 @@
 .step {
   padding: 14px;
   border: 1px solid var(--ink);
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: var(--ground);
 }
 

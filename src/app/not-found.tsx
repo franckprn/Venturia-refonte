@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import { notFound } from "@/content/rendezvous";
 import { Art, Rule, keepWords } from "@/components/home/Ui";
-import { PAINTINGS } from "@/components/home/photos";
+import { ART } from "@/content/paintings";
 import s from "@/components/home/home.module.css";
 import p from "@/components/home/pages.module.css";
 
@@ -24,7 +24,7 @@ export default function NotFound() {
           </h1>
           <p className={s.heroSub}>{keepWords(notFound.sub)}</p>
         </div>
-        <Art painting={PAINTINGS.rue} sizes="(max-width: 899px) 100vw, 33vw" className={p.lostArt} ratio="4 / 3" />
+        <Art painting={ART.lost} sizes="(max-width: 899px) 100vw, 33vw" className={p.lostArt} ratio="4 / 3" />
         <nav aria-label="Pages principales" className={p.lostNav}>
           <ul>
             {notFound.links.map((l) => (

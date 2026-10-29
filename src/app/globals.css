@@ -17,6 +17,12 @@
      page (la carte cas client Inoko, substitut de photo tant qu'aucune
      photo n'est fournie — Dernier accompagnement et méga-menu desktop,
      CLAUDE.md « Respiration »). */
+  /* Arrondis : un seul système sur tout le site. 4 px pour les boutons,
+     cartes, champs, conteneurs d'image, panneau du méga-menu et icônes
+     encadrées ; 3 px pour les tags. */
+  --radius: 4px;
+  --radius-tag: 3px;
+
   --color-charcoal: #1a1614;
   --color-cream: #dedcd3;
   --ground: var(--color-cream);

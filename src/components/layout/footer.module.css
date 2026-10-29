@@ -306,14 +306,14 @@
   grid-column: 1;
   justify-self: start;
   border-left: 1px solid color-mix(in srgb, var(--ground) 16%, transparent);
-  border-radius: 0 0 0 4px;
+  border-radius: 0 0 0 var(--radius);
 }
 
 .legalBarCornerRight {
   grid-column: 12;
   justify-self: end;
   border-right: 1px solid color-mix(in srgb, var(--ground) 16%, transparent);
-  border-radius: 0 0 4px 0;
+  border-radius: 0 0 var(--radius) 0;
 }
 
 /* Petits traits verticaux droits (sans congé) : un par colonne de
