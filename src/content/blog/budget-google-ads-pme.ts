@@ -51,7 +51,7 @@ export const budgetGoogleAdsPme: ArticleContent = {
   ],
 
   body: [
-    { type: "h2", text: "Étape 1 : calculer ce qu'une vente peut vous coûter" },
+    { type: "h2", text: "Étape 1 : calculer ce qu’une vente peut vous coûter" },
     {
       type: "paragraph",
       text:
@@ -63,14 +63,14 @@ export const budgetGoogleAdsPme: ArticleContent = {
       text:
         "Coût maximum par vente = panier moyen × taux de marge brute. " +
         "Pour un panier de 80 € et une marge de 40 %, une vente " +
-        "peut coûter jusqu'à 32 € en publicité.",
+        "peut coûter jusqu’à 32 € en publicité.",
     },
     {
       type: "paragraph",
       text:
         "Le même calcul donne votre ROAS minimum : 100 ÷ marge. " +
         "Avec 40 % de marge, chaque euro investi doit rapporter au " +
-        "moins 2,50 € de chiffre d'affaires.",
+        "moins 2,50 € de chiffre d’affaires.",
       link: { label: "Calculer votre ROAS minimum", href: "/services/sea" },
     },
 
@@ -78,7 +78,7 @@ export const budgetGoogleAdsPme: ArticleContent = {
     {
       type: "paragraph",
       text:
-        "Les stratégies d'enchères automatiques de Google ajustent " +
+        "Les stratégies d’enchères automatiques de Google ajustent " +
         "chaque enchère à partir de vos ventes passées. Pour la " +
         "stratégie au ROAS cible, Google demande au moins 15 " +
         "conversions sur les 30 derniers jours pour les campagnes " +
@@ -102,7 +102,7 @@ export const budgetGoogleAdsPme: ArticleContent = {
       type: "paragraph",
       text:
         "Google Ads se règle en budget quotidien moyen. Un jour de " +
-        "forte demande, Google peut dépenser jusqu'à deux fois ce " +
+        "forte demande, Google peut dépenser jusqu’à deux fois ce " +
         "montant, et il plafonne le total du mois à 30,4 fois le " +
         "budget quotidien. Pour 480 € par mois : 480 ÷ 30,4 ≈ " +
         "16 € par jour.",
@@ -112,7 +112,7 @@ export const budgetGoogleAdsPme: ArticleContent = {
     {
       type: "paragraph",
       text:
-        "L'étude WordStream by LocaliQ, menée sur plus de 16 000 " +
+        "L’étude WordStream by LocaliQ, menée sur plus de 16 000 " +
         "campagnes, relève un coût par clic moyen de 5,42 $ en 2025, " +
         "tous secteurs confondus, contre 4,66 $ en 2024.",
     },
@@ -133,7 +133,7 @@ export const budgetGoogleAdsPme: ArticleContent = {
         "ROAS proche du minimum : concentrez le budget sur les " +
           "produits et les requêtes qui vendent.",
         "ROAS sous le minimum : retravaillez les fiches produits, " +
-          "les prix affichés et les mots-clés avant d'ajouter du budget.",
+          "les prix affichés et les mots-clés avant d’ajouter du budget.",
       ],
     },
     {
@@ -153,7 +153,7 @@ export const budgetGoogleAdsPme: ArticleContent = {
       href: "https://support.google.com/google-ads/answer/2375423?hl=fr",
     },
     {
-      label: "Google Ads : à propos de la stratégie d'enchères au ROAS cible",
+      label: "Google Ads : à propos de la stratégie d’enchères au ROAS cible",
       href: "https://support.google.com/google-ads/answer/6268637?hl=fr",
     },
     {
@@ -193,7 +193,7 @@ export const budgetGoogleAdsPme: ArticleContent = {
       resume: "20 minutes, sans engagement",
       text:
         "20 minutes, sans engagement. On étudie votre budget Google " +
-        "Ads avant l'appel, puis on vous dit ce qu'on ferait, dans " +
+        "Ads avant l’appel, puis on vous dit ce qu’on ferait, dans " +
         "quel ordre.",
       href: "/contact",
     },

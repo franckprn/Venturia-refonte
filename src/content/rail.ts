@@ -26,15 +26,15 @@ export const railCards: [RailCardContent, RailCardContent, RailCardContent] = [
     title: "Le GEO, en une phrase",
     resume: "Être cité par les IA",
     text:
-      "Être cité par ChatGPT et Perplexity quand quelqu'un leur pose " +
+      "Être cité par ChatGPT et Perplexity quand quelqu’un leur pose " +
       "une question sur ce que vous vendez.",
   },
   {
     title: "On discute ?",
     resume: "20 minutes, sans engagement",
     text:
-      "20 minutes, sans engagement. On étudie votre site avant l'appel, " +
-      "puis on vous dit ce qu'on ferait, dans quel ordre.",
+      "20 minutes, sans engagement. On étudie votre site avant l’appel, " +
+      "puis on vous dit ce qu’on ferait, dans quel ordre.",
     href: "/contact",
   },
 ];
@@ -48,8 +48,8 @@ export const railContactCard: RailCardContent = {
   title: "Réserver 20 minutes",
   resume: "20 minutes, sans engagement",
   text:
-    "Sans engagement. On découvre votre boutique avant l'appel, puis on " +
-    "échange sur votre situation et sur la meilleure façon d'atteindre " +
+    "Sans engagement. On découvre votre boutique avant l’appel, puis on " +
+    "échange sur votre situation et sur la meilleure façon d’atteindre " +
     "vos objectifs.",
   href: "/contact",
 };

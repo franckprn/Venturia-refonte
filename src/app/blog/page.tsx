@@ -43,7 +43,7 @@ export default function BlogPage() {
           </p>
         </div>
         <div data-hero-photo className={p.blogHeroArt}>
-          <Art painting={ART.blog} sizes="(max-width: 899px) 100vw, 40vw" priority ratio="native" />
+          <Art painting={ART.blog} sizes="(max-width: 899px) 100vw, 40vw" priority />
         </div>
       </section>
 
@@ -57,7 +57,7 @@ export default function BlogPage() {
             const art = paintingFor(a.category);
             return (
               <li key={slug} className={p.entry} data-reveal>
-                <div className={p.entryThumb}>
+                <div className={p.entryThumb} style={{ aspectRatio: `${art.width} / ${art.height}` }}>
                   <Image src={art.src} alt="" fill sizes="(max-width: 899px) 30vw, 16vw" className={s.cover} />
                 </div>
                 <div className={p.entryMeta}>

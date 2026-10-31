@@ -49,8 +49,8 @@ export const services: [Service, Service, Service, Service] = [
     paragraphs: [
       "On retravaille vos pages et leur organisation pour que Google " +
         "les comprenne et les place plus haut sur les recherches de vos " +
-        "clients. On soigne aussi ce qui s'affiche dans les résultats, " +
-        "pour que les internautes cliquent chez vous plutôt qu'à côté. " +
+        "clients. On soigne aussi ce qui s’affiche dans les résultats, " +
+        "pour que les internautes cliquent chez vous plutôt qu’à côté. " +
         "Enfin, on structure vos contenus pour que ChatGPT et Perplexity " +
         "puissent vous citer.",
       "Résultat : plus de visites utiles, et plus de commandes.",
@@ -94,13 +94,13 @@ export const services: [Service, Service, Service, Service] = [
     paragraphs: [
       "On automatise ce qui se répète dans votre activité : la mise à " +
         "jour de vos fiches produits, les emails à vos clients à chaque " +
-        "étape après leur commande, et d'autres tâches propres à votre " +
+        "étape après leur commande, et d’autres tâches propres à votre " +
         "boutique.",
       "Tout est construit sur mesure, à partir des outils et des " +
         "méthodes que vous utilisez déjà : vous gardez vos habitudes, " +
         "et vous gagnez du temps.",
     ],
-    ctaLabel: "Découvrir l'automatisation",
+    ctaLabel: "Découvrir l’automatisation",
     href: "/services/automations",
     isLink: true,
   },

@@ -8,7 +8,7 @@ export const BOOKING_HREF = BOOKING_URL;
 
 export const menu = {
   ariaLabel: "Navigation principale",
-  homeLabel: "Venturia, retour à l'accueil",
+  homeLabel: "Venturia, retour à l’accueil",
   skip: "Aller au contenu",
   email: EMAIL,
   services,
@@ -35,7 +35,7 @@ export const menu = {
     close: "Fermer",
     servicesLabel: "Services",
     moreLabel: "Et aussi",
-    cta: "Bloquer 20 minutes dans l'agenda",
+    cta: "Bloquer 20 minutes dans l’agenda",
     write: "ou écrire à",
   },
 };

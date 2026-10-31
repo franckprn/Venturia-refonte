@@ -29,7 +29,7 @@ export const processusSteps: [ProcessusStep, ProcessusStep, ProcessusStep] = [
     number: "02",
     title: "Un plan à votre mesure",
     description:
-      "On vous propose les actions qui rapportent le plus, dans l'ordre " +
+      "On vous propose les actions qui rapportent le plus, dans l’ordre " +
       "où elles rapportent.",
   },
   {
@@ -37,7 +37,7 @@ export const processusSteps: [ProcessusStep, ProcessusStep, ProcessusStep] = [
     title: "On met en place, on ajuste",
     description:
       "On déploie les solutions qui vous font gagner du temps et de " +
-      "l'argent, et on les affine au fil des résultats.",
+      "l’argent, et on les affine au fil des résultats.",
   },
 ];
 

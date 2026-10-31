@@ -49,13 +49,11 @@ export function Cta({
 export function Panel({
   label,
   meta,
-  demo,
   children,
   className,
 }: {
   label: string;
   meta?: string;
-  demo?: boolean;
   children: React.ReactNode;
   className?: string;
 }) {
@@ -66,33 +64,28 @@ export function Panel({
         {meta ? <span>{meta}</span> : null}
       </div>
       <div className={s.panelBody}>{children}</div>
-      {demo ? <p className={s.panelDemo}>Données de démonstration</p> : null}
     </div>
   );
 }
 
+// Tableau légendé, toujours à ses proportions réelles (jamais recadré) :
+// le cadre prend le ratio de l'image, object-fit: cover n'y coupe rien.
 export function Art({
   painting,
   sizes,
   className,
   priority,
   parallax,
-  ratio,
 }: {
   painting: Painting;
   sizes: string;
   className?: string;
   priority?: boolean;
   parallax?: boolean;
-  /** Ratio du cadre ; par défaut 4/5. "native" : celui du tableau. */
-  ratio?: string;
 }) {
   return (
     <figure className={`${s.art} ${className ?? ""}`}>
-      <div
-        className={s.artFrame}
-        style={ratio ? { aspectRatio: ratio === "native" ? `${painting.width} / ${painting.height}` : ratio } : undefined}
-      >
+      <div className={s.artFrame} style={{ aspectRatio: `${painting.width} / ${painting.height}` }}>
         <Image
           src={painting.src}
           alt={painting.alt}
@@ -119,14 +112,18 @@ export function Caption({ painting }: { painting: Painting }) {
   );
 }
 
-// Typographie française au rendu : espace insécable avant ? ! : ; »,
-// après «, et entre un nombre et ce qui le suit (« 48 h », « 20 min »).
-// Espace insécable pleine (U+00A0) : Archivo n'a pas l'espace fine.
+// Typographie française au rendu : espace fine insécable (U+202F) avant
+// ? ! : ; et entre les tranches de milliers ; espace insécable (U+00A0)
+// avant € et %, après « et avant », et entre un nombre et l'unité qui le
+// suit (« 48 h », « 20 min »).
 export function fr(text: string): string {
   return text
-    .replace(/ ([?!:;»])/g, "\u00a0$1")
+    .replace(/ ([?!:;])/g, "\u202f$1")
+    .replace(/ »/g, "\u00a0»")
     .replace(/« /g, "«\u00a0")
-    .replace(/(\d) (?=[\p{L}\d€%])/gu, "$1\u00a0");
+    .replace(/(\d) (?=\d{3}(?!\d))/g, "$1\u202f")
+    .replace(/(\d) (?=[\p{L}€%])/gu, "$1\u00a0")
+    .replace(/ (?=[€%])/g, "\u00a0");
 }
 
 // Un mot composé (« mots-clés », « sur-mesure ») reste sur une ligne :

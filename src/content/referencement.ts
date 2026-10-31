@@ -14,7 +14,7 @@ export const seoHero = {
   kicker: "Référencement SEO et GEO pour les boutiques en ligne",
   title: "Trouvé sur Google, cité par les IA.",
   sub:
-    "On retravaille vos pages produits, vos catégories et vos guides pour qu'ils montent dans Google et " +
+    "On retravaille vos pages produits, vos catégories et vos guides pour qu’ils montent dans Google et " +
     "apparaissent dans les réponses de ChatGPT, Gemini ou Perplexity.",
 };
 
@@ -54,18 +54,18 @@ export const seoMethod = [
   },
   {
     verb: "Développer",
-    text: "Des contenus qui répondent aux questions posées avant l'achat, prêts à être repris par les IA.",
+    text: "Des contenus qui répondent aux questions posées avant l’achat, prêts à être repris par les IA.",
   },
 ] as const;
 
 export const seoStarting = [
   {
     title: "Votre boutique est récente",
-    text: "On commence par l'indexation et les fiches produits, la base de tout le reste.",
+    text: "On commence par l’indexation et les fiches produits, la base de tout le reste.",
   },
   {
     title: "Vous avez du trafic, peu de ventes",
-    text: "On repère les pages qui attirent des visiteurs et on les oriente vers l'achat.",
+    text: "On repère les pages qui attirent des visiteurs et on les oriente vers l’achat.",
   },
   {
     title: "Vous refaites votre site",
@@ -84,17 +84,17 @@ export const seoFaq = [
     ],
   },
   {
-    question: "Qu'est-ce que le GEO ?",
+    question: "Qu’est-ce que le GEO ?",
     answer: [
       "Le GEO (Generative Engine Optimization) prépare vos contenus pour que ChatGPT, Gemini, Perplexity et les résumés IA de Google citent votre boutique dans leurs réponses.",
-      "Il s'appuie sur les mêmes bases que le SEO : des pages claires, des données structurées et une marque présente sur les sites que les IA consultent.",
+      "Il s’appuie sur les mêmes bases que le SEO : des pages claires, des données structurées et une marque présente sur les sites que les IA consultent.",
     ],
   },
   {
-    question: "Combien coûte le référencement d'une boutique en ligne ?",
+    question: "Combien coûte le référencement d’une boutique en ligne ?",
     answer: [
       "Le prix est fixé sur devis, après un appel de 20 minutes.",
-      "Il dépend du nombre de fiches produits et de catégories, de la concurrence sur vos requêtes, de l'état technique du site et du nombre de contenus publiés chaque mois.",
+      "Il dépend du nombre de fiches produits et de catégories, de la concurrence sur vos requêtes, de l’état technique du site et du nombre de contenus publiés chaque mois.",
     ],
   },
   {
@@ -114,7 +114,7 @@ export const seoFaq = [
     question: "Référencement ou Google Ads : par quoi commencer ?",
     answer: [
       "Le référencement installe un trafic qui revient chaque mois, Google Ads apporte des visites dès son lancement : les deux se complètent.",
-      "Chez Inoko, Google Ads a été lancé en avril 2026, après le SEO, et s'est montré rentable dès la deuxième semaine, avec un ROAS de 15.",
+      "Chez Inoko, Google Ads a été lancé en avril 2026, après le SEO, et s’est montré rentable dès la deuxième semaine, avec un ROAS de 15.",
     ],
   },
 ] as const;

@@ -1,6 +1,7 @@
 // Contenu de la home. Chiffres Inoko : seuls chiffres de résultat autorisés
-// (CLAUDE.md, content/inoko.ts). Séparateur de milliers : espace insécable
-// (U+00A0), Archivo n'a pas l'espace fine.
+// (CLAUDE.md, content/inoko.ts). Typographie appliquée au rendu par fr()
+// (components/home/Ui.tsx) : espace fine insécable (U+202F) avant ? ! : ;
+// et entre les milliers, espace insécable (U+00A0) avant € et %.
 import type { ART } from "./paintings";
 
 export const CONTACT_HREF = "/contact";
@@ -18,6 +19,13 @@ export const hero = {
     "la montrent aux acheteurs prêts à commander.",
   cta: "Réserver un appel de 20 min",
   write: "ou écrire à",
+  // Carte Search Console posée sur le tableau (vrais chiffres Inoko).
+  panel: {
+    label: "Inoko",
+    meta: "Search Console",
+    big: "clics depuis Google en mai 2026",
+    foot: "clics en décembre 2025",
+  },
 };
 
 export const inokoClicks = [
@@ -29,8 +37,9 @@ export const inokoClicks = [
   { month: "mai", year: "2026", value: 1736 },
 ];
 
+// Séparateur de milliers : espace fine insécable (U+202F).
 export function fmt(n: number) {
-  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
 }
 
 type ArtKey = keyof typeof ART;
@@ -44,8 +53,8 @@ export const services = [
     tags: ["SEO", "GEO"],
     lead: "Être trouvé sur Google et cité par les IA.",
     text:
-      "On retravaille vos pages produits, vos catégories et vos guides pour qu'ils montent dans Google " +
-      "et apparaissent dans les réponses de ChatGPT, Gemini ou Perplexity.",
+      "On retravaille vos pages produits, vos catégories et vos guides pour qu’ils montent dans Google " +
+      "et apparaissent dans les réponses de ChatGPT et compagnie.",
   },
   {
     id: "publicite",
@@ -53,10 +62,8 @@ export const services = [
     art: "publicite" as ArtKey,
     name: "Publicité",
     tags: ["Google Ads"],
-    lead: "Des annonces Google Ads au moment où l'acheteur cherche.",
-    text:
-      "On construit et on pilote vos campagnes Google Ads, produit par produit, pour placer votre boutique " +
-      "devant les personnes prêtes à commander.",
+    lead: "Chaque euro de publicité suivi jusqu’à la vente.",
+    text: "On construit et on pilote vos campagnes sur les produits rentables, et on suit chaque euro investi.",
   },
   {
     id: "site",
@@ -64,10 +71,10 @@ export const services = [
     art: "site" as ArtKey,
     name: "Site internet",
     tags: ["Shopify", "WooCommerce", "PrestaShop", "Next.js"],
-    lead: "Une boutique livrée en 2 à 8 semaines, puis suivie.",
+    lead: "Une boutique où l’on achète sans hésiter.",
     text:
-      "Shopify, WooCommerce, PrestaShop ou sur-mesure en Next.js. L'hébergement, les mises à jour et les " +
-      "évolutions sont compris dans le forfait mensuel.",
+      "Des pages produits claires, une navigation simple et un design qui plaît : tout est pensé pour passer " +
+      "de la visite à la commande. Ensuite, on l’améliore mois après mois.",
   },
   {
     id: "automatisation",
@@ -77,129 +84,206 @@ export const services = [
     tags: ["n8n", "Serveur en Europe"],
     lead: "Les tâches répétitives confiées à des workflows.",
     text:
-      "On relie vos outils avec n8n : commandes, factures, stocks, emails. On l'héberge pour vous, " +
-      "sur un serveur en Europe.",
+      "Saisir les commandes, mettre à jour le stock, envoyer des e-mails et y répondre : on automatise ce que " +
+      "vous refaites chaque jour.",
   },
 ];
 
-// Deux titres possibles pour la section Services. Retenu : le résultat.
-export const servicesTitle = {
-  resultat: "Une boutique qu'on trouve, qui donne envie et qui vend.",
-  leviers: "Référencement, publicité, site, automatisation : quatre leviers pour vendre en ligne.",
+export const servicesCopy = {
+  label: "Services",
+  title: "Quatre leviers pour faire grandir votre boutique.",
+  tagsLabel: "Outils et spécialités,",
 };
 
-export const situations = {
+// Interfaces stylisées posées sur les tableaux des services. Aucun
+// chiffre : ni résultat, ni prix, ni budget (CLAUDE.md, « Images »).
+export const serviceUi = {
+  referencement: {
+    label: "Résultat Google",
+    url: "votre-boutique.fr › plaids",
+    title: "Plaid en laine mérinos, 6 coloris",
+    desc: "Laine douce et chaude, lavable en machine. Livraison suivie.",
+    aiTag: "Aperçu IA",
+    aiText: "source citée : votre-boutique.fr",
+  },
+  publicite: {
+    label: "Google Ads",
+    meta: "Campagnes Search",
+    status: "Active",
+    rows: ["Plaids en laine", "Coussins en lin", "Marque"],
+  },
+  site: {
+    label: "Fiche produit",
+    meta: "Shopify",
+    name: "Plaid en laine mérinos",
+    swatchesLabel: "Trois coloris",
+    button: "Ajouter au panier",
+  },
+  automatisation: {
+    label: "Workflow n8n",
+    meta: "Actif",
+    steps: ["Nouvelle commande", "Facture créée", "Stock mis à jour", "Email de suivi envoyé"],
+  },
+};
+
+// Labels des en-têtes de section (filet titré). PROVISOIRES pour les
+// sections reprises du test 1 : à valider par Franck.
+export const sectionLabels = {
+  interlude: "Notre approche",
+  situations: "Votre point de départ",
+  method: "Méthode",
+  start: "Démarrer",
+  blog: "Blog",
+};
+
+// « Vos clients cherchent déjà… » (test 1) : une phrase, à côté du Béraud.
+export const interludeCopy = {
+  ariaLabel: "Notre approche",
+  statement:
+    "Vos clients cherchent déjà ce que vous vendez. On s’assure qu’ils arrivent chez vous et qu’ils aient envie d’y acheter.",
+};
+
+// Où en est votre boutique ? (test 1)
+export const situationsCopy = {
   title: "Où en est votre boutique ?",
-  intro: "Chaque boutique en ligne part d'un point différent. Trouvez le vôtre, on vous montre par où commencer.",
+  intro: "Quatre situations qu’on rencontre souvent chez les e-commerçants.",
+  linksLabel: "Service adapté",
   items: [
     {
-      title: "Vous lancez votre boutique.",
-      text:
-        "On construit votre boutique sur Shopify, WooCommerce, PrestaShop ou en sur-mesure Next.js, prête à " +
-        "recevoir ses premières commandes. Hébergement, mises à jour et évolutions sont compris dans le forfait mensuel.",
-      links: [{ label: "Site internet", href: "/services/creation-site" }],
+      situation: "Vous lancez votre boutique",
+      text: "On construit le site qu’il vous faut : vos produits mis en valeur, une boutique prête à vendre dès la mise en ligne, et un référencement pensé dès le départ pour attirer vos premiers acheteurs.",
+      services: [{ label: "Site internet", href: "/services/creation-site" }],
     },
     {
-      title: "Vos ventes dépendent d'un seul canal.",
-      text:
-        "Marketplace, Leboncoin ou réseaux sociaux : on ouvre à votre boutique un accès direct aux acheteurs " +
-        "qui cherchent vos produits sur Google, dans les résultats naturels et dans les annonces.",
-      links: [
+      situation: "Vos ventes dépendent d’un seul canal",
+      text: "Une marketplace, Leboncoin ou les réseaux sociaux font toutes vos ventes. On vous ouvre Google : le référencement pour être trouvé dans la durée, Google Ads pour toucher les acheteurs dès aujourd’hui.",
+      services: [
         { label: "Référencement", href: "/services/seo" },
         { label: "Publicité", href: "/services/sea" },
       ],
     },
     {
-      title: "Vos ventes plafonnent.",
-      text:
-        "On reprend vos fiches produits, vos catégories et vos guides pour gagner des positions sur les " +
-        "recherches qui mènent à l'achat.",
-      links: [{ label: "Référencement", href: "/services/seo" }],
+      situation: "Vos ventes plafonnent",
+      text: "On commence par trouver d’où vient le blocage. Le plus souvent, la solution passe par le référencement et l’architecture du site.",
+      services: [{ label: "Référencement", href: "/services/seo" }],
     },
     {
-      title: "Les tâches répétitives vous prennent vos journées.",
-      text:
-        "Commandes, factures, stocks, emails de suivi : on relie vos outils avec n8n pour que ces tâches " +
-        "tournent seules, et vos journées reviennent à la boutique.",
-      links: [{ label: "Automatisation", href: "/services/automations" }],
+      situation: "Les tâches répétitives vous prennent vos journées",
+      text: "Les tâches chronophages vous prennent des heures chaque semaine : on les automatise, pour que vous vous concentriez sur votre boutique.",
+      services: [{ label: "Automatisation", href: "/services/automations" }],
     },
   ],
 };
 
-// Avis Google, recopiés mot pour mot. `placeholder: true` : texte provisoire,
-// affiché avec la mention « Avis provisoire », à remplacer avant la mise en ligne.
+// Avis Google, recopiés mot pour mot (seules les apostrophes et les
+// espaces typographiques changent) : un paragraphe par ligne de l’avis.
+// Entreprise, date et note : affichées seulement quand Franck les fournit.
+// `placeholder: true` : texte provisoire, affiché avec la mention « Avis
+// provisoire », jamais en production (voir publishedReviews ci-dessous).
 export type Review = {
-  text: string;
+  text: string[];
   author: string;
-  company: string;
-  date: string;
+  company?: string;
+  date?: string;
+  rating?: number;
   placeholder?: boolean;
 };
 
 export const reviews: Review[] = [
   {
-    text:
-      "Texte provisoire en attendant le premier avis Google : un échange clair dès le premier appel, " +
-      "un plan précis pour notre boutique, et des points réguliers pour suivre les chiffres.",
-    author: "Prénom Nom",
-    company: "Nom de la boutique",
-    date: "Mois 2026",
-    placeholder: true,
+    text: [
+      "Service remarquable.",
+      "Nous avons contractualisé en janvier dernier, nous sommes impressionnés des résultats, les clics organiques ont doublés ! Nous sommes ravis d’avoir sollicité Franck.",
+    ],
+    author: "Aiko Gary Blaze",
+    date: "2026",
+    rating: 5,
   },
 ];
 
-export const method = {
-  title: "Comment on travaille.",
+// Build de production (Vercel, VERCEL_ENV=production, ou
+// VENTURIA_PRODUCTION=1 ailleurs) : les avis provisoires sont écartés.
+// Sans avis publié, la section disparaît de la page.
+const IS_PRODUCTION = process.env.VERCEL_ENV === "production" || process.env.VENTURIA_PRODUCTION === "1";
+
+export const publishedReviews = reviews.filter((r) => !(r.placeholder && IS_PRODUCTION));
+
+export const reviewsCopy = {
+  label: "Avis Google",
+  title: "Ce que nos clients en disent.",
+  source: "Avis Google",
+  placeholderTag: "Avis provisoire",
+  ratingLabel: (n: number) => `${n} étoiles sur 5`,
+};
+
+// Comment on travaille (test 1). Le rapport mensuel est une interface
+// sans aucun chiffre : libellés et barres sans valeurs.
+export const methodCopy = {
+  title: "Comment on travaille",
+  intro: "Deux formules selon votre besoin, et un suivi qui vous dit chaque mois où en sont vos ventes.",
   formulas: [
     {
       name: "Mission ponctuelle",
-      text: "Un chantier précis, mené de bout en bout puis remis entre vos mains. Sans engagement.",
+      text: "Un besoin précis, un livrable : une boutique à créer, des pages produits à retravailler, une automatisation à mettre en place.",
+      term: "Sans engagement",
     },
     {
       name: "Accompagnement mensuel",
-      text: "On pilote vos leviers mois après mois. Engagement de 6 mois minimum.",
+      text: "On pilote vos leviers mois après mois : référencement, Google Ads, site ou automatisations, selon ce que vous avez choisi.",
+      term: "Engagement de 6 mois minimum",
     },
   ],
-  followTitle: "Vos chiffres, à tout moment.",
+  followTitle: "Le suivi, chaque mois",
   follow: [
-    { name: "Un tableau de bord en ligne", text: "Consultable à tout moment, depuis n'importe quel écran." },
-    { name: "Un rapport mensuel en PDF", text: "Son contenu suit les services choisis : référencement, annonces, site, automatisations." },
-    { name: "Un appel chaque mois", text: "On explique les chiffres et on fixe ensemble le plan du mois suivant." },
+    { title: "Un tableau de bord en ligne", text: "Vos chiffres, consultables à tout moment." },
+    { title: "Un rapport mensuel en PDF", text: "Son contenu suit les services que vous avez choisis." },
+    { title: "Un appel", text: "On vous explique les chiffres et on fixe ensemble le plan du mois suivant." },
   ],
   commitments: [
-    { label: "Vos comptes", text: "Google Ads, Search Console et les autres comptes restent à votre nom." },
-    { label: "Votre budget", text: "Votre budget publicitaire va en totalité à Google, sans commission." },
-    { label: "Vos emails", text: "Réponse à vos emails sous 48 h." },
+    { title: "Vos comptes restent à votre nom", text: "Google Ads, Search Console et les autres outils vous appartiennent." },
+    { title: "0 % de commission", text: "Votre budget publicitaire va en entier à Google." },
+    { title: "Réponse sous 48 h", text: "À chacun de vos emails." },
   ],
+  report: {
+    title: "Rapport mensuel",
+    period: "PDF",
+    ariaLabel: "Aperçu d’un rapport mensuel : visites depuis Google, commandes, positions et plan du mois suivant",
+    rows: ["Visites depuis Google", "Commandes", "Positions sur Google"],
+    next: "Plan du mois suivant",
+  },
 };
 
-export const start = {
-  title: "Pour démarrer, un appel de vingt minutes.",
+// Démarrer (test 1).
+export const startCopy = {
+  title: "Comment on démarre",
+  intro: "Trois étapes, de la première conversation au début du travail.",
   steps: [
     {
-      verb: "On échange",
-      text: "Un appel de 20 minutes en visio, réservé en quelques clics sur Cal.com : votre boutique, vos produits, vos objectifs.",
+      title: "Un appel de 20 minutes en visio",
+      body: "On prend le temps de comprendre votre boutique, vos produits, vos clients et vos objectifs, et on fait le point avec vous sur vos ventes et sur ce qui fonctionne déjà.",
     },
     {
-      verb: "On vous propose",
-      text: "Une proposition écrite, construite à partir de cet échange : les leviers à activer, le déroulé et le prix.",
+      title: "Une proposition écrite",
+      body: "On vous envoie une proposition construite à partir de cet échange : les leviers à activer, dans quel ordre, et le prix.",
     },
     {
-      verb: "On démarre",
-      text: "Vous validez, on se met au travail sur votre boutique.",
+      title: "Le démarrage",
+      body: "Proposition validée, on se met au travail sur votre boutique, et vous avez accès au dashboard pour voir l’avancement des chantiers.",
     },
   ],
-  cta: "Choisir mon créneau",
+  cta: "Choisir un créneau",
+  emailPrefix: "ou écrire à",
 };
 
 export const faq = {
   title: "Questions fréquentes.",
+  intro: "Une autre question ? Posez-la pendant l’appel, ou écrivez-nous.",
   items: [
     {
       q: "En combien de temps voit-on les premiers résultats en référencement ?",
       a:
-        "Pour Inoko, le travail a commencé en janvier 2026 : la boutique a reçu 9 commandes en mars, puis 13 en avril. " +
-        "Chaque boutique part d'un point différent : on en parle pendant l'appel de 20 minutes.",
+        "Pour Inoko, le travail a commencé en janvier 2026 : les premiers signes sont arrivés en mars, et le stade de maturité a été atteint en juin 2026. " +
+        "Chaque boutique part d’un point différent : on en parle pendant l’appel de 20 minutes.",
     },
     {
       q: "Quel budget prévoir pour Google Ads ?",
@@ -208,13 +292,13 @@ export const faq = {
         "on démarre à 300 € par mois, soit 10 € par jour. Ce budget est payé directement à Google, sans commission.",
     },
     {
-      q: "Faut-il s'engager ?",
+      q: "Faut-il s’engager ?",
       a: "Deux formules : une mission ponctuelle, sans engagement, ou un accompagnement mensuel, avec un engagement de 6 mois minimum.",
     },
     {
       q: "Pourquoi un prix sur devis ?",
       a:
-        "Le prix dépend de votre boutique et des leviers choisis. On le fixe après l'appel de 20 minutes, " +
+        "Le prix dépend de votre boutique et des leviers choisis. On le fixe après l’appel de 20 minutes, " +
         "dans une proposition écrite.",
     },
     {
@@ -227,10 +311,10 @@ export const faq = {
     },
     {
       q: "Que se passe-t-il si on arrête ?",
-      a: "Vos comptes et vos données restent à votre nom : vous gardez tout l'historique de votre boutique.",
+      a: "Vos comptes et vos données restent à votre nom : vous gardez tout l’historique de votre boutique.",
     },
     {
-      q: "Qu'est-ce que le GEO ?",
+      q: "Qu’est-ce que le GEO ?",
       a:
         "Le GEO consiste à faire citer votre boutique dans les réponses des IA : ChatGPT, Perplexity, Gemini " +
         "et les aperçus IA de Google.",
@@ -238,10 +322,13 @@ export const faq = {
   ],
 };
 
-export const blogPreview = {
-  title: "Le blog.",
+// Aperçu du blog « à la une » (test 1).
+export const blogPreviewCopy = {
+  title: "Le blog",
   intro: "Des méthodes concrètes pour faire grandir une boutique en ligne.",
   all: "Tous les articles",
+  readMore: "Lire l’article",
+  minutes: "min de lecture",
 };
 
 export const footerLegal = [
@@ -250,3 +337,28 @@ export const footerLegal = [
 ];
 
 export const footerTagline = "Studio digital : référencement, publicité, sites et automatisation pour les boutiques en ligne.";
+
+// Pied de page (test 2).
+export const footerCopy = {
+  ariaLabel: "Pied de page",
+  pitch: "Une question, un projet, une boutique à faire grandir ?",
+  cta: "Fixer un rendez-vous",
+  sitemapLabel: "Plan du site",
+  wordmark: "Venturia",
+  copyright: "© 2026 Venturia",
+  columns: {
+    services: "Services",
+    studio: "Le studio",
+    contact: "Nous joindre",
+  },
+  studioLinks: [
+    { href: "/cas-inoko", label: "Cas client Inoko" },
+    { href: "/#methode", label: "Comment on travaille" },
+    { href: "/#faq", label: "Questions fréquentes" },
+    { href: "/blog", label: "Blog" },
+  ],
+  contactLinks: {
+    booking: "Réserver un créneau",
+    contact: "Contact",
+  },
+};

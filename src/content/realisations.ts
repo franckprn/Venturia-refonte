@@ -69,12 +69,12 @@ export const realisations: RealisationsContent = {
     {
       value: 10000,
       suffix: " €",
-      caption: "DE CHIFFRE D'AFFAIRES MENSUEL, CONTRE 1 000 € AU DÉPART",
+      caption: "DE CHIFFRE D’AFFAIRES MENSUEL, CONTRE 1 000 € AU DÉPART",
     },
     {
       value: 15,
       suffix: " €",
-      caption: "DE CHIFFRE D'AFFAIRES POUR 1 € INVESTI EN GOOGLE ADS",
+      caption: "DE CHIFFRE D’AFFAIRES POUR 1 € INVESTI EN GOOGLE ADS",
     },
   ],
   linkLabel: "Voir comment",

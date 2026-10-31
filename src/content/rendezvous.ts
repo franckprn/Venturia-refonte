@@ -12,7 +12,7 @@ export const contactMeta = {
   title: "Contact : réserver un appel de 20 minutes | Venturia",
   description:
     "Réservez un appel de 20 minutes avec Venturia pour parler de votre boutique en ligne, " +
-    "ou écrivez à hey@venturia.fr. Un devis écrit suit l'appel.",
+    "ou écrivez à hey@venturia.fr. Un devis écrit suit l’appel.",
 };
 
 export const contactHero = {
@@ -41,7 +41,7 @@ export const contactCall = {
       text: "On repère par où commencer : référencement, publicité, site internet ou automatisation.",
     },
   ],
-  afterLabel: "Après l'appel",
+  afterLabel: "Après l’appel",
   afterTitle: "Un devis écrit.",
   afterText: "Le travail proposé, son déroulé et son prix, posés noir sur blanc. Vous décidez ensuite, à votre rythme.",
 };
@@ -49,10 +49,10 @@ export const contactCall = {
 export const agenda = {
   label: "Agenda",
   meta: "Appel de 20 minutes",
-  open: "Ouvrir l'agenda",
+  open: "Ouvrir l’agenda",
   title: "Agenda de réservation Venturia",
-  waiting: "Chargement de l'agenda…",
-  slow: "L'agenda s'ouvre aussi dans un nouvel onglet.",
+  waiting: "Chargement de l’agenda…",
+  slow: "L’agenda s’ouvre aussi dans un nouvel onglet.",
 };
 
 export const notFound = {

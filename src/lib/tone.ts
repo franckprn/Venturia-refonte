@@ -22,6 +22,7 @@ export type Tone = "light" | "dark" | "accent";
 export const DEFAULT_TONE: Tone = "light";
 
 type Bound = { id: string; top: number; tone: Tone };
+type Band = { top: number; bottom: number; tone: Tone };
 
 type Probe = {
   el: HTMLElement;
@@ -39,6 +40,10 @@ type Probe = {
  * ------------------------------------------------------------------ */
 
 let bounds: Bound[] = [];
+// Bandes d'une autre tonalité posées dans une section (ex. cartes de
+// chiffres sombres du bloc Inoko, dans une section claire) : elles ne
+// sont pas contiguës, on garde leur haut et leur bas.
+let bands: Band[] = [];
 const probes = new Set<Probe>();
 let rafId: number | null = null;
 let resizeObserver: ResizeObserver | null = null;
@@ -52,12 +57,18 @@ function refreshBounds() {
       return { id: el.id, top, tone: (el.dataset.tone as Tone) ?? DEFAULT_TONE };
     })
     .sort((a, b) => a.top - b.top);
+  bands = Array.from(document.querySelectorAll<HTMLElement>("section[data-tone] [data-tone]")).map((el) => {
+    const r = el.getBoundingClientRect();
+    return { top: r.top + window.scrollY, bottom: r.bottom + window.scrollY, tone: el.dataset.tone as Tone };
+  });
 }
 
 /** Tonalité de la section dont le sommet est le dernier franchi avant
  *  `documentY` — les sections étant contiguës dans le flux, pas besoin
  *  de connaître leur bas. */
 function toneAt(documentY: number): Tone {
+  const band = bands.find((b) => documentY >= b.top && documentY < b.bottom);
+  if (band) return band.tone;
   let tone = DEFAULT_TONE;
   for (const bound of bounds) {
     if (documentY < bound.top) break;
@@ -111,6 +122,7 @@ function teardown() {
     rafId = null;
   }
   bounds = [];
+  bands = [];
 }
 
 /**

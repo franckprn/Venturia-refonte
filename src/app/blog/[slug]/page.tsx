@@ -90,7 +90,7 @@ export default async function ArticlePage({ params }: { params: Promise<Params> 
             </p>
           </div>
           <div data-hero-photo className={p.articleArt}>
-            <Art painting={art} sizes="(max-width: 899px) 70vw, 28vw" priority ratio="native" />
+            <Art painting={art} sizes="(max-width: 899px) 70vw, 28vw" priority />
           </div>
         </section>
 

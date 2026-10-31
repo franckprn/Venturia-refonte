@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -11,6 +11,7 @@ import { ART } from "@/content/paintings";
 import { Caption, fr } from "@/components/home/Ui";
 import { BOOKING_HREF, menu } from "@/content/menu";
 import { INOKO_HREF } from "@/content/inoko";
+import { subscribeTone } from "@/lib/tone";
 import s from "./siteNav.module.css";
 
 // Barre fixe crème, un seul déclencheur par largeur :
@@ -20,24 +21,26 @@ import s from "./siteNav.module.css";
 // - mobile : « Menu » ouvre une feuille plein écran ; le reste de la page
 //   passe en inert et le focus tourne dans la barre et la feuille.
 // Échap ferme et rend le focus au déclencheur. Toutes les animations sont
-// en GSAP, ramenées à zéro sous prefers-reduced-motion. La barre se
-// retire au défilement vers le bas et revient dès qu'on remonte.
+// en GSAP, ramenées à zéro sous prefers-reduced-motion, regroupées dans
+// un gsap.context (annulé au démontage). Jamais autoAlpha : panneaux et
+// voile s'ouvrent par opacité + visibility explicites. La barre reste
+// visible pendant tout le défilement. Fond transparent et flouté : la
+// couleur du texte suit la section sous la barre (subscribeTone).
 
 type Open = null | "services" | "mobile";
 
 const HOVER_OPEN = 90;
 const HOVER_CLOSE = 220;
-const HIDE_AFTER = 160;
 const FOCUSABLE = "a[href], button:not([disabled])";
 
 const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-// Ramène la barre si le défilement l'a retirée.
-function revealBar(header: HTMLElement | null, hidden: { current: boolean }) {
-  if (!hidden.current || !header) return;
-  hidden.current = false;
-  gsap.to(header, { y: 0, duration: reduced() ? 0 : 0.5, ease: "expo.out" });
-}
+// Contexte GSAP de la nav, créé au montage, annulé au démontage.
+let navCtx: gsap.Context | null = null;
+const inCtx = (fn: () => void) => (navCtx ? navCtx.add(fn) : fn());
+
+// Ratio du tableau le plus large du sommaire : fixe la hauteur des aperçus.
+const MAX_RATIO = Math.max(...menu.services.map((sv) => ART[sv.art].width / ART[sv.art].height));
 
 const isVisible = (el: HTMLElement) =>
   el.checkVisibility ? el.checkVisibility({ visibilityProperty: true }) : el.offsetParent !== null;
@@ -46,6 +49,8 @@ export function SiteNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState<Open>(null);
   const [active, setActive] = useState(0);
+  // Aperçus du méga-menu chargés dès la première approche de « Services ».
+  const [warm, setWarm] = useState(false);
   const panelId = useId();
   const sheetId = useId();
 
@@ -63,8 +68,6 @@ export function SiteNav() {
   const hoverTimer = useRef<number | null>(null);
   const hoverOpenedAt = useRef(0);
   const focusFirst = useRef(false);
-  const barHidden = useRef(false);
-  const frameZ = useRef(1);
 
   const isCurrent = (href: string) => (href === "/" ? pathname === "/" : pathname === href);
 
@@ -77,6 +80,7 @@ export function SiteNav() {
 
   function onServicesEnter(e: React.PointerEvent) {
     if (e.pointerType !== "mouse") return;
+    setWarm(true);
     clearHover();
     if (openRef.current === "services") return;
     hoverTimer.current = window.setTimeout(() => {
@@ -99,6 +103,7 @@ export function SiteNav() {
     if (openRef.current === "services" && Date.now() - hoverOpenedAt.current < 600) return;
     // detail === 0 : activé au clavier (Entrée, Espace).
     focusFirst.current = e.detail === 0;
+    setWarm(true);
     setOpen((o) => (o === "services" ? null : "services"));
   }
 
@@ -107,17 +112,17 @@ export function SiteNav() {
     if (next && !e.currentTarget.contains(next)) setOpen((o) => (o === "services" ? null : o));
   }
 
-  // Le service actif remonte au premier plan, révélé de bas en haut.
+  // Tableaux empilés, déjà chargés : le service actif apparaît en fondu
+  // d'opacité, les autres s'effacent en même temps.
   function activate(i: number) {
     if (i === active) return;
     setActive(i);
-    const frame = previewRef.current?.querySelectorAll<HTMLElement>("[data-frame]")[i];
-    if (!frame) return;
-    frameZ.current += 1;
-    frame.style.zIndex = String(frameZ.current);
-    if (reduced()) return;
-    gsap.fromTo(frame, { clipPath: "inset(100% 0 0 0)" }, { clipPath: "inset(0% 0 0 0)", duration: 0.65, ease: "expo.out" });
-    gsap.fromTo(frame.querySelector("img"), { scale: 1.08 }, { scale: 1, duration: 1, ease: "expo.out" });
+    const frames = previewRef.current?.querySelectorAll<HTMLElement>("[data-frame]");
+    if (!frames) return;
+    const d = reduced() ? 0 : 0.2;
+    inCtx(() => {
+      frames.forEach((f, j) => gsap.to(f, { opacity: j === i ? 1 : 0, duration: d, ease: "power1.out", overwrite: true }));
+    });
   }
 
   // ---------- Mobile ----------
@@ -146,6 +151,24 @@ export function SiteNav() {
 
   // ---------- Effets ----------
 
+  // Contexte GSAP de la nav : toutes les animations y sont rangées.
+  useEffect(() => {
+    navCtx = gsap.context(() => {});
+    return () => {
+      navCtx?.revert();
+      navCtx = null;
+    };
+  }, []);
+
+  // Couleur du texte : tonalité de la section sous la barre.
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+    return subscribeTone(header, (tone) => {
+      header.dataset.tone = tone;
+    });
+  }, []);
+
   useEffect(() => {
     openRef.current = open;
   }, [open]);
@@ -169,29 +192,9 @@ export function SiteNav() {
     };
   }, []);
 
-  // La barre se retire en descendant, revient en remontant.
-  useEffect(() => {
-    const header = headerRef.current;
-    if (!header || reduced()) return;
-    let last = window.scrollY;
-    const onScroll = () => {
-      const y = window.scrollY;
-      const dy = y - last;
-      last = y;
-      if (openRef.current) return;
-      if (y > HIDE_AFTER && dy > 2 && !barHidden.current) {
-        barHidden.current = true;
-        gsap.to(header, { y: -(header.offsetHeight + 16), duration: 0.45, ease: "power3.out" });
-      } else if (dy < -2 || y <= HIDE_AFTER) {
-        revealBar(header, barHidden);
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // Méga-menu desktop. Les rangées s'animent en opacité seule : un
-  // autoAlpha les rendrait invisibles, et le lien focalisé perdrait le focus.
+  // Méga-menu desktop. Ouverture : visibility posée par gsap.set, puis
+  // opacité et clip-path animés. Les rangées s'animent en opacité seule,
+  // le lien focalisé garde le focus.
   useEffect(() => {
     const panel = panelRef.current;
     const scrim = scrimRef.current;
@@ -201,32 +204,45 @@ export function SiteNav() {
     gsap.killTweensOf([panel, scrim, rows, plusRef.current]);
 
     if (open === "services") {
-      revealBar(headerRef.current, barHidden);
-      gsap.set([panel, scrim], { autoAlpha: 1 });
+      gsap.set(panel, { visibility: "visible" });
+      gsap.set(scrim, { visibility: "visible" });
       if (focusFirst.current) {
         panel.querySelector<HTMLElement>(FOCUSABLE)?.focus();
         focusFirst.current = false;
       }
       if (r) {
         gsap.set(panel, { clipPath: "inset(0 0 0% 0)" });
+        gsap.set(scrim, { opacity: 1 });
         gsap.set(rows, { clearProps: "opacity,transform" });
         gsap.set(plusRef.current, { scaleY: 0, transformOrigin: "50% 50%" });
         return;
       }
-      gsap.fromTo(panel, { clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0% 0)", duration: 0.75, ease: "expo.out" });
-      gsap.fromTo(rows, { y: 28, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "expo.out", stagger: 0.05, delay: 0.06 });
-      gsap.fromTo(scrim, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4, ease: "power2.out" });
-      gsap.to(plusRef.current, { scaleY: 0, transformOrigin: "50% 50%", duration: 0.35, ease: "power3.out" });
+      inCtx(() => {
+        gsap.set(panel, { clipPath: "inset(0 0 100% 0)" });
+        gsap.set(rows, { y: 28, opacity: 0 });
+        gsap.set(scrim, { opacity: 0 });
+        gsap.to(panel, { clipPath: "inset(0 0 0% 0)", duration: 0.75, ease: "expo.out" });
+        gsap.to(rows, { y: 0, opacity: 1, duration: 0.7, ease: "expo.out", stagger: 0.05, delay: 0.06 });
+        gsap.to(scrim, { opacity: 1, duration: 0.4, ease: "power2.out" });
+        gsap.to(plusRef.current, { scaleY: 0, transformOrigin: "50% 50%", duration: 0.35, ease: "power3.out" });
+      });
     } else {
       const d = r ? 0 : 1;
-      gsap.to(panel, {
-        clipPath: "inset(0 0 100% 0)",
-        duration: 0.4 * d,
-        ease: "power3.inOut",
-        onComplete: () => gsap.set(panel, { autoAlpha: 0 }),
+      inCtx(() => {
+        gsap.to(panel, {
+          clipPath: "inset(0 0 100% 0)",
+          duration: 0.4 * d,
+          ease: "power3.inOut",
+          onComplete: () => gsap.set(panel, { visibility: "hidden" }),
+        });
+        gsap.to(scrim, {
+          opacity: 0,
+          duration: 0.3 * d,
+          ease: "power2.out",
+          onComplete: () => gsap.set(scrim, { visibility: "hidden" }),
+        });
+        gsap.to(plusRef.current, { scaleY: 1, transformOrigin: "50% 50%", duration: 0.35 * d, ease: "power3.out" });
       });
-      gsap.to(scrim, { autoAlpha: 0, duration: 0.3 * d, ease: "power2.out" });
-      gsap.to(plusRef.current, { scaleY: 1, transformOrigin: "50% 50%", duration: 0.35 * d, ease: "power3.out" });
     }
   }, [open]);
 
@@ -243,33 +259,38 @@ export function SiteNav() {
     gsap.killTweensOf([sheet, rows, top, bottom]);
 
     if (open === "mobile") {
-      revealBar(headerRef.current, barHidden);
       document.documentElement.style.overflow = "hidden";
       main?.setAttribute("inert", "");
-      gsap.set(sheet, { autoAlpha: 1 });
+      gsap.set(sheet, { visibility: "visible" });
       sheet.querySelector<HTMLElement>(FOCUSABLE)?.focus();
-      gsap.to(top, { y: 4, rotation: 45, svgOrigin: "11 5", duration: 0.4 * d, ease: "power3.out" });
-      gsap.to(bottom, { y: -4, rotation: -45, svgOrigin: "11 5", duration: 0.4 * d, ease: "power3.out" });
-      if (r) {
-        gsap.set(sheet, { clipPath: "inset(0 0 0% 0)" });
-        gsap.set(rows, { clearProps: "opacity,transform" });
-      } else {
-        gsap.fromTo(sheet, { clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0% 0)", duration: 0.7, ease: "expo.out" });
-        gsap.fromTo(rows, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "expo.out", stagger: 0.04, delay: 0.1 });
-      }
+      inCtx(() => {
+        gsap.to(top, { y: 4, rotation: 45, svgOrigin: "11 5", duration: 0.4 * d, ease: "power3.out" });
+        gsap.to(bottom, { y: -4, rotation: -45, svgOrigin: "11 5", duration: 0.4 * d, ease: "power3.out" });
+        if (r) {
+          gsap.set(sheet, { clipPath: "inset(0 0 0% 0)" });
+          gsap.set(rows, { clearProps: "opacity,transform" });
+        } else {
+          gsap.set(sheet, { clipPath: "inset(0 0 100% 0)" });
+          gsap.set(rows, { y: 24, opacity: 0 });
+          gsap.to(sheet, { clipPath: "inset(0 0 0% 0)", duration: 0.7, ease: "expo.out" });
+          gsap.to(rows, { y: 0, opacity: 1, duration: 0.6, ease: "expo.out", stagger: 0.04, delay: 0.1 });
+        }
+      });
       return () => {
         document.documentElement.style.overflow = "";
         main?.removeAttribute("inert");
       };
     }
 
-    gsap.to(sheet, {
-      clipPath: "inset(0 0 100% 0)",
-      duration: 0.4 * d,
-      ease: "power3.inOut",
-      onComplete: () => gsap.set(sheet, { autoAlpha: 0 }),
+    inCtx(() => {
+      gsap.to(sheet, {
+        clipPath: "inset(0 0 100% 0)",
+        duration: 0.4 * d,
+        ease: "power3.inOut",
+        onComplete: () => gsap.set(sheet, { visibility: "hidden" }),
+      });
+      gsap.to([top, bottom], { y: 0, rotation: 0, svgOrigin: "11 5", duration: 0.35 * d, ease: "power3.out" });
     });
-    gsap.to([top, bottom], { y: 0, rotation: 0, svgOrigin: "11 5", duration: 0.35 * d, ease: "power3.out" });
   }, [open]);
 
   const current = menu.services[active];
@@ -278,7 +299,7 @@ export function SiteNav() {
     <>
       <div ref={scrimRef} className={s.scrim} aria-hidden="true" onClick={() => setOpen(null)} />
 
-      <header ref={headerRef} className={s.bar} onKeyDown={onHeaderKeyDown} onFocus={() => revealBar(headerRef.current, barHidden)}>
+      <header ref={headerRef} className={s.bar} onKeyDown={onHeaderKeyDown}>
         <a href="#contenu" className={s.skip}>
           {menu.skip}
         </a>
@@ -303,6 +324,7 @@ export function SiteNav() {
                   data-open={open === "services" || undefined}
                   data-section={pathname.startsWith("/services/") || undefined}
                   onClick={onTriggerClick}
+                  onFocus={() => setWarm(true)}
                 >
                   <span className={s.itemLabel}>{menu.trigger}</span>
                   <svg viewBox="0 0 10 10" className={s.plus} aria-hidden="true">
@@ -337,11 +359,26 @@ export function SiteNav() {
                       </ul>
                     </div>
 
-                    <div className={s.preview} aria-hidden="true">
+                    <div className={s.preview} aria-hidden="true" style={{ "--r-max": MAX_RATIO } as CSSProperties}>
                       <div ref={previewRef} className={s.previewFrame}>
                         {menu.services.map((sv, i) => (
-                          <div key={sv.id} data-frame className={s.frame} style={i === 0 ? { zIndex: 1 } : undefined}>
-                            <Image src={ART[sv.art].src} alt="" fill sizes="30vw" className={s.cover} />
+                          <div
+                            key={sv.id}
+                            data-frame
+                            className={s.frame}
+                            style={{
+                              aspectRatio: `${ART[sv.art].width} / ${ART[sv.art].height}`,
+                              opacity: i === 0 ? 1 : 0,
+                            }}
+                          >
+                            <Image
+                              src={ART[sv.art].src}
+                              alt=""
+                              fill
+                              sizes="30vw"
+                              loading={warm ? "eager" : "lazy"}
+                              className={s.cover}
+                            />
                           </div>
                         ))}
                       </div>
@@ -438,7 +475,11 @@ export function SiteNav() {
                     aria-current={isCurrent(sv.href) ? "page" : undefined}
                     onClick={closeOnNavigate}
                   >
-                    <span className={s.thumb} aria-hidden="true">
+                    <span
+                      className={s.thumb}
+                      aria-hidden="true"
+                      style={{ aspectRatio: `${ART[sv.art].width} / ${ART[sv.art].height}` }}
+                    >
                       <Image src={ART[sv.art].src} alt="" fill sizes="64px" className={s.cover} />
                     </span>
                     <span>

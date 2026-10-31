@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BOOKING_URL, CONTACT_HREF, EMAIL, fmt, footerLegal, footerTagline, hero, services } from "@/content/home";
-import { INOKO_HREF } from "@/content/inoko";
+import { BOOKING_URL, CONTACT_HREF, EMAIL, fmt, footerCopy, footerLegal, footerTagline, hero, services } from "@/content/home";
 import { ART } from "@/content/paintings";
 import { ClicksChart } from "./ClicksChart";
 import { Caption, Cta, Panel, Rule, keepWords } from "./Ui";
@@ -58,12 +57,14 @@ export function Hero() {
         <figcaption className={`${s.artCaption} ${s.heroCaption}`}>
           <Caption painting={ART.hero} />
         </figcaption>
-        <Panel label="Inoko" meta="Search Console" className={s.heroPanel}>
+        <Panel label={hero.panel.label} meta={hero.panel.meta} className={s.heroPanel}>
           <p className={s.panelBig}>
-            {fmt(1736)} <span>clics depuis Google en mai 2026</span>
+            {fmt(1736)} <span>{hero.panel.big}</span>
           </p>
           <ClicksChart variant="mini" />
-          <p className={s.panelFoot}>{fmt(86)} clics en décembre 2025</p>
+          <p className={s.panelFoot}>
+            {fmt(86)} {hero.panel.foot}
+          </p>
         </Panel>
       </figure>
     </section>
@@ -183,37 +184,32 @@ export function Contact({
 
 const sitemap = [
   {
-    title: "Services",
+    title: footerCopy.columns.services,
     links: services.map((sv) => ({ href: sv.href, label: sv.name })),
   },
   {
-    title: "Le studio",
-    links: [
-      { href: INOKO_HREF, label: "Cas client Inoko" },
-      { href: "/#methode", label: "Comment on travaille" },
-      { href: "/#faq", label: "Questions fréquentes" },
-      { href: "/blog", label: "Blog" },
-    ],
+    title: footerCopy.columns.studio,
+    links: footerCopy.studioLinks,
   },
   {
-    title: "Nous joindre",
+    title: footerCopy.columns.contact,
     links: [
-      { href: BOOKING_URL, label: "Réserver un créneau" },
+      { href: BOOKING_URL, label: footerCopy.contactLinks.booking },
       { href: `mailto:${EMAIL}`, label: EMAIL },
-      { href: CONTACT_HREF, label: "Contact" },
+      { href: CONTACT_HREF, label: footerCopy.contactLinks.contact },
     ],
   },
 ];
 
-export function Footer({ pitch = "Une question, un projet, une boutique à faire grandir ?" }: { pitch?: string }) {
+export function Footer({ pitch = footerCopy.pitch }: { pitch?: string }) {
   return (
-    <section data-tone="dark" aria-label="Pied de page">
+    <section data-tone="dark" aria-label={footerCopy.ariaLabel}>
       <footer className={s.footer}>
         <div className={s.footerTop}>
           <p className={s.footerPitch}>{keepWords(pitch)}</p>
-          <Cta href={BOOKING_URL}>Fixer un rendez-vous</Cta>
+          <Cta href={BOOKING_URL}>{footerCopy.cta}</Cta>
         </div>
-        <nav aria-label="Plan du site" className={s.sitemap}>
+        <nav aria-label={footerCopy.sitemapLabel} className={s.sitemap}>
           {sitemap.map((col) => (
             <div key={col.title}>
               <p className={s.sitemapTitle}>{col.title}</p>
@@ -228,10 +224,10 @@ export function Footer({ pitch = "Une question, un projet, une boutique à faire
           ))}
         </nav>
         <p className={s.wordmark} aria-hidden="true">
-          Venturia
+          {footerCopy.wordmark}
         </p>
         <div className={s.footerBase}>
-          <span>© 2026 Venturia</span>
+          <span>{footerCopy.copyright}</span>
           <ul className={s.legal}>
             {footerLegal.map((l) => (
               <li key={l.href}>

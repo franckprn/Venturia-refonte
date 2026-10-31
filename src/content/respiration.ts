@@ -11,5 +11,5 @@ export type RespirationContent = {
 export const respiration: RespirationContent = {
   text:
     "Chaque jour, vos futurs clients cherchent sur Google ce que vous " +
-    "vendez. On les amène jusqu'à votre boutique.",
+    "vendez. On les amène jusqu’à votre boutique.",
 };

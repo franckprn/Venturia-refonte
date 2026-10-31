@@ -62,7 +62,7 @@ export default function SeoPage() {
 
         <div className={s.heroVisual}>
           <div data-hero-photo>
-            <Art painting={ART.referencement} sizes="(max-width: 899px) 100vw, 50vw" priority ratio="4 / 3" />
+            <Art painting={ART.referencement} sizes="(max-width: 899px) 100vw, 50vw" priority />
           </div>
           <Panel label="Inoko" meta="Search Console" className={`${s.heroPanel} ${p.seoPanel}`}>
             <p className={p.queryLabel}>Position moyenne du site</p>
@@ -99,7 +99,7 @@ export default function SeoPage() {
                 ))}
               </ol>
               {block.id === "geo" ? (
-                <Panel label="Réponse d'une IA" meta="Assistant" demo className={p.aiPanel}>
+                <Panel label="Réponse d'une IA" meta="Assistant" className={p.aiPanel}>
                   <p className={p.aiQuestion}>{keepWords("Quelle nappe en lin choisir pour une table de six ?")}</p>
                   <p className={p.aiAnswer}>
                     {keepWords(
@@ -166,7 +166,7 @@ export default function SeoPage() {
 
       {/* 6. Référencement et Google Ads : l'affiche */}
       <section className={p.cross} aria-labelledby="cross-title" data-tone="light">
-        <Art painting={ART.publicite} sizes="(max-width: 899px) 60vw, 25vw" className={p.crossArt} ratio="native" />
+        <Art painting={ART.publicite} sizes="(max-width: 899px) 60vw, 25vw" className={p.crossArt} />
         <div className={p.crossText}>
           <Rule label="Référencement et Google Ads" />
           <h2 id="cross-title" className={s.h2} data-reveal>

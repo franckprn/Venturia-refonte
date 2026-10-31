@@ -86,7 +86,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -132,7 +132,7 @@
 
 .monthStats dd {
   order: -1;
-  font-family: var(--font-display), system-ui, sans-serif;
+  font-family: var(--font-archivo), system-ui, sans-serif;
   font-variation-settings: "wdth" 84;
   font-weight: 600;
   font-size: 34px;
@@ -184,7 +184,7 @@
 
 .position dd {
   order: -1;
-  font-family: var(--font-display), system-ui, sans-serif;
+  font-family: var(--font-archivo), system-ui, sans-serif;
   font-variation-settings: "wdth" 84;
   font-weight: 600;
   font-size: clamp(36px, 4.2vw, 64px);

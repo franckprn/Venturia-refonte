@@ -47,7 +47,7 @@ export const nav = {
    *  les entrées de premier niveau (Nav.tsx). */
   ariaLabel: "Navigation principale",
   /** aria-label du lien logo, retour à l'accueil (Nav.tsx). */
-  logoAriaLabel: "Venturia, retour à l'accueil",
+  logoAriaLabel: "Venturia, retour à l’accueil",
 
   topLinks: [
     // Page pas encore publiée : isLink: false → <span> dans la barre

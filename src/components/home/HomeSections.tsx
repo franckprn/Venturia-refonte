@@ -1,27 +1,22 @@
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown, ArrowRight, ArrowUpRight, Plus } from "@phosphor-icons/react/dist/ssr";
+import type { CSSProperties } from "react";
+import Image from "next/image";
+import { ArrowUpRight, Plus, Star } from "@phosphor-icons/react/dist/ssr";
 import {
-  BOOKING_URL,
   EMAIL,
-  blogPreview,
   faq,
-  method,
-  reviews,
+  publishedReviews,
+  reviewsCopy,
+  serviceUi,
   services,
-  servicesTitle,
-  situations,
-  start,
+  servicesCopy,
 } from "@/content/home";
-import { INOKO_HREF, inokoHome } from "@/content/inoko";
-import { ART, INOKO_PHOTO } from "@/content/paintings";
-import { getArticleListEntries } from "@/content/blog";
-import { paintingFor } from "./Article";
-import { Art, Cta, Panel, Rule, fr, keepWords } from "./Ui";
+import { ART } from "@/content/paintings";
+import { Caption, Panel, Rule, fr, keepWords } from "./Ui";
 import s from "./home.module.css";
 
-// Sections de la home, dans l'ordre de la page. Toutes reprennent les
-// mêmes pièces : filet titré, bouton, carte d'interface, tableau légendé.
+// Sections de la home reprises du test 2 : Services, Avis, FAQ. Les
+// sections reprises du test 1 vivent dans ./v1.
 
 const pad = (i: number) => String(i + 1).padStart(2, "0");
 
@@ -29,30 +24,28 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
 
 function ServiceUi({ id }: { id: string }) {
   if (id === "referencement") {
+    const ui = serviceUi.referencement;
     return (
-      <Panel label="Résultat Google" meta="Position 1" demo className={s.servicePanel}>
-        <p className={s.serpUrl}>votre-boutique.fr › plaids</p>
-        <p className={s.serpTitle}>{keepWords("Plaid en laine mérinos, 6 coloris")}</p>
-        <p className={s.serpDesc}>{keepWords("Laine douce et chaude, lavable en machine. Livraison suivie.")}</p>
+      <Panel label={ui.label} className={s.servicePanel}>
+        <p className={s.serpUrl}>{ui.url}</p>
+        <p className={s.serpTitle}>{keepWords(ui.title)}</p>
+        <p className={s.serpDesc}>{keepWords(ui.desc)}</p>
         <p className={s.serpAi}>
-          <span>Aperçu IA</span> source citée : votre-boutique.fr
+          <span>{ui.aiTag}</span> {fr(ui.aiText)}
         </p>
       </Panel>
     );
   }
   if (id === "publicite") {
+    const ui = serviceUi.publicite;
     return (
-      <Panel label="Google Ads" meta="Campagnes Search" demo className={s.servicePanel}>
+      <Panel label={ui.label} meta={ui.meta} className={s.servicePanel}>
         <ul className={s.uiRows}>
-          {[
-            ["Plaids en laine", "12 € / jour"],
-            ["Coussins en lin", "8 € / jour"],
-            ["Marque", "5 € / jour"],
-          ].map(([name, budget]) => (
-            <li key={name}>
+          {ui.rows.map((row) => (
+            <li key={row}>
               <span className={s.uiDot} aria-hidden="true" />
-              <span>{name}</span>
-              <span className={s.uiMeta}>{fr(budget)}</span>
+              <span>{row}</span>
+              <span className={s.uiMeta}>{ui.status}</span>
             </li>
           ))}
         </ul>
@@ -60,292 +53,139 @@ function ServiceUi({ id }: { id: string }) {
     );
   }
   if (id === "site") {
+    const ui = serviceUi.site;
     return (
-      <Panel label="Fiche produit" meta="Shopify" demo className={s.servicePanel}>
-        <p className={s.productName}>Plaid en laine mérinos</p>
-        <p className={s.productPrice}>{fr("89,00 €")}</p>
-        <p className={s.swatches} aria-label="Trois coloris">
+      <Panel label={ui.label} meta={ui.meta} className={s.servicePanel}>
+        <p className={s.productName}>{ui.name}</p>
+        <p className={s.swatches} aria-label={ui.swatchesLabel}>
           <span data-c="ink" />
           <span data-c="paper" />
           <span data-c="red" />
         </p>
-        <p className={s.productButton}>Ajouter au panier</p>
+        <p className={s.productButton}>{ui.button}</p>
       </Panel>
     );
   }
+  const ui = serviceUi.automatisation;
   return (
-    <Panel label="Workflow n8n" meta="Actif" demo className={s.servicePanel}>
+    <Panel label={ui.label} meta={ui.meta} className={s.servicePanel}>
       <ol className={s.flow}>
-        <li>Nouvelle commande</li>
-        <li>Facture créée</li>
-        <li>Stock mis à jour</li>
-        <li>Email de suivi envoyé</li>
+        {ui.steps.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
       </ol>
     </Panel>
   );
 }
 
+// Coin de chaque interface, choisi hors du sujet de l'œuvre : bas
+// gauche (Pissarro : passants du premier plan ; Degas : pied du
+// porte-chapeaux), haut gauche (Lautrec : lettres « Moulin Rouge » ;
+// Caillebotte : boiseries du mur).
+const CORNERS = ["bl", "tl", "bl", "tl"] as const;
+
+// Ratio du tableau le plus large : fixe la hauteur commune.
+const MAX_RATIO = Math.max(...services.map((sv) => ART[sv.art].width / ART[sv.art].height));
+
 export function Services() {
   return (
     <section id="services" className={s.services} aria-labelledby="services-title" data-tone="light">
-      <Rule label="Services" />
+      <Rule label={servicesCopy.label} />
       <h2 id="services-title" className={s.h2} data-reveal>
-        {keepWords(servicesTitle.resultat)}
+        {keepWords(servicesCopy.title)}
       </h2>
       <ol className={s.serviceList}>
-        {services.map((sv, i) => (
-          <li key={sv.id} id={sv.id} className={s.service}>
-            <div className={s.serviceText} data-reveal>
-              <span className={s.mono}>{pad(i)}</span>
-              <h3 className={s.serviceName}>
-                <Link href={sv.href} className={s.serviceLink}>
-                  {sv.name}
-                  <ArrowUpRight aria-hidden="true" weight="bold" className={s.serviceArrow} />
-                </Link>
-              </h3>
-              <p className={s.serviceLead}>{keepWords(sv.lead)}</p>
-              <p className={s.serviceText2}>{keepWords(sv.text)}</p>
-              <ul className={s.tags} aria-label={`Outils et spécialités, ${sv.name}`}>
-                {sv.tags.map((t) => (
-                  <li key={t}>{t}</li>
-                ))}
-              </ul>
-            </div>
-            <div className={s.serviceVisual} data-reveal>
-              <Art painting={ART[sv.art]} sizes="(max-width: 899px) 100vw, 50vw" ratio="4 / 3" parallax />
-              <ServiceUi id={sv.id} />
-            </div>
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
-
-/* ---------- Cas Inoko, version courte ---------- */
-
-export function InokoCase() {
-  return (
-    <section id="inoko" className={s.case} aria-labelledby="inoko-title" data-tone="dark">
-      <Rule label={inokoHome.label} tone="dark" />
-      <h2 id="inoko-title" className={s.h2Giant} data-reveal>
-        {keepWords(inokoHome.title)}
-      </h2>
-
-      <div className={s.caseGrid}>
-        <figure className={s.casePhoto} data-reveal>
-          <Image src={INOKO_PHOTO.src} alt={INOKO_PHOTO.alt} fill sizes="(max-width: 899px) 100vw, 40vw" className={s.cover} />
-        </figure>
-        <ol className={s.caseStory}>
-          {inokoHome.story.map((st, i) => (
-            <li key={st.label} className={s.caseStep} data-reveal>
-              <p className={s.caseStepHead}>
-                <span>
-                  {pad(i)} {st.label}
-                </span>
-                <span>{st.period}</span>
-              </p>
-              <p className={s.caseStepText}>{keepWords(st.text)}</p>
-            </li>
-          ))}
-        </ol>
-      </div>
-
-      <dl className={s.caseFigures}>
-        {inokoHome.figures.map((f) => (
-          <div key={f.what} className={s.caseFigure} data-reveal>
-            <dt className={s.caseWhat}>{keepWords(f.what)}</dt>
-            <dd className={s.caseValue}>{fr(f.value)}</dd>
-            <dd className={s.casePeriod}>{keepWords(f.period)}</dd>
-          </div>
-        ))}
-      </dl>
-
-      <div className={s.caseFoot}>
-        <Cta href={INOKO_HREF} variant="line">
-          {inokoHome.link}
-        </Cta>
-        <p className={s.caseTransition}>
-          {keepWords(inokoHome.transition)}{" "}
-          <a href="#situations" className={s.caseNext}>
-            {inokoHome.transitionLink}
-            <ArrowDown aria-hidden="true" weight="bold" />
-          </a>
-        </p>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- Où en est votre boutique ? ---------- */
-
-export function Situations() {
-  return (
-    <section id="situations" className={s.situations} aria-labelledby="situations-title" data-tone="light">
-      <div className={s.sitHead}>
-        <h2 id="situations-title" className={s.h2Giant} data-reveal>
-          {keepWords(situations.title)}
-        </h2>
-        <p className={s.sitIntro} data-reveal>
-          {keepWords(situations.intro)}
-        </p>
-      </div>
-      <ol className={s.sitList}>
-        {situations.items.map((it, i) => (
-          <li key={it.title} className={s.sit} data-reveal>
-            <span className={s.mono}>{pad(i)}</span>
-            <h3 className={s.sitTitle}>{keepWords(it.title)}</h3>
-            <p className={s.sitText}>{keepWords(it.text)}</p>
-            <ul className={s.sitLinks} aria-label="Service adapté">
-              {it.links.map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className={s.sitLink}>
-                    {l.label}
-                    <ArrowRight aria-hidden="true" weight="bold" />
+        {services.map((sv, i) => {
+          const painting = ART[sv.art];
+          const style = {
+            "--r": painting.width / painting.height,
+            "--r-max": MAX_RATIO,
+          } as CSSProperties;
+          return (
+            <li key={sv.id} id={sv.id} className={s.service} data-corner={CORNERS[i % CORNERS.length]}>
+              <div className={s.serviceText} data-reveal>
+                <span className={s.mono}>{pad(i)}</span>
+                <h3 className={s.serviceName}>
+                  <Link href={sv.href} className={s.serviceLink}>
+                    {sv.name}
+                    <ArrowUpRight aria-hidden="true" weight="bold" className={s.serviceArrow} />
                   </Link>
-                </li>
-              ))}
-            </ul>
-          </li>
-        ))}
+                </h3>
+                <p className={s.serviceLead}>{keepWords(sv.lead)}</p>
+                <p className={s.serviceText2}>{keepWords(sv.text)}</p>
+                <ul className={s.tags} aria-label={`${servicesCopy.tagsLabel} ${sv.name}`}>
+                  {sv.tags.map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className={s.serviceVisual} style={style} data-reveal>
+                <figure className={s.serviceFigure}>
+                  <figcaption className={s.artCaption}>
+                    <Caption painting={painting} />
+                  </figcaption>
+                  <div className={s.serviceStage}>
+                    <div className={s.artFrame} style={{ aspectRatio: `${painting.width} / ${painting.height}` }}>
+                      <Image
+                        src={painting.src}
+                        alt={painting.alt}
+                        fill
+                        sizes="(max-width: 1023px) 100vw, 45vw"
+                        className={s.cover}
+                      />
+                    </div>
+                    <ServiceUi id={sv.id} />
+                  </div>
+                </figure>
+              </div>
+            </li>
+          );
+        })}
       </ol>
     </section>
   );
 }
 
-/* ---------- Avis (1 à 3) ---------- */
+/* ---------- Avis (1 à 3) : jamais d'avis provisoire en production ---------- */
 
 export function Reviews() {
-  if (reviews.length === 0) return null;
+  if (publishedReviews.length === 0) return null;
   return (
-    <section className={s.reviews} aria-labelledby="reviews-title" data-tone="light">
-      <Rule label="Avis Google" />
+    <section id="avis" className={s.reviews} aria-labelledby="reviews-title" data-tone="light">
+      <Rule label={reviewsCopy.label} />
       <h2 id="reviews-title" className={s.h2} data-reveal>
-        Ce que nos clients en disent.
+        {keepWords(reviewsCopy.title)}
       </h2>
-      <ul className={s.reviewList} data-count={Math.min(reviews.length, 3)}>
-        {reviews.slice(0, 3).map((r) => (
-          <li key={r.author + r.date} className={s.review} data-reveal>
+      <ul className={s.reviewList} data-count={Math.min(publishedReviews.length, 3)}>
+        {publishedReviews.slice(0, 3).map((r) => (
+          <li key={r.author} className={s.review} data-reveal>
             <figure>
               <blockquote className={s.reviewText}>
-                <p>{keepWords(`« ${r.text} »`)}</p>
+                {r.text.map((line, i) => (
+                  <p key={line}>
+                    {keepWords(`${i === 0 ? "« " : ""}${line}${i === r.text.length - 1 ? " »" : ""}`)}
+                  </p>
+                ))}
               </blockquote>
               <figcaption className={s.reviewBy}>
+                {r.rating ? (
+                  <span className={s.reviewStars} role="img" aria-label={reviewsCopy.ratingLabel(r.rating)}>
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <Star key={i} weight={i < r.rating! ? "fill" : "regular"} aria-hidden="true" />
+                    ))}
+                  </span>
+                ) : null}
                 <span className={s.reviewAuthor}>{r.author}</span>
-                <span>
-                  {r.company}, {r.date}
-                </span>
+                {r.company || r.date ? <span>{[r.company, r.date].filter(Boolean).join(", ")}</span> : null}
                 <span className={s.reviewTags}>
-                  <span>Avis Google</span>
-                  {r.placeholder ? <span data-warn>Avis provisoire</span> : null}
+                  <span>{reviewsCopy.source}</span>
+                  {r.placeholder ? <span data-warn>{reviewsCopy.placeholderTag}</span> : null}
                 </span>
               </figcaption>
             </figure>
           </li>
         ))}
       </ul>
-    </section>
-  );
-}
-
-/* ---------- Comment on travaille ---------- */
-
-export function Method() {
-  return (
-    <section id="methode" className={s.method} aria-labelledby="method-title" data-tone="light">
-      <Rule label="Méthode" />
-      <h2 id="method-title" className={s.h2Giant} data-reveal>
-        {keepWords(method.title)}
-      </h2>
-
-      <div className={s.formulas}>
-        {method.formulas.map((f, i) => (
-          <div key={f.name} className={s.formula} data-reveal>
-            <span className={s.mono}>Formule {i + 1}</span>
-            <h3 className={s.formulaName}>{f.name}</h3>
-            <p className={s.body}>{keepWords(f.text)}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className={s.follow}>
-        <div className={s.followText}>
-          <h3 className={s.followTitle} data-reveal>
-            {keepWords(method.followTitle)}
-          </h3>
-          <ol className={s.followList}>
-            {method.follow.map((f, i) => (
-              <li key={f.name} data-reveal>
-                <span className={s.mono}>{pad(i)}</span>
-                <span>
-                  <strong>{f.name}</strong>
-                  <span className={s.followDesc}>{keepWords(f.text)}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
-        </div>
-        <div className={s.followVisual} data-reveal>
-          <Panel label="Rapport mensuel" meta="PDF" demo className={s.reportPanel}>
-            <p className={s.reportTitle}>Votre boutique, ce mois-ci</p>
-            <ol className={s.reportToc}>
-              <li>Référencement</li>
-              <li>Google Ads</li>
-              <li>Ventes</li>
-              <li>Plan du mois suivant</li>
-            </ol>
-            <svg viewBox="0 0 240 64" className={s.reportBars} aria-hidden="true">
-              {[22, 30, 26, 38, 44, 52].map((h, i) => (
-                <rect key={i} x={i * 40 + 4} y={64 - h} width="28" height={h} data-last={i === 5 || undefined} />
-              ))}
-            </svg>
-          </Panel>
-          <Panel label="Tableau de bord" meta="En ligne" demo className={s.dashPanel}>
-            <p className={s.dashLine}>
-              <span className={s.uiDot} aria-hidden="true" /> Consultable à tout moment
-            </p>
-          </Panel>
-        </div>
-      </div>
-
-      <ul className={s.commitments}>
-        {method.commitments.map((c) => (
-          <li key={c.label} data-reveal>
-            <span className={s.mono}>{c.label}</span>
-            <p>{keepWords(c.text)}</p>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-/* ---------- Démarrer ---------- */
-
-export function Start() {
-  return (
-    <section id="demarrer" className={s.start} aria-labelledby="start-title" data-tone="light">
-      <Art painting={ART.demarrer} sizes="(max-width: 899px) 100vw, 40vw" className={s.startArt} ratio="4 / 5" parallax />
-      <div className={s.startBody}>
-        <h2 id="start-title" className={s.h2} data-reveal>
-          {keepWords(start.title)}
-        </h2>
-        <ol className={s.steps}>
-          {start.steps.map((st, i) => (
-            <li key={st.verb} className={s.step} data-reveal>
-              <span className={s.mono}>Étape {i + 1}</span>
-              <h3 className={s.stepVerb}>{st.verb}</h3>
-              <p className={s.body}>{keepWords(st.text)}</p>
-            </li>
-          ))}
-        </ol>
-        <div className={s.heroCtas} data-reveal>
-          <Cta href={BOOKING_URL}>{start.cta}</Cta>
-          <a href={`mailto:${EMAIL}`} className={s.textLink}>
-            ou nous écrire à {EMAIL}
-          </a>
-        </div>
-      </div>
     </section>
   );
 }
@@ -370,7 +210,7 @@ export function Faq() {
           {keepWords(faq.title)}
         </h2>
         <p className={s.body} data-reveal>
-          {keepWords("Une autre question ? Posez-la pendant l'appel, ou écrivez-nous.")}
+          {keepWords(faq.intro)}
         </p>
         <a href={`mailto:${EMAIL}`} className={s.textLink}>
           {EMAIL}
@@ -390,63 +230,6 @@ export function Faq() {
         ))}
       </div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-    </section>
-  );
-}
-
-/* ---------- Aperçu du blog, « à la une » : le plus récent en grand, 0 à 2 à côté ---------- */
-
-const dateFr = (iso: string) =>
-  new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-
-export function BlogPreview() {
-  const posts = [...getArticleListEntries()].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
-  if (posts.length === 0) return null;
-  const [lead, ...rest] = posts;
-  return (
-    <section className={s.blogPrev} aria-labelledby="blog-title" data-tone="light">
-      <div className={s.blogHead}>
-        <h2 id="blog-title" className={s.h2} data-reveal>
-          {blogPreview.title}
-        </h2>
-        <p className={s.body} data-reveal>
-          {keepWords(blogPreview.intro)}
-        </p>
-        <Link href="/blog" className={s.textLink}>
-          {blogPreview.all}
-        </Link>
-      </div>
-      <div className={s.blogGrid} data-count={posts.length}>
-        <article className={s.blogLead} data-reveal>
-          <Link href={`/blog/${lead.slug}`} className={s.blogCard}>
-            <Art painting={paintingFor(lead.category)} sizes="(max-width: 899px) 100vw, 60vw" ratio="3 / 2" />
-            <span className={s.blogText}>
-              <span className={s.mono}>
-                {lead.category} · {dateFr(lead.date)}
-              </span>
-              <span className={s.blogTitle}>{keepWords(lead.title)}</span>
-              <span className={s.blogExcerpt}>{keepWords(lead.excerpt)}</span>
-              <span className={s.blogMore}>
-                Lire l&apos;article
-                <ArrowRight aria-hidden="true" weight="bold" />
-              </span>
-            </span>
-          </Link>
-        </article>
-        {rest.length > 0 ? (
-          <ul className={s.blogSide}>
-            {rest.map((post) => (
-              <li key={post.slug} data-reveal>
-                <Link href={`/blog/${post.slug}`} className={s.blogSmall}>
-                  <Art painting={paintingFor(post.category)} sizes="(max-width: 899px) 100vw, 30vw" ratio="3 / 2" />
-                  <span className={s.mono}>{post.category}</span>
-                  <span className={s.blogSmallTitle}>{keepWords(post.title)}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-      </div>
     </section>
   );
 }

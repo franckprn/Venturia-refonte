@@ -24,7 +24,7 @@ export default function NotFound() {
           </h1>
           <p className={s.heroSub}>{keepWords(notFound.sub)}</p>
         </div>
-        <Art painting={ART.lost} sizes="(max-width: 899px) 100vw, 33vw" className={p.lostArt} ratio="4 / 3" />
+        <Art painting={ART.lost} sizes="(max-width: 899px) 100vw, 33vw" className={p.lostArt} />
         <nav aria-label="Pages principales" className={p.lostNav}>
           <ul>
             {notFound.links.map((l) => (

@@ -1,7 +1,8 @@
 /* Nav, méga-menu et menu mobile. Même palette fermée que la home
    (charbon, crème, rouge), arrondi 0, filet titré à carré rouge.
-   Aucune transition CSS : les mouvements passent par GSAP (SiteNav.tsx),
-   les survols changent d'état sans animation. */
+   Les mouvements passent par GSAP (SiteNav.tsx) ; seuls la couleur de
+   la barre et le survol des liens soulignés passent par une transition
+   CSS. */
 
 .bar {
   --ink: #1a1614;
@@ -19,13 +20,89 @@
   right: 8px;
   z-index: 60;
   height: calc(var(--nav-h) - 12px);
-  background: var(--paper);
+  /* Fond de la nav du site d'origine (nav.module.css, .navBlur) :
+     transparent et flouté, sans teinte ni ombre. Le flou vit sur un
+     calque dédié (::before) : posé sur .bar, il ferait de la barre la
+     racine du flou de ses propres panneaux. */
+  background: transparent;
   color: var(--ink);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-geist), system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.4;
+  transition:
+    color 150ms cubic-bezier(0, 0.55, 0.45, 1),
+    border-color 150ms cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: transparent;
+  -webkit-backdrop-filter: blur(24px); /* Safari, avant le standard */
+  backdrop-filter: blur(24px);
+  pointer-events: none;
+}
+
+/* Repli sans flou : fond opaque de la tonalité en cours, jamais
+   transparent (le texte de la page se superposerait à la barre). */
+@supports not (backdrop-filter: blur(1px)) {
+  .bar::before {
+    background: var(--paper);
+  }
+
+  .bar[data-tone="dark"]::before {
+    background: var(--ink);
+  }
+
+  .bar[data-tone="accent"]::before {
+    background: var(--red);
+  }
+}
+
+/* Texte de la barre : suit la section sous elle (subscribeTone,
+   src/lib/tone.ts). Les panneaux ouverts gardent leur fond crème et
+   leur texte charbon. */
+.bar[data-tone="dark"],
+.bar[data-tone="accent"] {
+  color: var(--paper);
+  --line: color-mix(in srgb, #dedcd3 22%, transparent);
+}
+
+.bar[data-tone="dark"] .soft,
+.bar[data-tone="accent"] .soft {
+  color: color-mix(in srgb, #dedcd3 72%, #1a1614);
+}
+
+.bar[data-tone="dark"] :where(a, button):focus-visible,
+.bar[data-tone="accent"] :where(a, button):focus-visible {
+  outline-color: var(--paper);
+}
+
+.bar[data-tone] .panel,
+.bar[data-tone] .sheet {
+  --line: color-mix(in srgb, #1a1614 18%, transparent);
+  color: var(--ink);
+}
+
+.bar[data-tone] .panel .soft,
+.bar[data-tone] .sheet .soft {
+  color: var(--ink-soft);
+}
+
+.bar[data-tone] .panel :where(a, button):focus-visible,
+.bar[data-tone] .sheet :where(a, button):focus-visible {
+  outline-color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    transition: none;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -67,11 +144,24 @@
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 5px;
+  transition:
+    color 200ms ease,
+    text-decoration-color 200ms ease;
 }
 
-.underline:hover {
+/* Liens soulignés (« Lire le cas », email) : texte et soulignement
+   passent en rouge au survol. */
+.underline:hover,
+.proof:hover .underline {
+  color: var(--red);
   text-decoration-color: var(--red);
-  text-decoration-thickness: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .underline,
+  .email {
+    transition: none;
+  }
 }
 
 /* Filet titré, comme sur la home. */
@@ -79,7 +169,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -159,7 +249,7 @@
 }
 
 .wordmark {
-  font-family: var(--font-display), system-ui, sans-serif;
+  font-family: var(--font-archivo), system-ui, sans-serif;
   font-variation-settings: "wdth" 84;
   font-weight: 600;
   font-size: 22px;
@@ -249,17 +339,21 @@
 
 .email {
   display: none;
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 13px;
   min-height: 44px;
   align-items: center;
   text-decoration: underline;
-  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
   text-underline-offset: 6px;
+  transition:
+    color 200ms ease,
+    text-decoration-color 200ms ease;
 }
 
 .email:hover {
-  text-decoration-color: currentColor;
+  color: var(--red);
+  text-decoration-color: var(--red);
 }
 
 @media (min-width: 1200px) {
@@ -364,6 +458,12 @@
   display: none;
 }
 
+@supports not (backdrop-filter: blur(1px)) {
+  .panel {
+    background: var(--paper) !important;
+  }
+}
+
 @media (min-width: 1024px) {
   .panel {
     display: block;
@@ -373,7 +473,13 @@
     right: -1px;
     max-height: calc(100dvh - var(--nav-h) - 16px);
     overflow-y: auto;
-    background: var(--paper);
+    /* Même verre que la barre (flou 24 px, préfixe Safari avant le
+       standard), avec une légère teinte crème : sans elle, le H1 flouté
+       du hero et le voile assombrissent le texte du sommaire. Repli
+       crème opaque sans flou. */
+    background: color-mix(in srgb, var(--paper) 72%, transparent);
+    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
     border: 1px solid var(--line);
     border-radius: var(--radius);
     visibility: hidden;
@@ -392,6 +498,9 @@
   grid-column: 1 / 9;
 }
 
+/* Méga-menu : tient entier dans la fenêtre dès 1280×720 ; si la place
+   manque, c'est l'aperçu du tableau qui se réduit (.previewFrame),
+   jamais les textes. */
 .rows {
   margin-top: 20px !important;
   border-bottom: 1px solid var(--line);
@@ -410,7 +519,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 12px;
   color: var(--ink-soft);
 }
@@ -423,7 +532,7 @@
 }
 
 .rowName {
-  font-family: var(--font-display), system-ui, sans-serif;
+  font-family: var(--font-archivo), system-ui, sans-serif;
   font-variation-settings: "wdth" 84;
   font-weight: 600;
   font-size: clamp(40px, 3.9vw, 60px);
@@ -462,23 +571,31 @@
   padding-top: 32px;
 }
 
+/* Tableaux à leur ratio réel : hauteur fixe (celle du plus large quand
+   il occupe toute la colonne), largeur selon le ratio. Seul le tableau
+   actif reste visible une fois révélé (SiteNav.tsx). */
+.preview {
+  container-type: inline-size;
+}
+
 .previewFrame {
   position: relative;
-  aspect-ratio: 3 / 2;
+  height: calc(100cqi / var(--r-max));
+}
+
+.frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
   overflow: hidden;
   border-radius: var(--radius);
   background: var(--ink);
 }
 
-.frame {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
 .caption {
   margin-top: 10px !important;
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 11px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -496,7 +613,7 @@
   padding: 5px 8px 4px;
   border: 1px solid var(--line);
   border-radius: var(--radius-tag);
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 11px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -570,18 +687,19 @@
 
 .sheetRow {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) 22px;
+  grid-template-columns: 72px minmax(0, 1fr) 22px;
   align-items: center;
   column-gap: 14px;
   padding: 12px 0;
   border-top: 1px solid var(--line);
 }
 
+/* Vignette au ratio du tableau (style en ligne) : hauteur fixe. */
 .thumb {
   position: relative;
   display: block;
-  width: 56px;
-  height: 56px;
+  justify-self: center;
+  height: 48px;
   overflow: hidden;
   border-radius: var(--radius);
   background: var(--ink);
@@ -589,7 +707,7 @@
 
 .sheetName {
   display: block;
-  font-family: var(--font-display), system-ui, sans-serif;
+  font-family: var(--font-archivo), system-ui, sans-serif;
   font-variation-settings: "wdth" 84;
   font-weight: 600;
   font-size: 28px;
